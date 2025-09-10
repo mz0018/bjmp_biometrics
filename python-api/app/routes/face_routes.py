@@ -1,5 +1,7 @@
 from fastapi import APIRouter
 from app.models.face_model import FaceData
+from app.helpers.image_utils import base64_to_webp, generate_filename
+from PIL import Image
 
 router = APIRouter()
 
@@ -30,6 +32,19 @@ async def register_face(data: FaceData):
             "errors": errors
         }
 
+    converted_images_info = []
+    for idx, img_base64 in enumerate(data.images):
+        webp_file = base64_to_webp(img_base64)
+        
+        img = Image.open(webp_file)
+        webp_file.seek(0)  
+        
+        converted_images_info.append({
+            "image_index": idx,
+            "format": img.format,   
+            "size_bytes": len(webp_file.getvalue())
+        })
+
     return {
         "status": "success",
         "admin": {
@@ -42,5 +57,5 @@ async def register_face(data: FaceData):
             "inmate": data.inmate_name,
             "address": data.visitor_address,
         },
-        "received_images": len(data.images),
+        "converted_images": converted_images_info
     }
