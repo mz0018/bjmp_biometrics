@@ -23,6 +23,12 @@ const useRegisterFace = () => {
     }
   }, []);
 
+  const resetForm = () => {
+    setVisitorName("");
+    setInmateName("");
+    setVisitorAddress("");
+  };
+
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -45,38 +51,54 @@ const useRegisterFace = () => {
 
   const saveImages = async () => {
     if (!admin) {
-      alert("Admin details not found. Please log in again.");
-      return;
+        alert("Admin details not found. Please log in again.");
+        return;
     }
 
-    if (!visitorName || !inmateName || !visitorAddress) {
-      alert("Please fill out all visitor details before saving.");
-      return;
-    }
+    setIsLoading(true);
+    setHasErrors({});
 
     try {
-      const response = await axios.post(
+        const response = await axios.post(
         `${import.meta.env.VITE_PY_API_URL}/register-face`,
         {
-          images: capturedImages,
-          id: admin._id || admin.id,
-          first_name: admin.first_name,
-          last_name: admin.last_name,
-          visitor_name: visitorName,
-          inmate_name: inmateName,
-          visitor_address: visitorAddress,
+            images: capturedImages,
+            id: admin._id || admin.id,
+            first_name: admin.first_name,
+            last_name: admin.last_name,
+            visitor_name: visitorName,
+            inmate_name: inmateName,
+            visitor_address: visitorAddress,
         }
-      );
+        );
 
-      alert("Images and visitor details sent to backend!");
-      console.log("Server response:", response.data);
+        if (response.data.status === "error") {
+            setHasErrors(response.data.errors);
+            setIsLoading(false);
+            return;
+        }
+
+        alert("Images and visitor details sent to backend!");
+        resetForm();
+        console.log("Server response:", response.data);
+
     } catch (err) {
-      console.error("Error sending images:", err);
-      alert("Failed to send data!");
+        console.error("Error sending images:", err);
+
+        if (err.response && err.response.data && err.response.data.errors) {
+            setHasErrors(err.response.data.errors);
+        } else {
+            alert("Failed to send data!");
+        }
+    } finally {
+        setIsLoading(false);
     }
-  };
+    };
+
 
   return {
+    isLoading,
+    hasErrors,
     videoRef,
     canvasRef,
     capturedImages,

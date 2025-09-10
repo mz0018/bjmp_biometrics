@@ -2,6 +2,8 @@ import useRegisterFace from "../hooks/useRegisterFace";
 
 const RegisterFace = () => {
   const {
+    isLoading,
+    hasErrors,
     videoRef,
     canvasRef,
     capturedImages,
@@ -28,27 +30,50 @@ const RegisterFace = () => {
       )}
 
       <div className="mb-4 space-y-2">
-        <input
-          type="text"
-          placeholder="Visitor's Name"
-          value={visitorName}
-          onChange={(e) => setVisitorName(e.target.value)}
-          className="w-full border p-2 rounded"
-        />
-        <input
-          type="text"
-          placeholder="Inmate to Visit"
-          value={inmateName}
-          onChange={(e) => setInmateName(e.target.value)}
-          className="w-full border p-2 rounded"
-        />
-        <input
-          type="text"
-          placeholder="Visitor's Address"
-          value={visitorAddress}
-          onChange={(e) => setVisitorAddress(e.target.value)}
-          className="w-full border p-2 rounded"
-        />
+        <div>
+          <input
+            type="text"
+            placeholder="Visitor's Name"
+            value={visitorName}
+            onChange={(e) => setVisitorName(e.target.value)}
+            className={`w-full border p-2 rounded ${
+              hasErrors.visitor_name ? "border-red-500" : "border-gray-300"
+            }`}
+          />
+          {hasErrors.visitor_name && (
+            <p className="text-red-500 text-sm">{hasErrors.visitor_name}</p>
+          )}
+        </div>
+
+        <div>
+          <input
+            type="text"
+            placeholder="Inmate to Visit"
+            value={inmateName}
+            onChange={(e) => setInmateName(e.target.value)}
+            className={`w-full border p-2 rounded ${
+              hasErrors.inmate_name ? "border-red-500" : "border-gray-300"
+            }`}
+          />
+          {hasErrors.inmate_name && (
+            <p className="text-red-500 text-sm">{hasErrors.inmate_name}</p>
+          )}
+        </div>
+
+        <div>
+          <input
+            type="text"
+            placeholder="Visitor's Address"
+            value={visitorAddress}
+            onChange={(e) => setVisitorAddress(e.target.value)}
+            className={`w-full border p-2 rounded ${
+              hasErrors.visitor_address ? "border-red-500" : "border-gray-300"
+            }`}
+          />
+          {hasErrors.visitor_address && (
+            <p className="text-red-500 text-sm">{hasErrors.visitor_address}</p>
+          )}
+        </div>
       </div>
 
       <video
@@ -60,7 +85,7 @@ const RegisterFace = () => {
         className="border"
       />
 
-      <div className="mt-2">
+      <div className="mt-2">        
         <button
           onClick={startCamera}
           className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
