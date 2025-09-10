@@ -1,42 +1,20 @@
-import os
-from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from app.routes import face_routes
 
-load_dotenv()
-
-PORT = int(os.getenv("PORT", 5000))
-ORIGIN_URL = os.getenv("ORIGIN_URL", "http://localhost:5173")
-
-app = FastAPI(title="Face Recognition API (Dev)")
+app = FastAPI(title="Face Recognition API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[ORIGIN_URL],
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Register routes
+app.include_router(face_routes.router, prefix="/api", tags=["Face Recognition"])
+
 @app.get("/api/ping")
 async def ping():
-    return {"message": "pong", "status": "ok"}
-
-class FaceData(BaseModel):
-    images: list[str]
-    id: str
-    first_name: str
-    last_name: str
-
-@app.post("/api/register-face")
-async def register_face(data: FaceData):
-    return {
-        "status": "success",
-        "admin": {
-            "id": data.id,
-            "first_name": data.first_name,
-            "last_name": data.last_name,
-        },
-        "received_images": len(data.images),
-    }
+    return {"message": "pong"}

@@ -1,61 +1,21 @@
-import { useRef, useState, useEffect } from "react";
-import axios from "axios";
+import useRegisterFace from "../hooks/useRegisterFace";
 
 const RegisterFace = () => {
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
-  const [capturedImages, setCapturedImages] = useState([]);
-  const [admin, setAdmin] = useState(null);
-
-  useEffect(() => {
-    const storedAdmin = localStorage.getItem("admin");
-    if (storedAdmin) {
-      setAdmin(JSON.parse(storedAdmin));
-    }
-  }, []);
-
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      videoRef.current.srcObject = stream;
-    } catch (err) {
-      console.error("Error accessing webcam:", err);
-      alert("Could not access webcam");
-    }
-  };
-
-  const captureImage = () => {
-    const context = canvasRef.current.getContext("2d");
-    context.drawImage(videoRef.current, 0, 0, 300, 200);
-    const imageData = canvasRef.current.toDataURL("image/png");
-
-    setCapturedImages((prev) => [...prev, imageData]);
-  };
-
-  const saveImages = async () => {
-    if (!admin) {
-      alert("Admin details not found. Please log in again.");
-      return;
-    }
-
-    try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_PY_API_URL}/register-face`,
-        {
-          images: capturedImages,
-          id: admin.id,
-          first_name: admin.first_name,
-          last_name: admin.last_name,
-        }
-      );
-
-      alert("Images sent to backend!");
-      console.log("Server response:", response.data);
-    } catch (err) {
-      console.error("Error sending images:", err);
-      alert("Failed to send images!");
-    }
-  };
+  const {
+    videoRef,
+    canvasRef,
+    capturedImages,
+    startCamera,
+    captureImage,
+    saveImages,
+    admin,
+    visitorName,
+    setVisitorName,
+    inmateName,
+    setInmateName,
+    visitorAddress,
+    setVisitorAddress,
+  } = useRegisterFace();
 
   return (
     <div className="p-6">
@@ -66,6 +26,30 @@ const RegisterFace = () => {
           Logged in as: <b>{admin.first_name} {admin.last_name}</b>
         </p>
       )}
+
+      <div className="mb-4 space-y-2">
+        <input
+          type="text"
+          placeholder="Visitor's Name"
+          value={visitorName}
+          onChange={(e) => setVisitorName(e.target.value)}
+          className="w-full border p-2 rounded"
+        />
+        <input
+          type="text"
+          placeholder="Inmate to Visit"
+          value={inmateName}
+          onChange={(e) => setInmateName(e.target.value)}
+          className="w-full border p-2 rounded"
+        />
+        <input
+          type="text"
+          placeholder="Visitor's Address"
+          value={visitorAddress}
+          onChange={(e) => setVisitorAddress(e.target.value)}
+          className="w-full border p-2 rounded"
+        />
+      </div>
 
       <video
         ref={videoRef}
@@ -100,7 +84,7 @@ const RegisterFace = () => {
         </button>
       </div>
 
-      <div className="flex gap-2 mt-4">
+      <div className="flex gap-2 mt-4 flex-wrap">
         {capturedImages.map((img, i) => (
           <img key={i} src={img} alt={`capture-${i}`} width="100" />
         ))}
