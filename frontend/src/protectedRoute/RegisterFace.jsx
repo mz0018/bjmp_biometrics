@@ -1,10 +1,18 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import axios from "axios";
 
 const RegisterFace = () => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [capturedImages, setCapturedImages] = useState([]);
+  const [admin, setAdmin] = useState(null);
+
+  useEffect(() => {
+    const storedAdmin = localStorage.getItem("admin");
+    if (storedAdmin) {
+      setAdmin(JSON.parse(storedAdmin));
+    }
+  }, []);
 
   const startCamera = async () => {
     try {
@@ -25,10 +33,21 @@ const RegisterFace = () => {
   };
 
   const saveImages = async () => {
+    if (!admin) {
+      alert("Admin details not found. Please log in again.");
+      return;
+    }
+
     try {
-      const response = await axios.post(`${import.meta.env.VITE_PY_API_URL}/register-face`, {
-        images: capturedImages,
-      });
+      const response = await axios.post(
+        `${import.meta.env.VITE_PY_API_URL}/register-face`,
+        {
+          images: capturedImages,
+          id: admin.id,
+          first_name: admin.first_name,
+          last_name: admin.last_name,
+        }
+      );
 
       alert("Images sent to backend!");
       console.log("Server response:", response.data);
@@ -41,6 +60,12 @@ const RegisterFace = () => {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Register Face Page</h1>
+
+      {admin && (
+        <p className="mb-2 text-gray-600">
+          Logged in as: <b>{admin.first_name} {admin.last_name}</b>
+        </p>
+      )}
 
       <video
         ref={videoRef}

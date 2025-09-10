@@ -25,10 +25,18 @@ async def ping():
 
 class FaceData(BaseModel):
     images: list[str]
+    id: str
+    first_name: str
+    last_name: str
 
 @app.post("/api/register-face")
 async def register_face(data: FaceData):
     return {
         "status": "success",
-        "received_images": len(data.images)
+        "admin": {
+            "id": data.id,
+            "first_name": data.first_name,
+            "last_name": data.last_name,
+        },
+        "received_images": len(data.images),
     }

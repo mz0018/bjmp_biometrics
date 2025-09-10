@@ -1,12 +1,27 @@
 import { Link } from "react-router-dom";
 import { FileText, UserPlus } from "lucide-react";
 import LogoutButton from "../protectedRoute/LogoutButton";
+import { useEffect, useState } from "react";
 
 const Sidebar = () => {
+  const [admin, setAdmin] = useState(null);
+
+  useEffect(() => {
+    const storedAdmin = localStorage.getItem("admin");
+    if (storedAdmin) {
+      setAdmin(JSON.parse(storedAdmin));
+    }
+  }, []);
+
   return (
     <aside className="w-64 bg-white shadow-lg p-4 flex flex-col justify-between">
       <div>
-        <h2 className="text-xl font-bold mb-6">Admin Panel</h2>
+
+        {admin && (
+          <>
+          <h2 className="text-xl font-bold mb-6 capitalize">{admin.first_name} Panel</h2>
+          </>
+        )}
 
         <nav className="flex flex-col gap-3">
           <Link
