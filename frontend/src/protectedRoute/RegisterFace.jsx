@@ -103,9 +103,9 @@ const RegisterFace = () => {
         <button
           onClick={saveImages}
           className="bg-purple-500 text-white px-4 py-2 rounded"
-          disabled={capturedImages.length === 0}
+          disabled={capturedImages.length === 0 || isLoading}
         >
-          Save Images
+          {isLoading ? 'Loading...' : 'Register'}
         </button>
       </div>
 
