@@ -1,23 +1,24 @@
-import tempfile
 from PIL import Image
+import torch
+import clip
+
+# Load CLIP model once globally
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model, preprocess = clip.load("ViT-B/32", device=device)
 
 def get_embedding(image_file):
     """
-    Convert image file to .webp and generate an embedding.
-    (Dummy embedding in this example — replace with real model.)
+    Generate a real embedding using CLIP.
     """
-
-    # Convert to RGB to avoid palette issues
+    # Convert to RGB
     img = Image.open(image_file).convert("RGB")
 
-    # Fix Windows locking issue: use delete=False
-    with tempfile.NamedTemporaryFile(suffix=".webp", delete=False) as tmp:
-        temp_path = tmp.name
+    # Preprocess image for CLIP
+    img_input = preprocess(img).unsqueeze(0).to(device)
 
-    img.save(temp_path, format="WEBP")
-
-    # TODO: Replace this with your real embedding model
-    # Example: embedding = model.encode(temp_path)
-    embedding = [0.1, 0.2, 0.3]  # dummy data
+    # Generate embedding
+    with torch.no_grad():
+        embedding = model.encode_image(img_input)
+        embedding = embedding.cpu().numpy().flatten().tolist()  # Convert to list
 
     return embedding
