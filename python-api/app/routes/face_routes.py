@@ -3,7 +3,6 @@ from fastapi.concurrency import run_in_threadpool
 from app.models.face_model import FaceData
 from app.helpers.image_utils import base64_to_webp, generate_filename
 from app.helpers.embedding_utils import get_embedding
-from PIL import Image
 import os
 
 router = APIRouter()
@@ -16,19 +15,20 @@ os.makedirs(SAVE_FOLDER, exist_ok=True)
 async def register_face(data: FaceData):
     errors = {}
 
-    # --- Original validation ---
-    if not data.id.strip():
-        errors["id"] = "Admin ID is required"
-    if not data.first_name.strip():
-        errors["first_name"] = "First name is required"
-    if not data.last_name.strip():
-        errors["last_name"] = "Last name is required"
-    if not data.visitor_name.strip():
-        errors["visitor_name"] = "Visitor name is required"
-    if not data.inmate_name.strip():
-        errors["inmate_name"] = "Inmate name is required"
-    if not data.visitor_address.strip():
-        errors["visitor_address"] = "Visitor address is required"
+    # --- Validation ---
+    required_fields = [
+        ("id", "Admin ID"),
+        ("first_name", "First name"),
+        ("last_name", "Last name"),
+        ("visitor_name", "Visitor name"),
+        ("inmate_name", "Inmate name"),
+        ("visitor_address", "Visitor address")
+    ]
+
+    for field, name in required_fields:
+        if not getattr(data, field).strip():
+            errors[field] = f"{name} is required"
+
     if not data.images or len(data.images) == 0:
         errors["images"] = "At least one image is required"
 
@@ -38,31 +38,26 @@ async def register_face(data: FaceData):
     converted_images_info = []
     embeddings = []
 
-    # --- Convert images and save ---
+    # --- Convert images, save, and generate embeddings ---
     for idx, img_base64 in enumerate(data.images):
+        # Convert base64 to WebP bytes
         webp_file = base64_to_webp(img_base64)
-        img = Image.open(webp_file)
-        webp_file.seek(0)
 
-        # Generate unique filename
+        # Generate unique filename and save
         filename = generate_filename(data.id)
         file_path = os.path.join(SAVE_FOLDER, filename)
-
-        # Save WebP file
         with open(file_path, "wb") as f:
-            f.write(webp_file.read())
+            f.write(webp_file.getvalue())
 
-        webp_file.seek(0)  # Reset pointer for embedding
-
-        # Generate embedding (optional)
+        # Generate embedding asynchronously
+        webp_file.seek(0)  # Ensure pointer is at start
         embedding = await run_in_threadpool(get_embedding, webp_file)
         embeddings.append(embedding)
 
         converted_images_info.append({
             "image_index": idx,
-            "format": img.format,
             "size_bytes": len(webp_file.getvalue()),
-            "saved_filename": filename,  # Info about saved file
+            "saved_filename": filename,
         })
 
     return {
