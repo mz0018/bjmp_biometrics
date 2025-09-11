@@ -10,7 +10,7 @@ def get_embedding(image_file):
     # Convert to RGB to avoid palette issues
     img = Image.open(image_file).convert("RGB")
 
-    # ✅ Fix Windows locking issue: use delete=False
+    # Fix Windows locking issue: use delete=False
     with tempfile.NamedTemporaryFile(suffix=".webp", delete=False) as tmp:
         temp_path = tmp.name
 
