@@ -18,7 +18,6 @@ export const useFaceRecognition = () => {
   const [lastRecognition, setLastRecognition] = useState(0);
   const [recognitionQueue, setRecognitionQueue] = useState({});
 
-  // ✅ Load models & start camera
   useEffect(() => {
     let stream;
 
@@ -58,7 +57,6 @@ export const useFaceRecognition = () => {
     };
   }, []);
 
-  // ✅ Detection loop
   const handleVideoPlay = async () => {
     let fpsCounter = 0;
     let fpsTimer = Date.now();
@@ -89,7 +87,6 @@ export const useFaceRecognition = () => {
       faceapi.draw.drawDetections(canvasRef.current, resized);
       faceapi.draw.drawFaceLandmarks(canvasRef.current, resized);
 
-      // ✅ FPS calculation
       fpsCounter++;
       if (Date.now() - fpsTimer > 500) {
         setFps(Math.round((fpsCounter * 1000) / (Date.now() - fpsTimer)));
@@ -123,9 +120,8 @@ export const useFaceRecognition = () => {
 
             if (res.data.matched) {
               setVisitor(res.data.visitor);
-              setNotFound(false);
-
-              // ✅ Pause 5s
+              console.log(res.data.visitor)
+              
               if (videoRef.current?.srcObject) {
                 videoRef.current.srcObject.getTracks().forEach((t) => t.stop());
                 setCameraActive(false);
@@ -139,7 +135,7 @@ export const useFaceRecognition = () => {
                         handleVideoPlay();
                       }
                     });
-                }, 5000);
+                }, 20000);
               }
             } else {
               setVisitor(null);
