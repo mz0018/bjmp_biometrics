@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from fastapi.concurrency import run_in_threadpool
 from app.models.face_model import FaceData
 from app.helpers.image_utils import base64_to_webp, generate_filename
-from app.helpers.embedding_utils import get_embedding
+from app.helpers.embedding_utils import get_embedding, find_best_match
 import os, json, uuid, numpy as np
 
 router = APIRouter()
@@ -129,7 +129,7 @@ async def recognize_face(data: dict):
     # Convert base64 → embedding
     webp_file = base64_to_webp(image_base64)
     webp_file.seek(0)
-    embedding = np.array(await run_in_threadpool(get_embedding, webp_file))
+    embedding = await run_in_threadpool(get_embedding, webp_file)
 
     # --- Use memory cache instead of reloading every time ---
     if not embeddings_cache:

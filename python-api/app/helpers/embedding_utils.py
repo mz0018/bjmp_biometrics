@@ -4,34 +4,50 @@ from PIL import Image
 import torch
 import clip
 import numpy as np
+from app.helpers.face_utils import detect_and_crop_face  # 👈 we’ll use this
 
 # Load CLIP model once globally
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model, preprocess = clip.load("ViT-B/32", device=device)
 
-# In-memory cache { visitor_id: embedding }
+# In-memory cache { visitor_id: {embedding, meta} }
 embedding_cache = {}
 
 
 def get_embedding(image_file, cache_key=None):
     """
-    Generate (or retrieve cached) normalized embedding using CLIP.
+    Generate (or retrieve cached) normalized embedding using CLIP,
+    with face detection & cropping.
     """
     if cache_key and cache_key in embedding_cache:
-        return embedding_cache[cache_key]
+        return embedding_cache[cache_key]["embedding"]
 
-    img = Image.open(image_file).convert("RGB")
+    # Read raw bytes first (needed for face detection)
+    if isinstance(image_file, str):  # if path given
+        with open(image_file, "rb") as f:
+            image_bytes = f.read()
+    else:  # if file-like object given
+        image_bytes = image_file.read()
+
+    # Detect & crop face (returns PIL image)
+    img = detect_and_crop_face(image_bytes)
+
+    # Preprocess for CLIP
     img_input = preprocess(img).unsqueeze(0).to(device)
 
     with torch.no_grad():
         embedding = model.encode_image(img_input)
         embedding = embedding.detach().cpu().numpy().flatten()
 
-    embedding = embedding / np.linalg.norm(embedding)  # normalize
+    # Normalize vector
+    embedding = embedding / np.linalg.norm(embedding)
     embedding_list = embedding.tolist()
 
+    # Cache if key provided
     if cache_key:
-        embedding_cache[cache_key] = embedding_list
+        if cache_key not in embedding_cache:
+            embedding_cache[cache_key] = {}
+        embedding_cache[cache_key]["embedding"] = embedding_list
 
     return embedding_list
 
@@ -42,7 +58,7 @@ def cosine_similarity(embedding1, embedding2):
     return float(np.dot(emb1, emb2) / (np.linalg.norm(emb1) * np.linalg.norm(emb2)))
 
 
-def find_best_match(query_embedding, threshold=0.75):
+def find_best_match(query_embedding, threshold=0.85):
     """
     Search the embedding cache for the best match.
     """
@@ -81,7 +97,7 @@ def preload_embeddings(folder="./saved_faces"):
             file_path = os.path.join(folder, filename)
             embedding = get_embedding(file_path, cache_key=visitor_info["visitor_id"])
 
-            # Store in cache with meta
+            # Store embedding + meta in cache
             embedding_cache[visitor_info["visitor_id"]] = {
                 "embedding": embedding,
                 "meta": visitor_info
