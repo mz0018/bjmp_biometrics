@@ -24,15 +24,15 @@ const Screen1 = () => {
         {visitor && (
           <div className="absolute bottom-3 left-3 bg-black/70 px-4 py-2 rounded-lg text-white">
             <p className="text-lg font-semibold">Visitor: {visitor.name}</p>
-            <p className="text-sm">Address: {visitor.address}</p>
-            <p className="text-sm">Inmate: {visitor.inmate}</p>
-            <p className="text-sm">ID: {visitor.visitor_id}</p>
+            <small className="text-xs text-gray-400 cursor-not-allowed lowercase">{visitor.visitor_id}</small>
+            <p className="text-md">Inmate: {visitor.inmate}</p>
+            <p className="text-md">Address: {visitor.address}</p>
           </div>
         )}
 
         {notFound && (
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-red-600/80 px-4 py-2 rounded-lg text-center text-white">
-            <p className="text-lg font-semibold">❌ Visitor Not Found</p>
+            <p className="text-lg font-semibold">Visitor Not Found</p>
           </div>
         )}
 

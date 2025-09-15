@@ -135,7 +135,7 @@ export const useFaceRecognition = () => {
                         handleVideoPlay();
                       }
                     });
-                }, 20000);
+                }, 2000);
               }
             } else {
               setVisitor(null);
