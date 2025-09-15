@@ -5,19 +5,20 @@ import uuid
 
 def base64_to_webp(image_base64):
     """
-    Convert Base64 image string to WebP bytes
+    Convert a Base64 image string to WebP bytes.
     """
-    header, encoded = image_base64.split(",", 1)
+    # Decode Base64 (ignore header if present)
+    _, encoded = image_base64.split(",", 1)
     image_data = base64.b64decode(encoded)
-    
-    img = Image.open(BytesIO(image_data))
+
+    # Convert → WebP in memory
     webp_io = BytesIO()
-    img.save(webp_io, format="WEBP")
+    Image.open(BytesIO(image_data)).save(webp_io, format="WEBP")
     webp_io.seek(0)
     return webp_io
 
 def generate_filename(admin_id):
     """
-    Generate a unique filename for the image
+    Generate a unique WebP filename for the image.
     """
     return f"{admin_id}_{uuid.uuid4().hex}.webp"

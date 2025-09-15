@@ -4,7 +4,7 @@ from PIL import Image
 import torch
 import clip
 import numpy as np
-from app.helpers.face_utils import detect_and_crop_face  # 👈 we’ll use this
+from app.helpers.face_utils import detect_and_crop_face  # 👈 used for cropping
 
 # Load CLIP model once globally
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -22,39 +22,31 @@ def get_embedding(image_file, cache_key=None):
     if cache_key and cache_key in embedding_cache:
         return embedding_cache[cache_key]["embedding"]
 
-    # Read raw bytes first (needed for face detection)
-    if isinstance(image_file, str):  # if path given
-        with open(image_file, "rb") as f:
-            image_bytes = f.read()
-    else:  # if file-like object given
-        image_bytes = image_file.read()
+    # Read bytes (works for both path & file-like)
+    image_bytes = (
+        open(image_file, "rb").read() if isinstance(image_file, str) else image_file.read()
+    )
 
-    # Detect & crop face (returns PIL image)
+    # Detect & crop face → returns PIL.Image
     img = detect_and_crop_face(image_bytes)
 
-    # Preprocess for CLIP
-    img_input = preprocess(img).unsqueeze(0).to(device)
-
+    # Preprocess + inference
     with torch.no_grad():
-        embedding = model.encode_image(img_input)
-        embedding = embedding.detach().cpu().numpy().flatten()
+        img_input = preprocess(img).unsqueeze(0).to(device)
+        embedding = model.encode_image(img_input).cpu().numpy().flatten()
 
-    # Normalize vector
+    # Normalize
     embedding = embedding / np.linalg.norm(embedding)
-    embedding_list = embedding.tolist()
 
-    # Cache if key provided
+    # Cache if needed
     if cache_key:
-        if cache_key not in embedding_cache:
-            embedding_cache[cache_key] = {}
-        embedding_cache[cache_key]["embedding"] = embedding_list
+        embedding_cache.setdefault(cache_key, {})["embedding"] = embedding.tolist()
 
-    return embedding_list
+    return embedding.tolist()
 
 
 def cosine_similarity(embedding1, embedding2):
-    emb1 = np.array(embedding1)
-    emb2 = np.array(embedding2)
+    emb1, emb2 = np.array(embedding1), np.array(embedding2)
     return float(np.dot(emb1, emb2) / (np.linalg.norm(emb1) * np.linalg.norm(emb2)))
 
 
@@ -62,19 +54,18 @@ def find_best_match(query_embedding, threshold=0.85):
     """
     Search the embedding cache for the best match.
     """
-    best_score = -1
-    best_id = None
+    best_id, best_score = None, -1
+
     for visitor_id, data in embedding_cache.items():
         sim = cosine_similarity(query_embedding, data["embedding"])
         if sim > best_score:
-            best_score = sim
-            best_id = visitor_id
+            best_score, best_id = sim, visitor_id
 
     if best_id and best_score >= threshold:
         return {
             "visitor_id": best_id,
             "similarity": best_score,
-            "meta": embedding_cache[best_id]["meta"]
+            "meta": embedding_cache[best_id]["meta"],
         }
     return None
 
@@ -86,22 +77,23 @@ def preload_embeddings(folder="./saved_faces"):
     """
     count = 0
     for filename in os.listdir(folder):
-        if filename.endswith(".webp"):
-            json_path = os.path.join(folder, f"{filename}.json")
-            if not os.path.exists(json_path):
-                continue
+        if not filename.endswith(".webp"):
+            continue
 
-            with open(json_path, "r") as f:
-                visitor_info = json.load(f)
+        json_path = os.path.join(folder, f"{filename}.json")
+        if not os.path.exists(json_path):
+            continue
 
-            file_path = os.path.join(folder, filename)
-            embedding = get_embedding(file_path, cache_key=visitor_info["visitor_id"])
+        with open(json_path, "r") as f:
+            visitor_info = json.load(f)
 
-            # Store embedding + meta in cache
-            embedding_cache[visitor_info["visitor_id"]] = {
-                "embedding": embedding,
-                "meta": visitor_info
-            }
-            count += 1
+        file_path = os.path.join(folder, filename)
+        embedding = get_embedding(file_path, cache_key=visitor_info["visitor_id"])
+
+        embedding_cache[visitor_info["visitor_id"]] = {
+            "embedding": embedding,
+            "meta": visitor_info,
+        }
+        count += 1
 
     print(f"✅ Preloaded {count} embeddings into memory")
