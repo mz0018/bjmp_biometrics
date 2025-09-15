@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import * as faceapi from "face-api.js";
 import * as tf from "@tensorflow/tfjs";
 import "@tensorflow/tfjs-backend-cpu";
@@ -6,8 +6,8 @@ import "@tensorflow/tfjs-backend-webgl";
 import axios from "axios";
 
 export const useFaceRecognition = () => {
-  const videoRef = useRef();
-  const canvasRef = useRef();
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
   const faceCanvasRef = useRef(document.createElement("canvas"));
   const frameRef = useRef(null);
 
@@ -16,8 +16,9 @@ export const useFaceRecognition = () => {
   const [notFound, setNotFound] = useState(false);
   const [cameraActive, setCameraActive] = useState(true);
   const [lastRecognition, setLastRecognition] = useState(0);
-  const [recognitionQueue, setRecognitionQueue] = useState({});
+  const recognitionQueue = useRef({}); // ✅ ref instead of state
 
+  // --- Load models once
   useEffect(() => {
     let stream;
 
@@ -32,8 +33,10 @@ export const useFaceRecognition = () => {
         console.log("⚠️ WebGL not available, using CPU backend");
       }
 
-      await faceapi.nets.tinyFaceDetector.loadFromUri("/models/tiny_face_detector");
-      await faceapi.nets.faceLandmark68Net.loadFromUri("/models/face_landmark_68");
+      await Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri("/models/tiny_face_detector"),
+        faceapi.nets.faceLandmark68Net.loadFromUri("/models/face_landmark_68"),
+      ]);
       console.log("✅ Models loaded");
 
       startVideo();
@@ -57,7 +60,8 @@ export const useFaceRecognition = () => {
     };
   }, []);
 
-  const handleVideoPlay = async () => {
+  // --- Memoized play handler
+  const handleVideoPlay = useCallback(() => {
     let fpsCounter = 0;
     let fpsTimer = Date.now();
 
@@ -74,10 +78,8 @@ export const useFaceRecognition = () => {
         )
         .withFaceLandmarks();
 
-      const displaySize = {
-        width: videoRef.current.videoWidth,
-        height: videoRef.current.videoHeight,
-      };
+      const { videoWidth, videoHeight } = videoRef.current;
+      const displaySize = { width: videoWidth, height: videoHeight };
 
       faceapi.matchDimensions(canvasRef.current, displaySize);
       const resized = faceapi.resizeResults(detections, displaySize);
@@ -87,29 +89,29 @@ export const useFaceRecognition = () => {
       faceapi.draw.drawDetections(canvasRef.current, resized);
       faceapi.draw.drawFaceLandmarks(canvasRef.current, resized);
 
+      // --- FPS update throttled
       fpsCounter++;
-      if (Date.now() - fpsTimer > 500) {
-        setFps(Math.round((fpsCounter * 1000) / (Date.now() - fpsTimer)));
+      const now = Date.now();
+      if (now - fpsTimer > 500) {
+        setFps(Math.round((fpsCounter * 1000) / (now - fpsTimer)));
         fpsCounter = 0;
-        fpsTimer = Date.now();
+        fpsTimer = now;
       }
 
-      const currentTime = Date.now();
-      if (currentTime - lastRecognition > 1500) {
-        for (let i = 0; i < resized.length; i++) {
-          const box = resized[i].detection.box;
+      // --- Recognition throttled
+      if (now - lastRecognition > 1500) {
+        resized.forEach(async (res, i) => {
+          const box = res.detection.box;
+          if (recognitionQueue.current[i]) return;
 
-          if (recognitionQueue[i]) continue;
-          setRecognitionQueue((prev) => ({ ...prev, [i]: true }));
+          recognitionQueue.current[i] = true;
 
           const faceCanvas = faceCanvasRef.current;
           faceCanvas.width = box.width;
           faceCanvas.height = box.height;
-          faceCanvas.getContext("2d").drawImage(
-            videoRef.current,
-            box.x, box.y, box.width, box.height,
-            0, 0, box.width, box.height
-          );
+          faceCanvas
+            .getContext("2d")
+            .drawImage(videoRef.current, box.x, box.y, box.width, box.height, 0, 0, box.width, box.height);
 
           const faceBase64 = faceCanvas.toDataURL("image/jpeg");
 
@@ -120,21 +122,21 @@ export const useFaceRecognition = () => {
 
             if (res.data.matched) {
               setVisitor(res.data.visitor);
-              console.log(res.data.visitor)
-              
+              console.log(res.data.visitor);
+
+              // --- Restart camera after match
               if (videoRef.current?.srcObject) {
                 videoRef.current.srcObject.getTracks().forEach((t) => t.stop());
                 setCameraActive(false);
-                setTimeout(() => {
+
+                setTimeout(async () => {
                   setVisitor(null);
-                  navigator.mediaDevices.getUserMedia({ video: true })
-                    .then((stream) => {
-                      if (videoRef.current) {
-                        videoRef.current.srcObject = stream;
-                        setCameraActive(true);
-                        handleVideoPlay();
-                      }
-                    });
+                  const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                  if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                    setCameraActive(true);
+                    handleVideoPlay();
+                  }
                 }, 2000);
               }
             } else {
@@ -144,28 +146,18 @@ export const useFaceRecognition = () => {
           } catch (err) {
             console.error("Recognition error:", err);
           } finally {
-            setRecognitionQueue((prev) => {
-              const copy = { ...prev };
-              delete copy[i];
-              return copy;
-            });
+            delete recognitionQueue.current[i];
           }
-        }
-        setLastRecognition(currentTime);
+        });
+
+        setLastRecognition(now);
       }
 
       frameRef.current = requestAnimationFrame(runDetection);
     };
 
     runDetection();
-  };
+  }, [cameraActive, lastRecognition]);
 
-  return {
-    videoRef,
-    canvasRef,
-    visitor,
-    notFound,
-    fps,
-    handleVideoPlay,
-  };
+  return { videoRef, canvasRef, visitor, notFound, fps, handleVideoPlay };
 };
