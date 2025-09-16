@@ -4,13 +4,20 @@ from app.models.face_model import FaceData
 from app.helpers.image_utils import base64_to_webp, generate_filename
 from app.helpers.embedding_utils import get_embedding
 import os, json, uuid, numpy as np
+import motor.motor_asyncio
+from motor.motor_asyncio import AsyncIOMotorClient
+from datetime import datetime
 
 router = APIRouter()
+
+MONGO_URI = "mongodb+srv://bjmp_face_recog:LXKGvyAsIaAx32hT@bjmp.kexnzgt.mongodb.net/?retryWrites=true&w=majority&appName=bjmp"
+client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URI)
+db = client["face_recognition"]
+logs_collection = db["recognition_logs"]
 
 SAVE_FOLDER = "./saved_faces"
 os.makedirs(SAVE_FOLDER, exist_ok=True)
 
-# {filename: (embedding_array, visitor_info)}
 embeddings_cache = {}
 
 
@@ -135,5 +142,12 @@ async def recognize_face(data: dict):
 
     if best_sim < THRESHOLD:
         return {"matched": False, "message": "No face matched", "similarity": best_sim}
+
+    log_entry = {
+        "visitor": best_visitor,
+        "similarity": best_sim,
+        "timestamp": datetime.utcnow()
+    }
+    await logs_collection.insert_one(log_entry)
 
     return {"matched": True, "visitor": best_visitor, "similarity": best_sim}
