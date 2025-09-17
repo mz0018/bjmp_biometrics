@@ -121,7 +121,7 @@ async def register_face(data: FaceData):
 async def recognize_face(data: dict):
     image_base64 = data.get("image")
     if not image_base64:
-        return {"matched": False, "message": "No image provided"}
+        return False  # No image provided
 
     # Convert base64 → embedding
     webp_file = base64_to_webp(image_base64)
@@ -129,7 +129,7 @@ async def recognize_face(data: dict):
     embedding = np.array(await run_in_threadpool(get_embedding, webp_file))
 
     if not embeddings_cache:
-        return {"matched": False, "message": "No registered faces found"}
+        return False  # No registered faces found
 
     # Vectorized cosine similarity
     sims = [
@@ -138,11 +138,12 @@ async def recognize_face(data: dict):
     ]
 
     best_sim, best_visitor = max(sims, key=lambda x: x[0])
-    THRESHOLD = 0.8
+    THRESHOLD = 0.88  # your similarity threshold
 
     if best_sim < THRESHOLD:
-        return {"matched": False, "message": "No face matched", "similarity": best_sim}
+        return False  # No match
 
+    # Optional: log matched visitor
     log_entry = {
         "visitor": best_visitor,
         "similarity": best_sim,
@@ -150,4 +151,6 @@ async def recognize_face(data: dict):
     }
     await logs_collection.insert_one(log_entry)
 
-    return {"matched": True, "visitor": best_visitor, "similarity": best_sim}
+    # Return matched visitor object
+    return best_visitor
+

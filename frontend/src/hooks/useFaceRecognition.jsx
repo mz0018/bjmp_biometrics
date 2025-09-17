@@ -119,8 +119,8 @@ export const useFaceRecognition = () => {
               image: faceBase64,
             });
 
-            if (res.data.matched) {
-              setVisitor(res.data.visitor);
+            if (res.data) {
+              setVisitor(res.data);
               setValue(prev => !prev)
 
               if (videoRef.current?.srcObject) {
@@ -135,7 +135,7 @@ export const useFaceRecognition = () => {
                     setCameraActive(true);
                     handleVideoPlay();
                   }
-                }, 2000);
+                }, 1000);
               }
             } else {
               setVisitor(null);

@@ -50,7 +50,7 @@ def cosine_similarity(embedding1, embedding2):
     return float(np.dot(emb1, emb2) / (np.linalg.norm(emb1) * np.linalg.norm(emb2)))
 
 
-def find_best_match(query_embedding, threshold=0.85):
+def find_best_match(query_embedding, threshold=0.92):
     """
     Search the embedding cache for the best match.
     """
@@ -67,8 +67,7 @@ def find_best_match(query_embedding, threshold=0.85):
             "similarity": best_score,
             "meta": embedding_cache[best_id]["meta"],
         }
-    return None
-
+    return False
 
 def preload_embeddings(folder="./saved_faces"):
     """
