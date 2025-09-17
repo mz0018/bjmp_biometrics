@@ -1,5 +1,6 @@
 import argon2 from "argon2";
 import Admin from "../models/AdminModel.js";
+import RecognitionLog from "../models/RecognitionLogSchema.js"
 
 export const signupAdmin = async (req, res) => {
   const { first_name, last_name, username, password, retype_password } = req.body;
@@ -117,5 +118,16 @@ export const signinAdmin = async (req, res) => {
     });
   }
 };
+
+export const getVisitorsLog = async (req, res) => {
+  try {
+    const logs = await RecognitionLog.find().sort({ timestamp: -1 });
+    return res.status(200).json(logs)
+  } catch (err) {
+    console.error('Backend Error: ', err);
+    res.status(500).json({ error: "Failed to fetch logs", err });
+  }
+};
+
 
 

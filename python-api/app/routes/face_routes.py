@@ -12,7 +12,7 @@ router = APIRouter()
 
 MONGO_URI = "mongodb+srv://bjmp_face_recog:LXKGvyAsIaAx32hT@bjmp.kexnzgt.mongodb.net/?retryWrites=true&w=majority&appName=bjmp"
 client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URI)
-db = client["face_recognition"]
+db = client["test"]
 logs_collection = db["recognition_logs"]
 
 SAVE_FOLDER = "./saved_faces"

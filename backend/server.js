@@ -18,7 +18,7 @@ app.use(express.urlencoded({ limit: "100mb", extended: true }));
 app.use("/api/admin", adminRoutes);
 
 app.get("/", (req, res) => {
-  res.send("Backend is running ✅");
+  res.send("Backend is running");
 });
 
 app.listen(PORT, () => {
