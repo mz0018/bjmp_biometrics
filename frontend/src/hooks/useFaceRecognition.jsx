@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useContext } from "react";
+import { GlobalContext } from "../context/GlobalContext";
 import * as faceapi from "face-api.js";
 import * as tf from "@tensorflow/tfjs";
 import "@tensorflow/tfjs-backend-cpu";
@@ -16,9 +17,10 @@ export const useFaceRecognition = () => {
   const [notFound, setNotFound] = useState(false);
   const [cameraActive, setCameraActive] = useState(true);
   const [lastRecognition, setLastRecognition] = useState(0);
-  const recognitionQueue = useRef({}); // ✅ ref instead of state
+  const recognitionQueue = useRef({});
 
-  // --- Load models once
+  const { setValue } = useContext(GlobalContext);
+
   useEffect(() => {
     let stream;
 
@@ -60,7 +62,6 @@ export const useFaceRecognition = () => {
     };
   }, []);
 
-  // --- Memoized play handler
   const handleVideoPlay = useCallback(() => {
     let fpsCounter = 0;
     let fpsTimer = Date.now();
@@ -89,7 +90,6 @@ export const useFaceRecognition = () => {
       faceapi.draw.drawDetections(canvasRef.current, resized);
       faceapi.draw.drawFaceLandmarks(canvasRef.current, resized);
 
-      // --- FPS update throttled
       fpsCounter++;
       const now = Date.now();
       if (now - fpsTimer > 500) {
@@ -98,7 +98,6 @@ export const useFaceRecognition = () => {
         fpsTimer = now;
       }
 
-      // --- Recognition throttled
       if (now - lastRecognition > 1500) {
         resized.forEach(async (res, i) => {
           const box = res.detection.box;
@@ -122,9 +121,8 @@ export const useFaceRecognition = () => {
 
             if (res.data.matched) {
               setVisitor(res.data.visitor);
-              console.log(res.data.visitor);
+              setValue(prev => !prev)
 
-              // --- Restart camera after match
               if (videoRef.current?.srcObject) {
                 videoRef.current.srcObject.getTracks().forEach((t) => t.stop());
                 setCameraActive(false);

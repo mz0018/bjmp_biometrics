@@ -24,3 +24,11 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
+app.use("/models", express.static("public/models", {
+  setHeaders: (res, path) => {
+    if (path.endsWith(".bin")) {
+      res.setHeader("Content-Type", "application/octet-stream");
+    }
+  }
+}));

@@ -1,6 +1,12 @@
 import { Link } from "react-router-dom";
+import { GlobalContext } from "./context/GlobalContext";
+import { useContext } from "react";
 
 const App = () => {
+  const { value } = useContext(GlobalContext);
+
+  console.log(value);
+
   return (
     <div className="flex gap-4">
       <Link 

@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { GlobalContext } from "../context/GlobalContext";
 import axios from "axios";
 
 const useVisitorsLogs = () => {
+  const { value } = useContext(GlobalContext);
   const [isLoading, setIsLoading] = useState(false);
   const [hasErrors, setHasErrors] = useState({});
   const [logs, setLogs] = useState([]);
@@ -25,7 +27,7 @@ const useVisitorsLogs = () => {
     };
 
     getLogs();
-  }, []);
+  }, [value]);
  
   return { isLoading, hasErrors, logs };
 };
