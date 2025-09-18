@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, useCallback, useContext } from "react";
-import { GlobalContext } from "../context/GlobalContext";
 import * as faceapi from "face-api.js";
 import * as tf from "@tensorflow/tfjs";
 import "@tensorflow/tfjs-backend-cpu";
@@ -18,8 +17,6 @@ export const useFaceRecognition = () => {
   const [cameraActive, setCameraActive] = useState(true);
   const [lastRecognition, setLastRecognition] = useState(0);
   const recognitionQueue = useRef({});
-
-  const { setValue } = useContext(GlobalContext);
 
   useEffect(() => {
     let stream;
@@ -121,7 +118,6 @@ export const useFaceRecognition = () => {
 
             if (res.data) {
               setVisitor(res.data);
-              setValue(prev => !prev)
               setNotFound(false)
 
               if (videoRef.current?.srcObject) {

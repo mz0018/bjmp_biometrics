@@ -1,9 +1,7 @@
-import { useState, useEffect, useContext } from "react";
-import { GlobalContext } from "../context/GlobalContext";
+import { useState, useEffect } from "react";
 import axios from "axios";
 
 const useVisitorsLogs = () => {
-  const { value } = useContext(GlobalContext);
   const [isLoading, setIsLoading] = useState(false);
   const [hasErrors, setHasErrors] = useState({});
   const [logs, setLogs] = useState([]);
@@ -24,10 +22,6 @@ const useVisitorsLogs = () => {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    getLogs();
-  }, [value]);
 
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:5001/ws");
