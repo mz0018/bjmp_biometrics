@@ -138,7 +138,7 @@ async def recognize_face(data: dict):
     ]
 
     best_sim, best_visitor = max(sims, key=lambda x: x[0])
-    THRESHOLD = 0.88  # your similarity threshold
+    THRESHOLD = 0.90  # your similarity threshold
 
     if best_sim < THRESHOLD:
         return False  # No match

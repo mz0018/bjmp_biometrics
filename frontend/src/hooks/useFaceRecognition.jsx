@@ -122,6 +122,7 @@ export const useFaceRecognition = () => {
             if (res.data) {
               setVisitor(res.data);
               setValue(prev => !prev)
+              setNotFound(false)
 
               if (videoRef.current?.srcObject) {
                 videoRef.current.srcObject.getTracks().forEach((t) => t.stop());

@@ -1,7 +1,7 @@
 # Ignore environment files
-python-api/.env
-backend/.env
-frontend/.env
+# python-api/.env
+# backend/.env
+# frontend/.env
 
 # Ignore any OS-specific files
 *.DS_Store
