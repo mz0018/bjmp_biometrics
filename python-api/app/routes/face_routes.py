@@ -148,7 +148,7 @@ async def recognize_face(data: dict):
         "visitor": best_visitor,
         "similarity": best_sim,
         "timestamp": datetime.utcnow(),
-        "expiresAt": datetime.utcnow() + timedelta(minutes=5)
+        "expiresAt": datetime.utcnow() + timedelta(seconds=10)
     }
     await logs_collection.insert_one(log_entry)
 

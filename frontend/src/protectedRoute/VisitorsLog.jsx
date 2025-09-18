@@ -1,18 +1,26 @@
 import useVisitorsLogs from "../hooks/useVisitorsLogs";
+import useSaveToReports from "../hooks/useSaveToReports";
 import { useEffect, useState } from "react";
 
 const VisitorsLog = () => {
   const { isLoading, hasErrors, logs } = useVisitorsLogs();
+  const { saveReport } = useSaveToReports();
   const [countdowns, setCountdowns] = useState({});
 
   useEffect(() => {
     if (logs.length > 0) {
       const interval = setInterval(() => {
-        setCountdowns(() => {
+        setCountdowns(prev => {
           const updated = {};
           logs.forEach(log => {
             const left = new Date(log.expiresAt).getTime() - Date.now();
-            updated[log._id] = Math.max(left, 0);
+            const newLeft = Math.max(left, 0);
+
+            if (newLeft === 0 && (prev[log._id] ?? left) > 0) {
+              saveReport(log)
+            }
+
+            updated[log._id] = newLeft;
           });
           return updated;
         });
