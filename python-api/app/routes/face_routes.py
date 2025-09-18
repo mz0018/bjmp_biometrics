@@ -6,7 +6,7 @@ from app.helpers.embedding_utils import get_embedding
 import os, json, uuid, numpy as np
 import motor.motor_asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
-from datetime import datetime
+from datetime import datetime, timedelta
 
 router = APIRouter()
 
@@ -147,7 +147,8 @@ async def recognize_face(data: dict):
     log_entry = {
         "visitor": best_visitor,
         "similarity": best_sim,
-        "timestamp": datetime.utcnow()
+        "timestamp": datetime.utcnow(),
+        "expiresAt": datetime.utcnow() + timedelta(minutes=5)
     }
     await logs_collection.insert_one(log_entry)
 
