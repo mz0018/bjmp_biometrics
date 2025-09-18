@@ -7,6 +7,7 @@ import os, json, uuid, numpy as np
 import motor.motor_asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
 from datetime import datetime, timedelta
+from app.ws_manager import clients
 
 router = APIRouter()
 
@@ -121,37 +122,39 @@ async def register_face(data: FaceData):
 async def recognize_face(data: dict):
     image_base64 = data.get("image")
     if not image_base64:
-        return False  # No image provided
+        return False
 
-    # Convert base64 → embedding
     webp_file = base64_to_webp(image_base64)
     webp_file.seek(0)
     embedding = np.array(await run_in_threadpool(get_embedding, webp_file))
 
     if not embeddings_cache:
-        return False  # No registered faces found
+        return False
 
-    # Vectorized cosine similarity
     sims = [
         (float(np.dot(embedding, e) / (np.linalg.norm(embedding) * np.linalg.norm(e))), v_info)
         for e, v_info in embeddings_cache.values()
     ]
 
     best_sim, best_visitor = max(sims, key=lambda x: x[0])
-    THRESHOLD = 0.90  # your similarity threshold
+    THRESHOLD = 0.90
 
     if best_sim < THRESHOLD:
-        return False  # No match
+        return False
 
-    # Optional: log matched visitor
     log_entry = {
         "visitor": best_visitor,
         "similarity": best_sim,
         "timestamp": datetime.utcnow(),
-        "expiresAt": datetime.utcnow() + timedelta(seconds=10)
+        "expiresAt": datetime.utcnow() + timedelta(seconds=30)
     }
     await logs_collection.insert_one(log_entry)
 
-    # Return matched visitor object
+    for client in clients:
+        try:
+            await client.send_text("refresh_logs")
+        except:
+            pass
+
     return best_visitor
 
