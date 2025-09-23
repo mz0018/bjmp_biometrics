@@ -56,9 +56,6 @@ starlette
 sympy
 threadpoolctl
 tokenizers==0.13.3
-torch
-torchaudio
-torchvision
 tqdm
 transformers
 typing_extensions
@@ -68,3 +65,6 @@ watchfiles
 wcwidth
 websockets
 Werkzeug
+exceptiongroup
+motor
+

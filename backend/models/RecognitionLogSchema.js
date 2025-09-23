@@ -12,4 +12,4 @@ const RecognitionLogSchema = new mongoose.Schema({
     expiresAt: { type: Date }
 });
 
-export default mongoose.model("RecognitionLog", RecognitionLogSchema, "recognition_logs");
+export default mongoose.model("RecognitionLog", RecognitionLogSchema, "visitorsLogs");

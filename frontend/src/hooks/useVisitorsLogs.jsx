@@ -11,6 +11,7 @@ const useVisitorsLogs = () => {
       setIsLoading(true);
       const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/visitorsLogs`);
       setLogs(res.data);
+      console.log(`Fetched Logs: ${res.data}`);
     } catch (err) {
       if (err.response && err.response.data) {
         console.error("Error response:", err.response.data);

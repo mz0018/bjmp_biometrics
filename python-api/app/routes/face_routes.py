@@ -12,9 +12,10 @@ from app.ws_manager import clients
 router = APIRouter()
 
 MONGO_URI = "mongodb+srv://bjmp_face_recog:LXKGvyAsIaAx32hT@bjmp.kexnzgt.mongodb.net/?retryWrites=true&w=majority&appName=bjmp"
+
 client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URI)
-db = client["test"]
-logs_collection = db["recognition_logs"]
+db = client["bjmp_biometrics"]
+logs_collection = db["visitorsLogs"]
 
 SAVE_FOLDER = "./saved_faces"
 os.makedirs(SAVE_FOLDER, exist_ok=True)

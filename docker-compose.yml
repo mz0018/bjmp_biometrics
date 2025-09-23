@@ -1,14 +1,5 @@
 version: '3.8'
 services:
-  mongo:
-    image: mongo:7
-    container_name: mongo
-    restart: always
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-
   backend:
     build: ./backend
     container_name: backend
@@ -16,9 +7,7 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - MONGO_URI=mongodb://mongo:27017/bjmp_biometrics
-    depends_on:
-      - mongo
+      - MONGO_URI=mongodb+srv://bjmp_face_recog:LXKGvyAsIaAx32hT@bjmp.kexnzgt.mongodb.net/bjmp_biometrics?retryWrites=true&w=majority&appName=bjmp
 
   frontend:
     build: ./frontend
@@ -35,8 +24,6 @@ services:
     restart: always
     ports:
       - "5001:5001"
-    depends_on:
-      - mongo
+    environment:
+      - MONGO_URI=mongodb+srv://bjmp_face_recog:LXKGvyAsIaAx32hT@bjmp.kexnzgt.mongodb.net/bjmp_biometrics?retryWrites=true&w=majority&appName=bjmp
 
-volumes:
-  mongo_data:
