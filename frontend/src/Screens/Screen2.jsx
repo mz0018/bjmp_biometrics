@@ -10,7 +10,18 @@ const Screen2 = () => {
 
   return (
     <div className="flex min-h-screen">
-      <div className="hidden xl:flex w-1/2 bg-gray-100"></div>
+      <div className="hidden xl:flex w-1/2 bg-gray-100 relative">
+        <img src="/img/office.webp" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-black/55"></div>
+
+        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[200px] bg-red-500/40 flex items-center justify-center px-6">
+          <img 
+            src="/img/banner-v2.png" 
+            alt="banner" 
+            className="w-full h-full object-contain" 
+          />
+        </div>
+      </div>
 
       <div className="flex flex-col items-center justify-center w-full xl:w-1/2 p-6">
         <Suspense fallback={isSignupOpen ? <SignupFallback /> : <SigninFallback />}>

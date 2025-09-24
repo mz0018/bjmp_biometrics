@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { User, Lock, Eye, EyeOff } from "lucide-react";
 import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
@@ -21,7 +21,10 @@ const InputField = ({
       {name.charAt(0).toUpperCase() + name.slice(1).replace("_", " ")}
     </label>
     <div className="relative">
-      <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+      <Icon
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+        size={18}
+      />
       <input
         id={id}
         type={type === "password" && showPassword ? "text" : type}
@@ -31,7 +34,9 @@ const InputField = ({
         placeholder={placeholder}
         autoComplete={type === "password" ? "current-password" : "username"}
         className={`w-full pl-10 px-4 py-2 border rounded-sm focus:outline-none focus:ring-2 text-[#002868] placeholder-[#002868] ${
-          error ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-[#002868]"
+          error
+            ? "border-red-500 focus:ring-red-500"
+            : "border-gray-300 focus:ring-[#002868]"
         }`}
       />
       {type === "password" && (
@@ -48,13 +53,22 @@ const InputField = ({
 );
 
 const Signup = () => {
-  const { formData, handleChange, handleSubmit, isLoading, errors } = useSignupAdmin();
+  const { formData, handleChange, handleSubmit, isLoading, errors } =
+    useSignupAdmin();
   const [showPassword, setShowPassword] = useState(false);
 
-  const notyf = new Notyf({ duration: 3000, position: { x: "right", y: "top" } });
+  const notyf = useRef(
+    new Notyf({ duration: 3000, position: { x: "right", y: "top" } })
+  );
+  const prevErrors = useRef({});
 
   useEffect(() => {
-    Object.values(errors).forEach((err) => err && notyf.error(err));
+    Object.entries(errors).forEach(([key, err]) => {
+      if (err && err !== prevErrors.current[key]) {
+        notyf.current.error(err);
+      }
+    });
+    prevErrors.current = errors;
   }, [errors]);
 
   return (
@@ -66,7 +80,10 @@ const Signup = () => {
         Enter your details to create an account
       </p>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-6 text-left w-full">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-4 p-6 text-left w-full"
+      >
         {/* First & Last Name side by side */}
         <div className="flex gap-4">
           <div className="flex-1">
@@ -76,7 +93,7 @@ const Signup = () => {
               name="first_name"
               value={formData.first_name}
               onChange={handleChange}
-              placeholder="First name"
+              placeholder="John"
               Icon={User}
               error={errors.first_name}
             />
@@ -88,7 +105,7 @@ const Signup = () => {
               name="last_name"
               value={formData.last_name}
               onChange={handleChange}
-              placeholder="Last name"
+              placeholder="Doe"
               Icon={User}
               error={errors.last_name}
             />
@@ -102,7 +119,7 @@ const Signup = () => {
           name="username"
           value={formData.username}
           onChange={handleChange}
-          placeholder="Username"
+          placeholder="john@example.com"
           Icon={User}
           error={errors.username}
         />
@@ -114,7 +131,7 @@ const Signup = () => {
           name="password"
           value={formData.password}
           onChange={handleChange}
-          placeholder="Password"
+          placeholder="Create a password"
           Icon={Lock}
           showPassword={showPassword}
           togglePassword={() => setShowPassword(!showPassword)}
@@ -128,7 +145,7 @@ const Signup = () => {
           name="retype_password"
           value={formData.retype_password}
           onChange={handleChange}
-          placeholder="Retype password"
+          placeholder="Confirm your password"
           Icon={Lock}
           showPassword={showPassword}
           togglePassword={() => setShowPassword(!showPassword)}
@@ -140,7 +157,9 @@ const Signup = () => {
           disabled={isLoading}
           className="w-full py-2.5 rounded-sm font-medium text-white bg-[#BF0A30] hover:bg-[#990820] transition disabled:opacity-50 flex justify-center items-center gap-2"
         >
-          {isLoading && <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>}
+          {isLoading && (
+            <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+          )}
           {isLoading ? "Signing up..." : "Signup"}
         </button>
       </form>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { User, Lock, Eye, EyeOff } from "lucide-react";
 import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
@@ -51,10 +51,16 @@ const Signin = () => {
   const { formData, handleChange, handleSubmit, isLoading, errors } = useSigninAdmin();
   const [showPassword, setShowPassword] = useState(false);
 
-  const notyf = new Notyf({ duration: 3000, position: { x: "right", y: "top" } });
+  const notyf = useRef(new Notyf({ duration: 3000, position: { x: "right", y: "top" } }));
+  const prevErrors = useRef({});
 
   useEffect(() => {
-    Object.values(errors).forEach((err) => err && notyf.error(err));
+    Object.entries(errors).forEach(([key, err]) => {
+      if (err && err !== prevErrors.current[key]) {
+        notyf.current.error(err);
+      }
+    });
+    prevErrors.current = errors;
   }, [errors]);
 
   return (
@@ -94,7 +100,7 @@ const Signin = () => {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-2.5 rounded-sm font-medium text-white bg-[#BF0A30] hover:bg-[#990820] transition disabled:opacity-50 flex justify-center items-center gap-2"
+          className="w-full py-2.5 rounded-sm font-medium text-white bg-[#BF0A30] hover:bg-[#990820] transition disabled:opacity-50 flex justify-center items-center gap-2 cursor-pointer"
         >
           {isLoading && (
             <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>

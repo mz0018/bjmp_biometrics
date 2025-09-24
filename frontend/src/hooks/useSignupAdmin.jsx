@@ -1,5 +1,9 @@
 import { useState } from "react";
 import axios from "axios";
+import { Notyf } from "notyf";
+import "notyf/notyf.min.css";
+
+const notyf = new Notyf({ duration: 5000, position: { x: "right", y: "top" } });
 
 const useSignupAdmin = () => {
   const [formData, setFormData] = useState({
@@ -42,7 +46,8 @@ const useSignupAdmin = () => {
         `${import.meta.env.VITE_API_URL}/admin/signup`,
         formData
       );
-      console.log("✅ Signup success:", response.data);
+      notyf.success(response.data.message);
+
       resetForm();
     } catch (err) {
       if (err.response?.data?.errors) {
