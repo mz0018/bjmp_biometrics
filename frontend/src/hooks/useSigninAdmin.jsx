@@ -30,7 +30,7 @@ const useSigninAdmin = () => {
         formData
       );
       localStorage.setItem("admin", JSON.stringify(response.data.data));
-      navigate('/protectedRoute');
+      navigate('/protectedRoute/visitors-log');
     } catch (err) {
       if (err.response?.data?.errors) {
         setErrors(err.response.data.errors);
