@@ -4,7 +4,7 @@ import { LogIn, Camera } from "lucide-react";
 export default function AppContent() {
   const buttons = [
     {
-      to: "/verify",
+      to: "/verification",
       label: "Open Verification Camera",
       icon: Camera,
       bg: "bg-[#002868] hover:bg-[#001F4F]",

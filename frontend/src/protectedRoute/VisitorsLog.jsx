@@ -26,6 +26,7 @@ const VisitorsLog = () => {
   const { saveReport, handleStop } = useSaveToReports();
   const [countdowns, setCountdowns] = useState({});
   const [search, setSearch] = useState("");
+  const [stopped, setStopped] = useState({});
 
   useEffect(() => {
     if (logs.length === 0) return;
@@ -148,12 +149,16 @@ const VisitorsLog = () => {
                         })}
                       </td>
                       <td className="px-4 py-2 text-sm font-medium text-bjmp-blue">
-                        {timeLeft <= 0 ? "00:00" : formatTime(timeLeft)}
+                        {stopped[log._id]
+                          ? `Saved to log (${stopped[log._id]})`
+                          : timeLeft <= 0
+                          ? "Saved to log"
+                          : formatTime(timeLeft)}
                       </td>
                       <td className="px-4 py-2 text-sm">
-                        {timeLeft > 0 && (
+                        {!stopped[log._id] && timeLeft > 0 && (
                           <button
-                            onClick={() => handleStop(log, timeLeft)}
+                            onClick={() => handleStop(log, setStopped)}
                             className="px-3 py-1 text-xs font-medium text-white bg-red-500 rounded hover:bg-red-600 transition"
                           >
                             Stop
