@@ -13,7 +13,6 @@ import {
   Clock,
 } from "lucide-react";
 
-// Reusable table header cell
 const TableHeaderCell = ({ icon: Icon, label }) => (
   <th className="px-4 py-3 text-left text-sm font-semibold tracking-wide">
     <div className="flex items-center gap-1">
@@ -24,11 +23,10 @@ const TableHeaderCell = ({ icon: Icon, label }) => (
 
 const VisitorsLog = () => {
   const { isLoading, hasErrors, logs } = useVisitorsLogs();
-  const { saveReport } = useSaveToReports();
+  const { saveReport, handleStop } = useSaveToReports();
   const [countdowns, setCountdowns] = useState({});
   const [search, setSearch] = useState("");
 
-  // countdown logic
   useEffect(() => {
     if (logs.length === 0) return;
 
@@ -51,7 +49,6 @@ const VisitorsLog = () => {
     return () => clearInterval(interval);
   }, [logs.length, saveReport]);
 
-  // memoized time formatter
   const formatTime = useCallback((ms) => {
     const totalSec = Math.floor(ms / 1000);
     const min = Math.floor(totalSec / 60);
@@ -59,7 +56,6 @@ const VisitorsLog = () => {
     return `${min}:${sec.toString().padStart(2, "0")}`;
   }, []);
 
-  // memoized filtering
   const filteredLogs = useMemo(
     () =>
       logs.filter((log) =>
@@ -68,7 +64,6 @@ const VisitorsLog = () => {
     [logs, search]
   );
 
-  // loading state
   if (isLoading)
     return (
       <div className="flex items-center justify-center gap-2 text-gray-500">
@@ -77,7 +72,6 @@ const VisitorsLog = () => {
       </div>
     );
 
-  // error state
   if (hasErrors.error)
     return (
       <div className="flex items-center justify-center gap-2 text-red-500">
@@ -88,7 +82,6 @@ const VisitorsLog = () => {
 
   return (
     <section className="p-6">
-      {/* Header */}
       <header className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-3">
         <h1 className="text-2xl font-bold uppercase">Visitors Log</h1>
 
@@ -117,11 +110,13 @@ const VisitorsLog = () => {
                 <TableHeaderCell icon={Activity} label="Similarity" />
                 <TableHeaderCell icon={Calendar} label="Timestamp" />
                 <TableHeaderCell icon={Clock} label="Time Left" />
+                <th className="px-4 py-3 text-left text-sm font-semibold tracking-wide">
+                  Actions
+                </th>
               </tr>
             </thead>
           </table>
 
-          {/* Scrollable body */}
           <div
             className="overflow-y-auto"
             style={{ maxHeight: "calc(100vh - 250px)" }}
@@ -153,7 +148,17 @@ const VisitorsLog = () => {
                         })}
                       </td>
                       <td className="px-4 py-2 text-sm font-medium text-bjmp-blue">
-                        {formatTime(timeLeft)}
+                        {timeLeft <= 0 ? "00:00" : formatTime(timeLeft)}
+                      </td>
+                      <td className="px-4 py-2 text-sm">
+                        {timeLeft > 0 && (
+                          <button
+                            onClick={() => handleStop(log, timeLeft)}
+                            className="px-3 py-1 text-xs font-medium text-white bg-red-500 rounded hover:bg-red-600 transition"
+                          >
+                            Stop
+                          </button>
+                        )}
                       </td>
                     </tr>
                   );
@@ -162,7 +167,6 @@ const VisitorsLog = () => {
             </table>
           </div>
 
-          {/* Footer / Counter */}
           <div className="px-4 py-2 text-sm text-gray-600 bg-gray-50 border-t border-gray-200">
             Showing <span className="font-semibold">{filteredLogs.length}</span>{" "}
             {filteredLogs.length === 1 ? "entry" : "entries"}
