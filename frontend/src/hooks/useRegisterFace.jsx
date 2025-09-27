@@ -8,13 +8,18 @@ const useRegisterFace = () => {
   const [capturedImages, setCapturedImages] = useState([]);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [hasErrors, setHasErrors] = useState({})
+  const [hasErrors, setHasErrors] = useState({});
 
   const [admin, setAdmin] = useState(null);
 
   const [visitorName, setVisitorName] = useState("");
-  const [inmateName, setInmateName] = useState("");
   const [visitorAddress, setVisitorAddress] = useState("");
+  const [visitorContact, setVisitorContact] = useState("");
+  const [visitorGender, setVisitorGender] = useState("");
+
+  const [visitorListOfInmates, setVisitorListOfInmates] = useState([
+    { inmate_name: "", relationship: "" },
+  ]);
 
   useEffect(() => {
     const storedAdmin = localStorage.getItem("admin");
@@ -25,8 +30,10 @@ const useRegisterFace = () => {
 
   const resetForm = () => {
     setVisitorName("");
-    setInmateName("");
     setVisitorAddress("");
+    setVisitorContact("");
+    setVisitorGender("");
+    setVisitorListOfInmates([{ inmate_name: "", relationship: "" }]);
   };
 
   const startCamera = async () => {
@@ -51,50 +58,50 @@ const useRegisterFace = () => {
 
   const saveImages = async () => {
     if (!admin) {
-        alert("Admin details not found. Please log in again.");
-        return;
+      alert("Admin details not found. Please log in again.");
+      return;
     }
 
     setIsLoading(true);
     setHasErrors({});
 
     try {
-        const response = await axios.post(
+      const response = await axios.post(
         `${import.meta.env.VITE_PY_API_URL}/register-face`,
         {
-            images: capturedImages,
-            id: admin._id || admin.id,
-            first_name: admin.first_name,
-            last_name: admin.last_name,
-            visitor_name: visitorName,
-            inmate_name: inmateName,
-            visitor_address: visitorAddress,
+          images: capturedImages,
+          id: admin._id || admin.id,
+          first_name: admin.first_name,
+          last_name: admin.last_name,
+          visitor_name: visitorName,
+          visitor_address: visitorAddress,
+          visitor_contact: visitorContact,
+          visitor_gender: visitorGender,
+          inmates: visitorListOfInmates,
         }
-        );
+      );
 
-        if (response.data.status === "error") {
-            setHasErrors(response.data.errors);
-            setIsLoading(false);
-            return;
-        }
-
-        alert("Images and visitor details sent to backend!");
-        resetForm();
-        console.log("Server response:", response.data);
-
-    } catch (err) {
-        console.error("Error sending images:", err);
-
-        if (err.response && err.response.data && err.response.data.errors) {
-            setHasErrors(err.response.data.errors);
-        } else {
-            alert("Failed to send data!");
-        }
-    } finally {
+      if (response.data.status === "error") {
+        setHasErrors(response.data.errors);
         setIsLoading(false);
-    }
-    };
+        return;
+      }
 
+      alert("Images and visitor details sent to backend!");
+      resetForm();
+      console.log("Server response:", response.data);
+    } catch (err) {
+      console.error("Error sending images:", err);
+
+      if (err.response && err.response.data && err.response.data.errors) {
+        setHasErrors(err.response.data.errors);
+      } else {
+        alert("Failed to send data!");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return {
     isLoading,
@@ -108,10 +115,14 @@ const useRegisterFace = () => {
     admin,
     visitorName,
     setVisitorName,
-    inmateName,
-    setInmateName,
     visitorAddress,
     setVisitorAddress,
+    visitorContact,
+    setVisitorContact,
+    visitorGender,
+    setVisitorGender,
+    visitorListOfInmates,
+    setVisitorListOfInmates,
   };
 };
 

@@ -13,10 +13,14 @@ const RegisterFace = () => {
     admin,
     visitorName,
     setVisitorName,
-    inmateName,
-    setInmateName,
     visitorAddress,
     setVisitorAddress,
+    visitorContact,
+    setVisitorContact,
+    visitorGender,
+    setVisitorGender,
+    visitorListOfInmates,
+    setVisitorListOfInmates,
   } = useRegisterFace();
 
   return (
@@ -30,6 +34,7 @@ const RegisterFace = () => {
       )}
 
       <div className="mb-4 space-y-2">
+        {/* Visitor Name */}
         <div>
           <input
             type="text"
@@ -45,21 +50,41 @@ const RegisterFace = () => {
           )}
         </div>
 
+        {/* Visitor Contact */}
         <div>
           <input
             type="text"
-            placeholder="Inmate to Visit"
-            value={inmateName}
-            onChange={(e) => setInmateName(e.target.value)}
+            placeholder="Visitor's Contact"
+            value={visitorContact}
+            onChange={(e) => setVisitorContact(e.target.value)}
             className={`w-full border p-2 rounded ${
-              hasErrors.inmate_name ? "border-red-500" : "border-gray-300"
+              hasErrors.visitor_contact ? "border-red-500" : "border-gray-300"
             }`}
           />
-          {hasErrors.inmate_name && (
-            <p className="text-red-500 text-sm">{hasErrors.inmate_name}</p>
+          {hasErrors.visitor_contact && (
+            <p className="text-red-500 text-sm">{hasErrors.visitor_contact}</p>
           )}
         </div>
 
+        {/* Visitor Gender */}
+        <div>
+          <select
+            value={visitorGender}
+            onChange={(e) => setVisitorGender(e.target.value)}
+            className={`w-full border p-2 rounded ${
+              hasErrors.visitor_gender ? "border-red-500" : "border-gray-300"
+            }`}
+          >
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+          {hasErrors.visitor_gender && (
+            <p className="text-red-500 text-sm">{hasErrors.visitor_gender}</p>
+          )}
+        </div>
+
+        {/* Visitor Address */}
         <div>
           <input
             type="text"
@@ -74,8 +99,63 @@ const RegisterFace = () => {
             <p className="text-red-500 text-sm">{hasErrors.visitor_address}</p>
           )}
         </div>
+
+        {/* Inmates List */}
+        <div>
+          <label className="block font-medium mb-1">Inmates to Visit</label>
+          {visitorListOfInmates.map((inmate, index) => (
+            <div key={index} className="flex gap-2 mb-2">
+              <input
+                type="text"
+                placeholder="Inmate Name"
+                value={inmate.inmate_name}
+                onChange={(e) => {
+                  const newList = [...visitorListOfInmates];
+                  newList[index].inmate_name = e.target.value;
+                  setVisitorListOfInmates(newList);
+                }}
+                className="flex-1 border p-2 rounded"
+              />
+              <input
+                type="text"
+                placeholder="Relationship"
+                value={inmate.relationship}
+                onChange={(e) => {
+                  const newList = [...visitorListOfInmates];
+                  newList[index].relationship = e.target.value;
+                  setVisitorListOfInmates(newList);
+                }}
+                className="flex-1 border p-2 rounded"
+              />
+              <button
+                type="button"
+                className="bg-red-500 text-white px-2 rounded"
+                onClick={() =>
+                  setVisitorListOfInmates(
+                    visitorListOfInmates.filter((_, i) => i !== index)
+                  )
+                }
+              >
+                X
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            className="bg-blue-500 text-white px-3 py-1 rounded"
+            onClick={() =>
+              setVisitorListOfInmates([
+                ...visitorListOfInmates,
+                { inmate_name: "", relationship: "" },
+              ])
+            }
+          >
+            + Add Inmate
+          </button>
+        </div>
       </div>
 
+      {/* Camera */}
       <video
         ref={videoRef}
         autoPlay
@@ -85,7 +165,7 @@ const RegisterFace = () => {
         className="border"
       />
 
-      <div className="mt-2">        
+      <div className="mt-2">
         <button
           onClick={startCamera}
           className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
@@ -105,7 +185,7 @@ const RegisterFace = () => {
           className="bg-purple-500 text-white px-4 py-2 rounded"
           disabled={capturedImages.length === 0 || isLoading}
         >
-          {isLoading ? 'Loading...' : 'Register'}
+          {isLoading ? "Loading..." : "Register"}
         </button>
       </div>
 

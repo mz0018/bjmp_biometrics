@@ -56,8 +56,9 @@ async def register_face(data: FaceData):
         "first_name": "First name",
         "last_name": "Last name",
         "visitor_name": "Visitor name",
-        "inmate_name": "Inmate name",
         "visitor_address": "Visitor address",
+        "visitor_contact": "Visitor contact",
+        "visitor_gender": "Visitor gender"
     }
     errors = {f: f"{name} is required" for f, name in required_fields.items() if not getattr(data, f).strip()}
     if not data.images:
@@ -73,8 +74,10 @@ async def register_face(data: FaceData):
     visitor_data = {
         "visitor_id": visitor_id,
         "name": data.visitor_name,
-        "inmate": data.inmate_name,
         "address": data.visitor_address,
+        "contact": data.visitor_contact,
+        "gender": data.visitor_gender,
+        "inmates": [i.dict() for i in data.inmates],
     }
 
     for idx, img_base64 in enumerate(data.images):
