@@ -23,32 +23,8 @@ const TableHeaderCell = ({ icon: Icon, label }) => (
 
 const VisitorsLog = () => {
   const { isLoading, hasErrors, logs } = useVisitorsLogs();
-  const { saveReport, handleStop } = useSaveToReports();
-  const [countdowns, setCountdowns] = useState({});
+  const { handleStop, countdowns, stopped } = useSaveToReports(logs);
   const [search, setSearch] = useState("");
-  const [stopped, setStopped] = useState({});
-
-  useEffect(() => {
-    if (logs.length === 0) return;
-
-    const interval = setInterval(() => {
-      setCountdowns((prev) => {
-        const updated = {};
-        logs.forEach((log) => {
-          const left = new Date(log.expiresAt).getTime() - Date.now();
-          const newLeft = Math.max(left, 0);
-
-          if (newLeft === 0 && (prev[log._id] ?? left) > 0) {
-            saveReport(log);
-          }
-          updated[log._id] = newLeft;
-        });
-        return updated;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [logs.length, saveReport]);
 
   const formatTime = useCallback((ms) => {
     const totalSec = Math.floor(ms / 1000);
@@ -149,16 +125,18 @@ const VisitorsLog = () => {
                         })}
                       </td>
                       <td className="px-4 py-2 text-sm font-medium text-bjmp-blue">
-                        {stopped[log._id]
-                          ? `Saved to log (${stopped[log._id]})`
+                        {log.isSaveToLogs
+                          ? "Saved to log"
+                          : stopped[log._id]
+                          ? "Saved to log"
                           : timeLeft <= 0
                           ? "Saved to log"
                           : formatTime(timeLeft)}
                       </td>
                       <td className="px-4 py-2 text-sm">
-                        {!stopped[log._id] && timeLeft > 0 && (
+                        {!log.isSaveToLogs && !stopped[log._id] && timeLeft > 0 && (
                           <button
-                            onClick={() => handleStop(log, setStopped)}
+                            onClick={() => handleStop(log)}
                             className="px-3 py-1 text-xs font-medium text-white bg-red-500 rounded hover:bg-red-600 transition"
                           >
                             Stop

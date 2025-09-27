@@ -1,5 +1,7 @@
+import { lazy } from "react";
 import { Outlet } from "react-router-dom";
-import Sidebar from "./Sidebar";
+
+const Sidebar = lazy(() => import("./Sidebar"));
 
 const AdminDashboard = () => {
   return (

@@ -9,7 +9,8 @@ const RecognitionLogSchema = new mongoose.Schema({
     },
     similarity: Number,
     timestamp: Date,
-    expiresAt: { type: Date }
+    expiresAt: { type: Date },
+    isSaveToLogs: { type: Boolean, default: false }
 });
 
 export default mongoose.model("RecognitionLog", RecognitionLogSchema, "visitorsLogs");

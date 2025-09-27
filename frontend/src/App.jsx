@@ -30,6 +30,7 @@ export default function AppContent() {
           <img
             src="/img/BJMP-icon.png"
             alt="BJMP Logo"
+            loading="lazy"
             className="w-24 h-24 object-contain drop-shadow-lg"
           />
           <h1 className="text-2xl md:text-4xl font-bold leading-snug text-white text-center md:text-left">

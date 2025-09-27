@@ -1,9 +1,10 @@
 import { lazy, useState, Suspense } from "react";
-import SigninFallback from "../fallback/SigninFallback";
-import SignupFallback from "../fallback/SignupFallback";
 
 const Signup = lazy(() => import("./auth/Signup"));
 const Signin = lazy(() => import("./auth/Signin"));
+
+const SigninFallback = lazy(() => import("../fallback/SigninFallback"));
+const SignupFallback = lazy(() => import("../fallback/SignupFallback"));
 
 const Screen2 = () => {
   const [isSignupOpen, setIsSignupOpen] = useState(false);
@@ -11,13 +12,14 @@ const Screen2 = () => {
   return (
     <div className="flex min-h-screen">
       <div className="hidden xl:flex w-1/2 bg-gray-100 relative">
-        <img src="/img/office.webp" className="w-full h-full object-cover" />
+        <img src="/img/office.webp" loading="lazy" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-black/55"></div>
 
         <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[200px] bg-red-500/40 flex items-center justify-center px-6">
           <img 
             src="/img/banner-v2.png" 
             alt="banner" 
+            loading="lazy"
             className="w-full h-full object-contain" 
           />
         </div>

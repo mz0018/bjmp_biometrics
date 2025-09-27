@@ -129,5 +129,37 @@ export const getVisitorsLog = async (req, res) => {
   }
 };
 
+export const updateSaveToLogs = async (req, res) => {
+  try {
+    const log_id = req.params.id;
+
+    const log = await RecognitionLog.findById(log_id);
+    if (!log) {
+      return res.status(404).json({ error: "Log not found" });
+    }
+
+    console.log(
+      `Log ${log_id} BEFORE update isSaveToLogs: ${log.isSaveToLogs}`
+    );
+
+    log.isSaveToLogs = true;
+    await log.save();
+
+    console.log(
+      `Log ${log_id} AFTER update isSaveToLogs: ${log.isSaveToLogs}`
+    );
+
+    res.status(200).json({
+      log_id,
+      isSaveToLogs: log.isSaveToLogs,
+    });
+  } catch (err) {
+    console.error("Error updating log:", err);
+    res.status(500).json({ error: "Failed to update log state", details: err.message });
+  }
+};
+
+
+
 
 
