@@ -1,51 +1,26 @@
+# app/routes/face_routes.py
 from fastapi import APIRouter
 from fastapi.concurrency import run_in_threadpool
 from app.models.face_model import FaceData
 from app.helpers.image_utils import base64_to_webp, generate_filename
-from app.helpers.embedding_utils import get_embedding
+from app.helpers.embedding_utils import get_embedding, embedding_cache, find_best_match
+from app.helpers.storage import save_visitor_data
+from app.helpers.json_response import json_response
 import os, json, uuid, numpy as np
 import motor.motor_asyncio
-from motor.motor_asyncio import AsyncIOMotorClient
 from datetime import datetime, timedelta
 from app.ws_manager import clients
+from bson import ObjectId
 
 router = APIRouter()
 
 MONGO_URI = "mongodb+srv://bjmp_face_recog:LXKGvyAsIaAx32hT@bjmp.kexnzgt.mongodb.net/?retryWrites=true&w=majority&appName=bjmp"
-
 client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URI)
 db = client["bjmp_biometrics"]
 logs_collection = db["visitorsLogs"]
 
 SAVE_FOLDER = "./saved_faces"
 os.makedirs(SAVE_FOLDER, exist_ok=True)
-
-embeddings_cache = {}
-
-
-async def load_embeddings():
-    """Load all saved embeddings into memory on startup."""
-    for filename in os.listdir(SAVE_FOLDER):
-        if not filename.endswith(".webp"):
-            continue
-
-        file_path = os.path.join(SAVE_FOLDER, filename)
-        json_path = os.path.join(SAVE_FOLDER, f"{filename}.json")
-
-        with open(file_path, "rb") as f:
-            embedding = await run_in_threadpool(get_embedding, f)
-
-        visitor_info = None
-        if os.path.exists(json_path):
-            with open(json_path, "r") as f:
-                visitor_info = json.load(f)
-
-        embeddings_cache[filename] = (np.array(embedding), visitor_info)
-
-
-@router.on_event("startup")
-async def startup_event():
-    await load_embeddings()
 
 
 @router.post("/register-face")
@@ -65,12 +40,13 @@ async def register_face(data: FaceData):
         errors["images"] = "At least one image is required"
 
     if errors:
-        return {"status": "error", "errors": errors}
+        return json_response({"status": "error", "errors": errors})
 
     # Unique visitor ID
     visitor_id = str(uuid.uuid4())
     converted_images_info, embeddings = [], []
 
+    # Core visitor metadata
     visitor_data = {
         "visitor_id": visitor_id,
         "name": data.visitor_name,
@@ -90,26 +66,26 @@ async def register_face(data: FaceData):
         with open(file_path, "wb") as f:
             f.write(webp_file.getvalue())
 
-        # Embedding
+        # Embedding (compute in threadpool)
         webp_file.seek(0)
         embedding = await run_in_threadpool(get_embedding, webp_file)
         embeddings.append(embedding)
 
-        # Save visitor info JSON (overwrite ensures consistency)
-        json_path = os.path.join(SAVE_FOLDER, f"{filename}.json")
-        with open(json_path, "w") as f:
-            json.dump(visitor_data, f)
+        # Update in-memory cache (per-visitor, multiple embeddings)
+        embedding_cache.setdefault(visitor_id, {"meta": visitor_data, "embeddings": []})
+        embedding_cache[visitor_id]["embeddings"].append(embedding)
 
-        # Update memory cache
-        embeddings_cache[filename] = (np.array(embedding), visitor_data)
+        # Save to visitor JSON on disk (full metadata)
+        save_visitor_data(visitor_data, filename, embedding)
 
+        # Info for API response
         converted_images_info.append({
             "image_index": idx,
             "size_bytes": len(webp_file.getvalue()),
             "saved_filename": filename,
         })
 
-    return {
+    return json_response({
         "status": "success",
         "admin": {
             "id": data.id,
@@ -119,47 +95,50 @@ async def register_face(data: FaceData):
         "visitor": visitor_data,
         "converted_images": converted_images_info,
         "embeddings": embeddings,
-    }
+    })
 
 
 @router.post("/recognize-face")
 async def recognize_face(data: dict):
-    image_base64 = data.get("image")
-    if not image_base64:
-        return False
+    try:
+        image_base64 = data.get("image")
+        if not image_base64:
+            return json_response({"status": "error", "message": "No image provided"})
 
-    webp_file = base64_to_webp(image_base64)
-    webp_file.seek(0)
-    embedding = np.array(await run_in_threadpool(get_embedding, webp_file))
+        # Convert & embed
+        webp_file = base64_to_webp(image_base64)
+        webp_file.seek(0)
+        query_embedding = await run_in_threadpool(get_embedding, webp_file)
 
-    if not embeddings_cache:
-        return False
+        # Use shared in-memory cache
+        if not embedding_cache:
+            return json_response({"status": "error", "message": "No embeddings available"})
 
-    sims = [
-        (float(np.dot(embedding, e) / (np.linalg.norm(embedding) * np.linalg.norm(e))), v_info)
-        for e, v_info in embeddings_cache.values()
-    ]
+        # Use helper to find match
+        match = find_best_match(query_embedding, threshold=0.90)
+        if not match:
+            return json_response({"status": "error", "message": "No match found"})
 
-    best_sim, best_visitor = max(sims, key=lambda x: x[0])
-    THRESHOLD = 0.90
+        # Create log entry
+        log_entry = {
+            "visitor_id": match["visitor_id"],
+            "visitor_info": match["meta"],
+            "similarity": match["similarity"],
+            "timestamp": datetime.utcnow(),
+            "expiresAt": datetime.utcnow() + timedelta(hours=1),
+            "isSaveToLogs": False,
+        }
+        await logs_collection.insert_one(log_entry)
 
-    if best_sim < THRESHOLD:
-        return False
+        # Notify all WebSocket clients
+        for client in clients:
+            try:
+                await client.send_text("refresh_logs")
+            except:
+                pass
 
-    log_entry = {
-        "visitor": best_visitor,
-        "similarity": best_sim,
-        "timestamp": datetime.utcnow(),
-        "expiresAt": datetime.utcnow() + timedelta(hours=1),
-        "isSaveToLogs": False
-    }
-    await logs_collection.insert_one(log_entry)
+        
+        return json_response({"status": "success", "log": log_entry})
 
-    for client in clients:
-        try:
-            await client.send_text("refresh_logs")
-        except:
-            pass
-
-    return best_visitor
-
+    except Exception as e:
+        return json_response({"status": "error", "message": str(e)})

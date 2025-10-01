@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState, useCallback, useContext } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import * as faceapi from "face-api.js";
 import * as tf from "@tensorflow/tfjs";
 import "@tensorflow/tfjs-backend-cpu";
 import "@tensorflow/tfjs-backend-webgl";
-import axios from "axios";
+import api from "../api";
 
 export const useFaceRecognition = () => {
   const videoRef = useRef(null);
@@ -17,6 +17,7 @@ export const useFaceRecognition = () => {
   const [cameraActive, setCameraActive] = useState(true);
   const [lastRecognition, setLastRecognition] = useState(0);
   const recognitionQueue = useRef({});
+  const [inmateConfirmed, setInmateConfirmed] = useState(false);
 
   useEffect(() => {
     let stream;
@@ -58,6 +59,23 @@ export const useFaceRecognition = () => {
       if (frameRef.current) cancelAnimationFrame(frameRef.current);
     };
   }, []);
+
+  const restartCamera = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    if (videoRef.current) {
+      videoRef.current.srcObject = stream;
+    }
+    setCameraActive(true);
+    setInmateConfirmed(false);
+    handleVideoPlay();
+  };
+
+  const handleInmateConfirmed = () => {
+    setVisitor(null);
+    setTimeout(() => {
+      restartCamera();
+    }, 1000);
+  };
 
   const handleVideoPlay = useCallback(() => {
     let fpsCounter = 0;
@@ -112,31 +130,20 @@ export const useFaceRecognition = () => {
           const faceBase64 = faceCanvas.toDataURL("image/jpeg");
 
           try {
-            const res = await axios.post(`${import.meta.env.VITE_PY_API_URL}/recognize-face`, {
-              image: faceBase64,
-            });
+            const res = await api.post("/recognize-face", { image: faceBase64 });
 
-            if (res.data) {
-              setVisitor(res.data);
-              setNotFound(false)
+            if (res.data?.status === "success") {
+              setVisitor(res.data.log);
+              setNotFound(false);
 
               if (videoRef.current?.srcObject) {
                 videoRef.current.srcObject.getTracks().forEach((t) => t.stop());
                 setCameraActive(false);
-
-                setTimeout(async () => {
-                  setVisitor(null);
-                  const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                  if (videoRef.current) {
-                    videoRef.current.srcObject = stream;
-                    setCameraActive(true);
-                    handleVideoPlay();
-                  }
-                }, 1000);
               }
             } else {
               setVisitor(null);
               setNotFound(true);
+              console.log("No match: ", res.data?.message || "Visitor not found");
             }
           } catch (err) {
             console.error("Recognition error:", err);
@@ -154,5 +161,13 @@ export const useFaceRecognition = () => {
     runDetection();
   }, [cameraActive, lastRecognition]);
 
-  return { videoRef, canvasRef, visitor, notFound, fps, handleVideoPlay };
+  return {
+    videoRef,
+    canvasRef,
+    visitor,
+    notFound,
+    fps,
+    handleVideoPlay,
+    handleInmateConfirmed,
+  };
 };

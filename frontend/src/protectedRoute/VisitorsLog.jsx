@@ -36,7 +36,9 @@ const VisitorsLog = () => {
   const filteredLogs = useMemo(
     () =>
       logs.filter((log) =>
-        log.visitor.name.toLowerCase().includes(search.toLowerCase())
+        log.visitor?.name
+          ?.toLowerCase()
+          .includes(search.toLowerCase())
       ),
     [logs, search]
   );
@@ -112,17 +114,25 @@ const VisitorsLog = () => {
                         index % 2 === 0 ? "bg-gray-50" : "bg-white"
                       }`}
                     >
-                      <td className="px-4 py-2 text-sm">{log.visitor.name}</td>
-                      <td className="px-4 py-2 text-sm">{log.visitor.inmate}</td>
-                      <td className="px-4 py-2 text-sm">{log.visitor.address}</td>
                       <td className="px-4 py-2 text-sm">
-                        {log.similarity.toFixed(2)}
+                        {log.visitor?.name || "Unknown"}
                       </td>
                       <td className="px-4 py-2 text-sm">
-                        {new Date(log.timestamp).toLocaleString("en-US", {
-                          dateStyle: "medium",
-                          timeStyle: "short",
-                        })}
+                        {log.visitor?.inmate || "N/A"}
+                      </td>
+                      <td className="px-4 py-2 text-sm">
+                        {log.visitor?.address || "N/A"}
+                      </td>
+                      <td className="px-4 py-2 text-sm">
+                        {log.similarity?.toFixed?.(2) ?? "—"}
+                      </td>
+                      <td className="px-4 py-2 text-sm">
+                        {log.timestamp
+                          ? new Date(log.timestamp).toLocaleString("en-US", {
+                              dateStyle: "medium",
+                              timeStyle: "short",
+                            })
+                          : "—"}
                       </td>
                       <td className="px-4 py-2 text-sm font-medium text-bjmp-blue">
                         {log.isSaveToLogs

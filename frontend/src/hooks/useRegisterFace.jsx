@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import axios from "axios";
+import api from "../api";
 
 const useRegisterFace = () => {
   const videoRef = useRef(null);
@@ -66,20 +66,17 @@ const useRegisterFace = () => {
     setHasErrors({});
 
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_PY_API_URL}/register-face`,
-        {
-          images: capturedImages,
-          id: admin._id || admin.id,
-          first_name: admin.first_name,
-          last_name: admin.last_name,
-          visitor_name: visitorName,
-          visitor_address: visitorAddress,
-          visitor_contact: visitorContact,
-          visitor_gender: visitorGender,
-          inmates: visitorListOfInmates,
-        }
-      );
+      const response = await api.post("/register-face", {
+        images: capturedImages,
+        id: admin._id || admin.id,
+        first_name: admin.first_name,
+        last_name: admin.last_name,
+        visitor_name: visitorName,
+        visitor_address: visitorAddress,
+        visitor_contact: visitorContact,
+        visitor_gender: visitorGender,
+        inmates: visitorListOfInmates,
+      });
 
       if (response.data.status === "error") {
         setHasErrors(response.data.errors);
@@ -87,9 +84,12 @@ const useRegisterFace = () => {
         return;
       }
 
-      alert("Images and visitor details sent to backend!");
-      resetForm();
-      console.log("Server response:", response.data);
+      if (response.data.status === "success") {
+        alert("Images and visitor details sent to backend!");
+        resetForm();
+        console.log("Server response:", response.data);
+      }
+
     } catch (err) {
       console.error("Error sending images:", err);
 
