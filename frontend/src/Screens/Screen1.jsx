@@ -1,19 +1,48 @@
-import { useFaceRecognition } from "../hooks/useFaceRecognition";
+// src/pages/Screen1.jsx
 import { memo, useState } from "react";
+import useFaceRecognition from "../hooks/useFaceRecognition";
+import api from "../api";
 
 const boxStyle = "bg-black/70 px-4 py-2 rounded-lg text-white";
 
-// Updated VisitorInfo to include inmate dropdown
 const VisitorInfo = memo(({ visitor, onConfirm }) => {
   const [selectedInmate, setSelectedInmate] = useState("");
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!selectedInmate) return;
-    onConfirm(selectedInmate);
+    const inmateObj = JSON.parse(selectedInmate);
+
+    try {
+      const res = await api.post("/recognize-face", {
+        visitor_id: visitor.visitor_id,
+        selected_inmate: inmateObj,
+        similarity: visitor.similarity, // optional
+      });
+
+      // <-- LOGGING: backend response + saved log (inspect before proceeding)
+      console.log("Backend response:", res.data);
+      const savedLog = res.data?.log;
+      console.log("Saved log (full):", savedLog);
+      console.log("Log ID:", savedLog?._id);
+      console.log("Visitor ID:", savedLog?.visitor_id);
+      console.log("Selected inmate:", savedLog?.selected_inmate);
+      console.log("Similarity:", savedLog?.similarity);
+      // ---------------------------------------------------------------
+
+      if (res.data?.status === "success") {
+        // pass savedLog to parent so it can inspect BEFORE restarting camera
+        onConfirm(savedLog);
+      } else {
+        alert("Failed to save visit: " + (res.data?.message || "unknown"));
+      }
+    } catch (err) {
+      console.error("Save visit error:", err);
+      alert("Failed to save visit (network error)");
+    }
   };
 
   return (
-    <section className={`absolute bottom-3 left-3 ${boxStyle}`}>
+    <section className={`${boxStyle} absolute bottom-3 left-3 w-[300px]`}>
       <p className="text-lg font-semibold">Visitor: {visitor.name}</p>
       <small className="text-xs text-gray-400 lowercase block mb-2">
         {visitor.visitor_id}
@@ -37,9 +66,9 @@ const VisitorInfo = memo(({ visitor, onConfirm }) => {
       <button
         onClick={handleConfirm}
         disabled={!selectedInmate}
-        className={`w-full mt-1 px-3 py-1 rounded ${
+        className={`w-full px-3 py-1 rounded text-sm ${
           selectedInmate ? "bg-green-600" : "bg-gray-500"
-        } text-white text-sm`}
+        } text-white`}
       >
         Confirm
       </button>
@@ -72,10 +101,20 @@ const Screen1 = () => {
 
   const [inmateSelected, setInmateSelected] = useState(false);
 
-  const handleConfirm = (inmateData) => {
-    console.log("Selected inmate:", JSON.parse(inmateData));
+  // handleConfirm now receives the savedLog from VisitorInfo
+  const handleConfirm = async (savedLog) => {
+    // Log what the backend returned so you can check it first
+    console.log("Confirm clicked. savedLog received in Screen1:", savedLog);
+
+    if (savedLog) {
+      console.log("SavedLog._id:", savedLog._id);
+      console.log("SavedLog.visitor_id:", savedLog.visitor_id);
+      console.log("SavedLog.selected_inmate:", savedLog.selected_inmate);
+    }
+
     setInmateSelected(true);
-    handleInmateConfirmed(); 
+
+    await handleInmateConfirmed();
   };
 
   return (
@@ -101,7 +140,7 @@ const Screen1 = () => {
             visitor={{
               ...visitor.visitor_info,
               visitor_id: visitor.visitor_id,
-              inmates: visitor.visitor_info.inmates,
+              similarity: visitor.similarity,
             }}
             onConfirm={handleConfirm}
           />

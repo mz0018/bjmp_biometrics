@@ -100,45 +100,78 @@ async def register_face(data: FaceData):
 
 @router.post("/recognize-face")
 async def recognize_face(data: dict):
+    """
+    Handles two simple flows:
+    1) Recognition: frontend sends {"image": "<base64>"}.
+       - returns match info (does NOT save image or log).
+       - if no embeddings or no match, returns status "not_found".
+    2) Confirmation/save: frontend sends {"visitor_id": "...", "selected_inmate": {...}, "similarity": ...}
+       - saves a visit log (no image stored) and returns success.
+    """
     try:
         image_base64 = data.get("image")
-        if not image_base64:
-            return json_response({"status": "error", "message": "No image provided"})
+        visitor_id = data.get("visitor_id")
+        selected_inmate = data.get("selected_inmate")
+        similarity = data.get("similarity")
 
-        # Convert & embed
-        webp_file = base64_to_webp(image_base64)
-        webp_file.seek(0)
-        query_embedding = await run_in_threadpool(get_embedding, webp_file)
+        # ------ Confirmation / Save flow (no image needed) ------
+        if visitor_id and selected_inmate:
+            log_entry = {
+                "visitor_id": visitor_id,
+                "selected_inmate": selected_inmate,
+                "similarity": similarity,
+                "timestamp": datetime.utcnow(),
+                "expiresAt": datetime.utcnow() + timedelta(hours=1),
+                "isSaveToLogs": True,
+            }
+            await logs_collection.insert_one(log_entry)
 
-        # Use shared in-memory cache
-        if not embedding_cache:
-            return json_response({"status": "error", "message": "No embeddings available"})
+            # notify websocket clients
+            for client in clients:
+                try:
+                    await client.send_text("refresh_logs")
+                except:
+                    pass
 
-        # Use helper to find match
-        match = find_best_match(query_embedding, threshold=0.90)
-        if not match:
-            return json_response({"status": "error", "message": "No match found"})
+            return json_response({"status": "success", "log": log_entry})
 
-        # Create log entry
-        log_entry = {
-            "visitor_id": match["visitor_id"],
-            "visitor_info": match["meta"],
-            "similarity": match["similarity"],
-            "timestamp": datetime.utcnow(),
-            "expiresAt": datetime.utcnow() + timedelta(hours=1),
-            "isSaveToLogs": False,
-        }
-        await logs_collection.insert_one(log_entry)
+        # ------ Recognition flow (image provided) ------
+        if image_base64:
+            # convert and embed (no file saving)
+            webp_file = base64_to_webp(image_base64)
+            webp_file.seek(0)
+            query_embedding = await run_in_threadpool(get_embedding, webp_file)
 
-        # Notify all WebSocket clients
-        for client in clients:
-            try:
-                await client.send_text("refresh_logs")
-            except:
-                pass
+            # If embedding cache is empty, we won't crash — just treat as no match
+            match = None
+            if embedding_cache:
+                match = find_best_match(query_embedding, threshold=0.90)
 
-        
-        return json_response({"status": "success", "log": log_entry})
+            if not match:
+                # Return not found (frontend can show "Visitor Not Found")
+                return json_response({"status": "not_found", "message": "No match found"})
+
+            # Prepare response object (do NOT save the image or log here)
+            response_log = {
+                "visitor_id": match["visitor_id"],
+                "visitor_info": match.get("meta"),
+                "similarity": match.get("similarity"),
+                "timestamp": datetime.utcnow(),
+                "expiresAt": datetime.utcnow() + timedelta(hours=1),
+                "isSaveToLogs": False,
+            }
+
+            # notify websocket clients if you still want realtime updates (optional)
+            for client in clients:
+                try:
+                    await client.send_text("refresh_logs")
+                except:
+                    pass
+
+            return json_response({"status": "success", "log": response_log})
+
+        # If neither image nor confirmation payload, return a simple error
+        return json_response({"status": "error", "message": "No image or visitor confirmation provided"})
 
     except Exception as e:
         return json_response({"status": "error", "message": str(e)})
