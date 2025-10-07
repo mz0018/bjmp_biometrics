@@ -1,4 +1,3 @@
-// src/pages/Screen1.jsx
 import { memo, useState } from "react";
 import useFaceRecognition from "../hooks/useFaceRecognition";
 import api from "../api";
@@ -16,25 +15,13 @@ const VisitorInfo = memo(({ visitor, onConfirm }) => {
       const res = await api.post("/recognize-face", {
         visitor_id: visitor.visitor_id,
         selected_inmate: inmateObj,
-        similarity: visitor.similarity, // optional
+        similarity: visitor.similarity,
       });
 
-      // <-- LOGGING: backend response + saved log (inspect before proceeding)
-      console.log("Backend response:", res.data);
       const savedLog = res.data?.log;
-      console.log("Saved log (full):", savedLog);
-      console.log("Log ID:", savedLog?._id);
-      console.log("Visitor ID:", savedLog?.visitor_id);
-      console.log("Selected inmate:", savedLog?.selected_inmate);
-      console.log("Similarity:", savedLog?.similarity);
-      // ---------------------------------------------------------------
-
-      if (res.data?.status === "success") {
-        // pass savedLog to parent so it can inspect BEFORE restarting camera
-        onConfirm(savedLog);
-      } else {
-        alert("Failed to save visit: " + (res.data?.message || "unknown"));
-      }
+      console.log("Backend response:", res.data);
+      if (res.data?.status === "success") onConfirm(savedLog);
+      else alert("Failed to save visit: " + (res.data?.message || "unknown"));
     } catch (err) {
       console.error("Save visit error:", err);
       alert("Failed to save visit (network error)");
@@ -44,9 +31,7 @@ const VisitorInfo = memo(({ visitor, onConfirm }) => {
   return (
     <section className={`${boxStyle} absolute bottom-3 left-3 w-[300px]`}>
       <p className="text-lg font-semibold">Visitor: {visitor.name}</p>
-      <small className="text-xs text-gray-400 lowercase block mb-2">
-        {visitor.visitor_id}
-      </small>
+      <small className="text-xs text-gray-400 lowercase block mb-2">{visitor.visitor_id}</small>
       <p className="text-md mb-1">Address: {visitor.address}</p>
 
       <label className="block text-sm mb-1">Select inmate to visit:</label>
@@ -101,20 +86,12 @@ const Screen1 = () => {
 
   const [inmateSelected, setInmateSelected] = useState(false);
 
-  // handleConfirm now receives the savedLog from VisitorInfo
   const handleConfirm = async (savedLog) => {
-    // Log what the backend returned so you can check it first
     console.log("Confirm clicked. savedLog received in Screen1:", savedLog);
-
-    if (savedLog) {
-      console.log("SavedLog._id:", savedLog._id);
-      console.log("SavedLog.visitor_id:", savedLog.visitor_id);
-      console.log("SavedLog.selected_inmate:", savedLog.selected_inmate);
-    }
-
     setInmateSelected(true);
-
     await handleInmateConfirmed();
+
+    setInmateSelected(false);
   };
 
   return (
