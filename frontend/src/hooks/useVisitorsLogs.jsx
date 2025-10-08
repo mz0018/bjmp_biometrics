@@ -3,7 +3,7 @@ import axios from "axios";
 
 const useVisitorsLogs = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [hasErrors, setHasErrors] = useState({});
+  const [hasErrors, setHasErrors] = useState(null);
   const [logs, setLogs] = useState([]);
 
   const getLogs = async () => {
@@ -11,7 +11,7 @@ const useVisitorsLogs = () => {
       setIsLoading(true);
       const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/visitorsLogs`);
       setLogs(res.data);
-      console.log(`Fetched Logs: ${res.data}`);
+      console.log("Fetched logs:", res.data);
     } catch (err) {
       if (err.response && err.response.data) {
         console.error("Error response:", err.response.data);

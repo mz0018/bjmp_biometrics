@@ -36,7 +36,7 @@ const VisitorsLog = () => {
   const filteredLogs = useMemo(
     () =>
       logs.filter((log) =>
-        log.visitor?.name
+        log.visitor_info?.name
           ?.toLowerCase()
           .includes(search.toLowerCase())
       ),
@@ -51,11 +51,11 @@ const VisitorsLog = () => {
       </div>
     );
 
-  if (hasErrors.error)
+  if (hasErrors)
     return (
       <div className="flex items-center justify-center gap-2 text-red-500">
         <AlertCircle className="w-5 h-5" />
-        <span>Error: {hasErrors.error}</span>
+        <span>Error: {hasErrors}</span>
       </div>
     );
 
@@ -115,13 +115,15 @@ const VisitorsLog = () => {
                       }`}
                     >
                       <td className="px-4 py-2 text-sm">
-                        {log.visitor?.name || "Unknown"}
+                        {log.visitor_info?.name || "Unknown"}
                       </td>
                       <td className="px-4 py-2 text-sm">
-                        {log.visitor?.inmate || "N/A"}
+                        {log.selected_inmate?.inmate_name
+                          ? `${log.selected_inmate.inmate_name} (${log.selected_inmate.relationship})`
+                          : "N/A"}
                       </td>
                       <td className="px-4 py-2 text-sm">
-                        {log.visitor?.address || "N/A"}
+                        {log.visitor_info?.address || "N/A"}
                       </td>
                       <td className="px-4 py-2 text-sm">
                         {log.similarity?.toFixed?.(2) ?? "—"}
