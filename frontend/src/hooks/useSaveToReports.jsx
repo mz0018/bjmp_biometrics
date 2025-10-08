@@ -35,9 +35,7 @@ const useSaveToReports = (logs = []) => {
     const consumedMs = end - start;
 
     saveReport(log);
-    console.log(
-      `Visitor ${log.visitor.name} stayed for ${formatDuration(consumedMs)}`
-    );
+    console.log(`Visitor ${log.visitor_info?.name} stayed for ${formatDuration(consumedMs)}`);
 
     setStopped((prev) => ({ ...prev, [log._id]: true }));
   };
