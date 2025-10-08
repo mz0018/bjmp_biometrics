@@ -8,31 +8,37 @@ const VisitorInfo = memo(({ visitor, onConfirm }) => {
   const [selectedInmate, setSelectedInmate] = useState("");
 
   const handleConfirm = async () => {
-    if (!selectedInmate) return;
-    const inmateObj = JSON.parse(selectedInmate);
+  if (!selectedInmate) return;
+  const inmateObj = JSON.parse(selectedInmate);
 
-    try {
-      const res = await api.post("/recognize-face", {
-        visitor_id: visitor.visitor_id,
-        selected_inmate: inmateObj,
-        similarity: visitor.similarity,
-      });
+  try {
+    const res = await api.post("/recognize-face", {
+      visitor_id: visitor.visitor_id,
+      visitor_info: {
+        name: visitor.visitor_info.name,
+        address: visitor.visitor_info.address,
+        contact: visitor.visitor_info.contact,
+        inmates: visitor.visitor_info.inmates,
+      },
+      selected_inmate: inmateObj,
+      similarity: visitor.similarity,
+    });
 
-      const savedLog = res.data?.log;
-      console.log("Backend response:", res.data);
-      if (res.data?.status === "success") onConfirm(savedLog);
-      else alert("Failed to save visit: " + (res.data?.message || "unknown"));
-    } catch (err) {
-      console.error("Save visit error:", err);
-      alert("Failed to save visit (network error)");
-    }
-  };
+    const savedLog = res.data?.log;
+    console.log("Backend response:", res.data);
+    if (res.data?.status === "success") onConfirm(savedLog);
+    else alert("Failed to save visit: " + (res.data?.message || "unknown"));
+  } catch (err) {
+    console.error("Save visit error:", err);
+    alert("Failed to save visit (network error)");
+  }
+};
 
   return (
     <section className={`${boxStyle} absolute bottom-3 left-3 w-[300px]`}>
-      <p className="text-lg font-semibold">Visitor: {visitor.name}</p>
+      <p className="text-lg font-semibold">Visitor: {visitor.visitor_info?.name}</p>
       <small className="text-xs text-gray-400 lowercase block mb-2">{visitor.visitor_id}</small>
-      <p className="text-md mb-1">Address: {visitor.address}</p>
+      <p className="text-md mb-1">Address: {visitor.visitor_info?.address}</p>
 
       <label className="block text-sm mb-1">Select inmate to visit:</label>
       <select
@@ -41,7 +47,7 @@ const VisitorInfo = memo(({ visitor, onConfirm }) => {
         onChange={(e) => setSelectedInmate(e.target.value)}
       >
         <option value="">-- Choose inmate --</option>
-        {visitor.inmates?.map((inmate, idx) => (
+        {visitor.visitor_info?.inmates?.map((inmate, idx) => (
           <option key={idx} value={JSON.stringify(inmate)}>
             {inmate.inmate_name} ({inmate.relationship})
           </option>
@@ -89,7 +95,7 @@ const Screen1 = () => {
   const handleConfirm = async (savedLog) => {
     console.log("Confirm clicked. savedLog received in Screen1:", savedLog);
     setInmateSelected(true);
-    await handleInmateConfirmed();
+    await handleInmateConfirmed(savedLog.selected_inmate);
 
     setInmateSelected(false);
   };
@@ -114,11 +120,7 @@ const Screen1 = () => {
 
         {visitor && !inmateSelected && (
           <VisitorInfo
-            visitor={{
-              ...visitor.visitor_info,
-              visitor_id: visitor.visitor_id,
-              similarity: visitor.similarity,
-            }}
+            visitor={visitor}
             onConfirm={handleConfirm}
           />
         )}

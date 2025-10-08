@@ -116,13 +116,17 @@ async def recognize_face(data: dict):
 
         # ------ Confirmation / Save flow (no image needed) ------
         if visitor_id and selected_inmate:
+            # Include full visitor info (name, address, contact, etc.)
+            visitor_info = data.get("visitor_info")  # <-- frontend should send this
+
             log_entry = {
                 "visitor_id": visitor_id,
+                "visitor_info": visitor_info,      # <-- save full info
                 "selected_inmate": selected_inmate,
                 "similarity": similarity,
                 "timestamp": datetime.utcnow(),
                 "expiresAt": datetime.utcnow() + timedelta(hours=1),
-                "isSaveToLogs": True,
+                "isSaveToLogs": False,             
             }
             await logs_collection.insert_one(log_entry)
 

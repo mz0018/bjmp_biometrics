@@ -17,12 +17,11 @@ export const useFaceRecognition = () => {
   const [cameraActive, setCameraActive] = useState(true);
   const cameraActiveRef = useRef(true);
 
-  const [lastRecognition, setLastRecognition] = useState(0);
   const lastRecognitionRef = useRef(0);
-
   const recognitionQueue = useRef({});
   const modelsLoadedRef = useRef(false);
 
+  // Initialize camera and load models
   useEffect(() => {
     let stream;
     const init = async () => {
@@ -37,7 +36,6 @@ export const useFaceRecognition = () => {
         faceapi.nets.tinyFaceDetector.loadFromUri("/models/tiny_face_detector"),
         faceapi.nets.faceLandmark68Net.loadFromUri("/models/face_landmark_68"),
       ]);
-
       modelsLoadedRef.current = true;
 
       try {
@@ -49,7 +47,6 @@ export const useFaceRecognition = () => {
         console.error("Camera error:", err);
       }
     };
-
     init();
 
     return () => {
@@ -77,6 +74,7 @@ export const useFaceRecognition = () => {
     }
   };
 
+  // Run face recognition
   const handleVideoPlay = useCallback(() => {
     let fpsCounter = 0;
     let fpsTimer = Date.now();
@@ -88,15 +86,11 @@ export const useFaceRecognition = () => {
       }
 
       const detections = await faceapi
-        .detectAllFaces(
-          videoRef.current,
-          new faceapi.TinyFaceDetectorOptions({ inputSize: 128, scoreThreshold: 0.5 })
-        )
+        .detectAllFaces(videoRef.current, new faceapi.TinyFaceDetectorOptions({ inputSize: 128, scoreThreshold: 0.5 }))
         .withFaceLandmarks();
 
       const { videoWidth, videoHeight } = videoRef.current;
       const displaySize = { width: videoWidth, height: videoHeight };
-
       faceapi.matchDimensions(canvasRef.current, displaySize);
       const resized = faceapi.resizeResults(detections, displaySize);
       const ctx = canvasRef.current.getContext("2d");
@@ -122,30 +116,33 @@ export const useFaceRecognition = () => {
             const faceCanvas = faceCanvasRef.current;
             faceCanvas.width = width;
             faceCanvas.height = height;
-            faceCanvas
-              .getContext("2d")
-              .drawImage(videoRef.current, x, y, width, height, 0, 0, width, height);
+            faceCanvas.getContext("2d").drawImage(videoRef.current, x, y, width, height, 0, 0, width, height);
 
             const faceBase64 = faceCanvas.toDataURL("image/jpeg");
             const resApi = await api.post("/recognize-face", { image: faceBase64 });
 
             if (resApi.data?.status === "success") {
-              setVisitor(
-                resApi.data.log || {
-                  visitor_info: resApi.data.visitor,
-                  visitor_id: resApi.data.visitor_id,
-                  similarity: resApi.data.similarity,
-                }
-              );
+              const log = resApi.data.log;
+              setVisitor({
+              visitor_id: log.visitor_id,
+                visitor_info: {
+                  name: log.visitor_info?.name,
+                  address: log.visitor_info?.address,
+                  contact: log.visitor_info?.contact,
+                  inmates: log.visitor_info?.inmates,
+                },
+                similarity: log.similarity,
+              });
               setNotFound(false);
 
               videoRef.current?.srcObject?.getTracks().forEach((t) => t.stop());
               setCameraActive(false);
               cameraActiveRef.current = false;
+              console.log("Visitor recognized:", log);
             } else {
               setVisitor(null);
               setNotFound(true);
-              console.log("No match:", resApi.data?.message || "Visitor not found");
+              console.log("Visitor not found");
             }
           } catch (err) {
             console.error("Recognition error:", err);
@@ -153,7 +150,7 @@ export const useFaceRecognition = () => {
             delete recognitionQueue.current[i];
           }
         });
-        setLastRecognition(now);
+
         lastRecognitionRef.current = now;
       }
 
@@ -164,11 +161,35 @@ export const useFaceRecognition = () => {
     runDetection();
   }, []);
 
+  const handleInmateConfirmed = async (selectedInmate) => {
+    if (!visitor || !selectedInmate) return;
+
+    try {
+      const resApi = await api.post("/recognize-face", {
+        visitor_id: visitor.visitor_id,
+        visitor_info: {
+          name: visitor.visitor_info.name,
+          address: visitor.visitor_info.address,
+          contact: visitor.visitor_info.contact,
+          inmates: visitor.visitor_info.inmates,
+        },
+        selected_inmate: selectedInmate,
+        similarity: visitor.similarity,
+      });
+
+      if (resApi.data?.status === "success") {
+        console.log("Visitor confirmation saved:", resApi.data.log);
+        await forcefulRestartRecognition();
+      }
+    } catch (err) {
+      console.error("Confirmation error:", err);
+    }
+  };
+
   const forcefulRestartRecognition = async () => {
     setVisitor(null);
     setNotFound(false);
     recognitionQueue.current = {};
-    setLastRecognition(0);
     lastRecognitionRef.current = 0;
 
     if (frameRef.current) cancelAnimationFrame(frameRef.current);
@@ -176,7 +197,7 @@ export const useFaceRecognition = () => {
     if (videoRef.current?.srcObject) {
       try {
         videoRef.current.srcObject.getTracks().forEach((t) => t.stop());
-      } catch (e) {}
+      } catch {}
       videoRef.current.srcObject = null;
     }
 
@@ -193,7 +214,6 @@ export const useFaceRecognition = () => {
     }
 
     await tf.ready();
-
     try {
       await restartCamera();
       if (videoRef.current) {
@@ -203,10 +223,6 @@ export const useFaceRecognition = () => {
     } catch (err) {
       console.error("forceful restart failed:", err);
     }
-  };
-
-  const handleInmateConfirmed = async () => {
-    await forcefulRestartRecognition();
   };
 
   return {
