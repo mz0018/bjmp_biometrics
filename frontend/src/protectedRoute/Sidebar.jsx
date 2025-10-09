@@ -22,7 +22,7 @@ const Sidebar = () => {
     },
     {
       to: "register-face",
-      label: "Register Face",
+      label: "Register New Visitor",
       icon: UserPlus,
     },
   ];
