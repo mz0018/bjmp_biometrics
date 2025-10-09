@@ -118,6 +118,19 @@ async def recognize_face(data: dict):
         if visitor_id and selected_inmate:
             # Include full visitor info (name, address, contact, etc.)
             visitor_info = data.get("visitor_info")  # <-- frontend should send this
+            one_hour_ago = datetime.utcnow() - timedelta(hours=1)
+
+            existing_log = await logs_collection.find_one({
+                "visitor_id": visitor_id,
+                "timestamp": {"$gte": one_hour_ago},
+            })
+
+            if existing_log:
+                return json_response({
+                    "status": "duplicate",
+                    "message": "Duplicated punch.",
+                    "log": existing_log
+                })
 
             log_entry = {
                 "visitor_id": visitor_id,

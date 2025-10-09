@@ -8,31 +8,37 @@ const VisitorInfo = memo(({ visitor, onConfirm }) => {
   const [selectedInmate, setSelectedInmate] = useState("");
 
   const handleConfirm = async () => {
-  if (!selectedInmate) return;
-  const inmateObj = JSON.parse(selectedInmate);
+    if (!selectedInmate) return;
+    const inmateObj = JSON.parse(selectedInmate);
 
-  try {
-    const res = await api.post("/recognize-face", {
-      visitor_id: visitor.visitor_id,
-      visitor_info: {
-        name: visitor.visitor_info.name,
-        address: visitor.visitor_info.address,
-        contact: visitor.visitor_info.contact,
-        inmates: visitor.visitor_info.inmates,
-      },
-      selected_inmate: inmateObj,
-      similarity: visitor.similarity,
-    });
+    try {
+      const res = await api.post("/recognize-face", {
+        visitor_id: visitor.visitor_id,
+        visitor_info: {
+          name: visitor.visitor_info.name,
+          address: visitor.visitor_info.address,
+          contact: visitor.visitor_info.contact,
+          inmates: visitor.visitor_info.inmates,
+        },
+        selected_inmate: inmateObj,
+        similarity: visitor.similarity,
+      });
 
-    const savedLog = res.data?.log;
-    console.log("Backend response:", res.data);
-    if (res.data?.status === "success") onConfirm(savedLog);
-    else alert("Failed to save visit: " + (res.data?.message || "unknown"));
-  } catch (err) {
-    console.error("Save visit error:", err);
-    alert("Failed to save visit (network error)");
-  }
-};
+      const savedLog = res.data?.log;
+      console.log("Backend response:", res.data);
+
+      if (res.data?.status === "success") {
+        onConfirm(savedLog);
+      } else if (res.data?.status === "duplicate") {
+        alert("Duplicate visit detected. Cannot confirm again.");
+      } else {
+        alert("Failed to save visit: " + (res.data?.message || "unknown"));
+      }
+    } catch (err) {
+      console.error("Save visit error:", err);
+      alert("Failed to save visit (network error)");
+    }
+  };
 
   return (
     <section className={`${boxStyle} absolute bottom-3 left-3 w-[300px]`}>
