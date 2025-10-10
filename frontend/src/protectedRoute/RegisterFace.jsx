@@ -1,5 +1,6 @@
 import { useState } from "react";
 import useRegisterFace from "../hooks/useRegisterFace";
+import TakenPictureFallback from "../fallback/TakenPictureFallbackj";
 import {
   PlusCircle,
   Trash2,
@@ -37,6 +38,7 @@ const RegisterFace = () => {
     setVisitorGender,
     visitorListOfInmates,
     setVisitorListOfInmates,
+    setCapturedImages
   } = useRegisterFace();
 
   return (
@@ -44,9 +46,15 @@ const RegisterFace = () => {
       <h1 className="text-3xl font-bold mb-4 text-start">
         Visitor Registration
       </h1>
-      <p className="text-gray-500">
-        Please provide the required details to register a new visitor.
-      </p>
+      {!openCameraSection ? (
+        <p className="text-gray-500">
+          Please provide the required details to register a new visitor.
+        </p>
+      ) : (
+        <p className="text-gray-500">
+          Please ensure your camera has <span className="font-semibold">adequate lighting</span> and <span className="font-semibold">high resolution</span> for accurate face registration. Capture up to a <span className="font-semibold">maximum of five clear images</span> from <span className="font-semibold">different angles</span> for best recognition accuracy.
+        </p>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {!openCameraSection && (
@@ -226,44 +234,65 @@ const RegisterFace = () => {
         )}
 
         {openCameraSection && (
-          <div className="p-6 space-y-5">
+          <div className="col-span-2 w-full py-6 space-y-5">
+            {/* Title */}
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Face Recognition Step</h2>
+
+            {/* Camera Section */}
             <div className="flex flex-col md:flex-row gap-6">
-              {/* Left Side – Camera */}
-              <div className="flex-1 flex flex-col items-center gap-4">
-                <div className="w-full max-w-md">
+              {/* Left – Camera */}
+              <div className="flex-[1] space-y-4">
+                <div className="relative w-full h-[50vh] rounded-sm border-gray-500 overflow-hidden">
+                  {/* Fallback Image */}
+                  <img
+                    src="/img/cam.webp"
+                    alt="Camera not active"
+                    className="absolute top-0 left-0 w-full h-full object-cover"
+                    style={{ filter: "grayscale(0.8)" }}
+                  />
+
+                  {/* Video (will cover image once started) */}
                   <video
                     ref={videoRef}
                     autoPlay
                     playsInline
-                    className="w-full border rounded-lg mb-2 object-cover"
-                  />
-                  <canvas
-                    ref={canvasRef}
-                    width="320"
-                    height="240"
-                    className="w-full border rounded-lg"
-                  />
+                    className="absolute top-0 left-0 w-full h-full object-cover"
+                  ></video>
                 </div>
 
-                <div className="flex flex-wrap gap-3 mt-2">
+                <canvas
+                  ref={canvasRef}
+                  width="320"
+                  height="240"
+                  className="hidden"
+                  aria-hidden="true"
+                />
+
+                <div className="flex gap-3 mt-2 justify-center md:justify-start">
                   <button
                     onClick={startCamera}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-sm hover:bg-blue-600 flex items-center gap-2"
+                    className="flex-1 bg-[#002868] text-white h-10 rounded-sm hover:bg-blue-900 flex items-center justify-center gap-2"
                   >
                     <Camera size={18} />
                     Start
                   </button>
+
                   <button
                     onClick={captureImage}
-                    className="bg-green-500 text-white px-4 py-2 rounded-sm hover:bg-green-600 flex items-center gap-2"
+                    className="flex-1 bg-red-500 text-white h-10 rounded-sm hover:bg-red-600 flex items-center justify-center gap-2"
                   >
                     <CameraOff size={18} />
                     Capture
                   </button>
+
                   <button
                     onClick={saveImages}
                     disabled={capturedImages.length === 0 || isLoading}
-                    className="bg-purple-500 text-white px-4 py-2 rounded-sm hover:bg-purple-600 flex items-center gap-2"
+                    className={`flex-1 h-10 rounded-sm flex items-center justify-center gap-2 text-white ${
+                      isLoading
+                        ? "bg-purple-400 cursor-not-allowed"
+                        : "bg-green-600 hover:bg-green-700"
+                    }`}
                   >
                     <Save size={18} />
                     {isLoading ? "Loading..." : "Register"}
@@ -271,35 +300,24 @@ const RegisterFace = () => {
                 </div>
               </div>
 
-              {/* Right Side – Captured Images */}
-              <div className="flex-1">
-                <h3 className="font-semibold mb-3">Taken Pictures</h3>
-                <div className="grid grid-cols-2 gap-3 max-h-80 overflow-auto">
-                  {capturedImages.length === 0 ? (
-                    <p className="text-sm text-gray-500 col-span-2">
-                      No pictures yet
-                    </p>
-                  ) : (
-                    capturedImages.map((img, i) => (
-                      <img
-                        key={i}
-                        src={img}
-                        alt={`capture-${i}`}
-                        className="w-full h-28 object-cover rounded-sm border"
-                      />
-                    ))
-                  )}
-                </div>
-              </div>
+              {/* Right – Captured Images */}
+              <TakenPictureFallback
+                capturedImages={capturedImages}
+                setCapturedImages={setCapturedImages}
+              />
             </div>
 
-            <button
-              onClick={() => setOpenCameraSection(false)}
-              className="bg-gray-200 text-gray-800 px-4 py-2 rounded-sm flex items-center gap-2"
+            <a
+              href="#"
+              className="font-semibold text-[#002868] inline-flex items-center gap-1"
+              onClick={(e) => {
+                e.preventDefault();
+                setOpenCameraSection(false);
+              }}
             >
               <ArrowLeft size={18} />
-              Go Back
-            </button>
+              Go back and double-check your entered credentials.
+            </a>
           </div>
         )}
       </div>

@@ -123,6 +123,7 @@ const useRegisterFace = () => {
     setVisitorGender,
     visitorListOfInmates,
     setVisitorListOfInmates,
+    setCapturedImages
   };
 };
 
