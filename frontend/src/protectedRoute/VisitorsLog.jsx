@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import useVisitorsLogs from "../hooks/useVisitorsLogs";
 import useSaveToReports from "../hooks/useSaveToReports";
+import GenerateReports from "./GenerateReports";
 import {
   Search,
   Loader2,
@@ -62,6 +63,8 @@ const VisitorsLog = () => {
     <section className="p-6">
       <header className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-3">
         <h1 className="text-2xl font-bold uppercase">Visitors Log</h1>
+
+        <GenerateReports logs={logs} />
 
         <div className="relative w-full sm:w-64">
           <Search className="absolute left-3 top-2.5 text-gray-400 w-4 h-4" />
