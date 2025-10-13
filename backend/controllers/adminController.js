@@ -159,7 +159,50 @@ export const updateSaveToLogs = async (req, res) => {
   }
 };
 
+export const generateReports = async (req, res) => {
+  try {
+    const { from, to } = req.body;
 
+    if (!from || !to) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing date range",
+      });
+    }
+
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
+    toDate.setHours(23, 59, 59, 999);
+
+    const logs = await RecognitionLog.find({
+      timestamp: { $gte: fromDate, $lte: toDate },
+      isSaveToLogs: true,
+    })
+      .select(
+        "visitor_info.name visitor_info.address visitor_info.contact selected_inmate.inmate_name selected_inmate.relationship timestamp"
+      )
+      .sort({ timestamp: -1 });
+
+    if (!logs.length) {
+      return res.status(200).json({
+        success: false,
+        message: "No data found for selected range.",
+        data: [],
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: logs,
+    });
+  } catch (err) {
+    console.error("Error in generateReports:", err);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
 
 
 
