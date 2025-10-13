@@ -16,6 +16,7 @@
     "@tensorflow/tfjs-backend-webgl": "^4.22.0",
     "axios": "^1.11.0",
     "face-api.js": "^0.22.2",
+    "file-saver": "^2.0.5",
     "lucide-react": "^0.543.0",
     "notyf": "^3.10.0",
     "react": "^19.1.1",
