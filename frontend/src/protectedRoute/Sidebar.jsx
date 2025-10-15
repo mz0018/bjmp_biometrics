@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { FileText, UserPlus } from "lucide-react";
+import { UserPlus, TableCellsSplit, UserLock } from "lucide-react";
 import LogoutButton from "../protectedRoute/LogoutButton";
 import { useEffect, useState } from "react";
 
@@ -18,12 +18,17 @@ const Sidebar = () => {
     {
       to: "visitors-log",
       label: "Visitors Log",
-      icon: FileText,
+      icon: TableCellsSplit,
     },
     {
       to: "register-face",
-      label: "Register New Visitor",
+      label: "Visitor Registration",
       icon: UserPlus,
+    },
+    {
+      to: "register-inmate",
+      label: "Inmate Registration",
+      icon: UserLock,
     },
   ];
 

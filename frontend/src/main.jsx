@@ -9,6 +9,7 @@ const Screen2 = lazy(() => import("./Screens/Screen2.jsx"));
 const AdminDashboard = lazy(() => import("./protectedRoute/AdminDashboard.jsx"));
 const VisitorsLog = lazy(() => import("./protectedRoute/VisitorsLog.jsx"));
 const RegisterFace = lazy(() => import("./protectedRoute/RegisterFace.jsx"));
+const InmateRegistration = lazy(() => import("./protectedRoute/InmateRegistration.jsx"));
 
 const router = createBrowserRouter([
   { path: "/", element: <App /> },
@@ -19,7 +20,8 @@ const router = createBrowserRouter([
     element: <AdminDashboard />,
     children: [
       { path: "visitors-log", element: <VisitorsLog /> },
-      { path: "register-face", element: <RegisterFace /> }, 
+      { path: "register-face", element: <RegisterFace /> },
+      { path: "register-inmate", element: <InmateRegistration /> }, 
     ],
   },
 ]);
