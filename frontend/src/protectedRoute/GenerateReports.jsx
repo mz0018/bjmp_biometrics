@@ -1,5 +1,6 @@
 import { useState } from "react";
 import useGenerateReports from "../hooks/useGenerateReports";
+import { FileText, X, Loader2 } from "lucide-react";
 
 const GenerateReports = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -11,13 +12,16 @@ const GenerateReports = () => {
   return (
     <>
       <button
+        type="button"
         onClick={() => {
           setIsModalOpen(true);
           setError(false);
         }}
-        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-sm transition"
+        className="inline-flex items-center gap-2 bg-[#002868] hover:bg-blue-900 text-white px-4 py-2 rounded-sm transition cursor-pointer"
+        aria-label="Open generate reports modal"
       >
-        Generate Reports
+        <FileText className="w-4 h-4" />
+        <span>Generate Reports</span>
       </button>
 
       {isModalOpen && (
@@ -59,23 +63,39 @@ const GenerateReports = () => {
 
             <div className="flex justify-end gap-2 mt-5">
               <button
+                type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-sm bg-red-500 text-sm transition text-white hover:bg-red-600 cursor-pointer"
+                aria-label="Cancel generate reports"
               >
-                Cancel
+                <X className="w-4 h-4" />
+                <span>Cancel</span>
               </button>
+
               <button
+                type="button"
                 disabled={loading}
                 onClick={() =>
                   generateReport(fromDate, toDate, () => setIsModalOpen(false))
                 }
-                className={`${
+                className={`inline-flex items-center gap-2 ${
                   loading
-                    ? "bg-green-400 cursor-not-allowed"
-                    : "bg-green-500 hover:bg-green-600"
-                } text-white px-4 py-2 rounded-sm text-sm transition`}
+                    ? "bg-[#002868] cursor-not-allowed"
+                    : "bg-[#002868] hover:bg-blue-900"
+                } text-white px-4 py-2 rounded-sm text-sm transition cursor-pointer`}
+                aria-label="Generate report"
               >
-                {loading ? "Generating..." : "Generate"}
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Generating...</span>
+                  </>
+                ) : (
+                  <>
+                    <FileText className="w-4 h-4" />
+                    <span>Generate</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
