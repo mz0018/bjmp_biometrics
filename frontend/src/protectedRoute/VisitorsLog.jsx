@@ -63,9 +63,9 @@ const VisitorsLog = () => {
     <section className="p-6">
       <header className="flex flex-col mb-6 gap-3">
         <div className="w-full">
-          <h1 className="text-2xl font-bold uppercase">Visitors Log</h1>
+          <h1 className="text-2xl font-bold mb-4 text-start">Visitors Log</h1>
 
-          <p className="mt-2 text-sm text-gray-500 max-w-2xl leading-relaxed">
+          <p className="text-sm text-gray-500 max-w-2xl leading-relaxed">
             Restricted visitor records encrypted, access-limited, and audit-logged.
           </p>
         </div>

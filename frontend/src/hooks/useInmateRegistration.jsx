@@ -1,5 +1,9 @@
 import { useState } from "react";
 import axios from "axios";
+import { Notyf } from "notyf";
+import "notyf/notyf.min.css";
+
+const notyf = new Notyf({ duration: 5000, position: { x: "right", y: "top" } });
 
 const useInmateRegistration = () => {
   const [loading, setLoading] = useState(false);
@@ -81,6 +85,7 @@ const useInmateRegistration = () => {
           "Content-Type": "multipart/form-data",
         },
       });
+      notyf.success(response.data.message);
       resetForm();
     } catch (error) {
       if (error.response?.data?.errors) {
