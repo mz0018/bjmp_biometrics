@@ -8,7 +8,7 @@ import {
 } from "../helpers/mockData";
 
 const InmateRegistration = () => {
-  const { handleInmateRegistration, formData, handleChange } = useInmateRegistration();
+  const { handleInmateRegistration, formData, handleChange, loading, hasError } = useInmateRegistration();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
@@ -128,10 +128,11 @@ const InmateRegistration = () => {
         </div>
 
         <button
+          disabled={loading}
           type="submit"
           className="mt-8 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
         >
-          Register
+          {loading ? "Registering..." : "Register Inmate"}
         </button>
       </form>
     </div>

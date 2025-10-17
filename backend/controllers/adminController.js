@@ -204,5 +204,22 @@ export const generateReports = async (req, res) => {
   }
 };
 
+export const registerInmate = async (req, res) => {
+  try {
+    console.log("📥 Received inmate registration data:");
+
+    console.log("Body Data:", req.body);
+
+    console.log("Uploaded Files:", req.files);
+
+    res.status(200).json({
+      message: "Inmate data received successfully (logged in console)",
+    });
+  } catch (error) {
+    console.error("Error logging inmate data:", error);
+    res.status(500).json({ message: "Error logging inmate data" });
+  }
+};
+
 
 

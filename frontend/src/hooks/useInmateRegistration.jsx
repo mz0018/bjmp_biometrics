@@ -1,6 +1,9 @@
 import { useState } from "react";
+import axios from "axios";
 
 const useInmateRegistration = () => {
+  const [loading, setLoading] = useState(false);
+  const [hasError, setHasError] = useState({});
   const [formData, setFormData] = useState({
     firstname: "",
     middleInitial: "",
@@ -41,22 +44,56 @@ const useInmateRegistration = () => {
     }
   };
 
-  const handleInmateRegistration = (e) => {
+  const resetForm = () => {
+    setFormData({
+      firstname: "",
+      middleInitial: "",
+      lastname: "",
+      gender: "",
+      dateOfBirth: "",
+      nationality: "",
+      address: "",
+      civilStatus: "",
+      height: "",
+      weight: "",
+      caseNumber: "",
+      offense: "",
+      sentence: "",
+      courtName: "",
+      arrestDate: "",
+      commitmentDate: "",
+      status: "",
+      remarks: "",
+      mugshot_front: null,
+      mugshot_left: null,
+      mugshot_right: null,
+    })
+  }
+
+  const handleInmateRegistration = async (e) => {
     e.preventDefault();
 
-    const formToSubmit = new FormData();
-
-    Object.entries(formData).forEach(([key, value]) => {
-      formToSubmit.append(key, value);
-    });
-
-    for (let pair of formToSubmit.entries()) {
-      console.log(pair[0] + ": ", pair[1]);
+    try {
+      setLoading(true);
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/admin/inmates`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      resetForm();
+    } catch (error) {
+      if (error.response?.data?.errors) {
+        setHasError(error.response.data.errors);
+      } else {
+        setHasError({ general: "Something went wrong, please try again." });
+      }
+    } finally {
+      setLoading(false);
     }
 
   };
 
-  return { handleInmateRegistration, formData, handleChange };
+  return { handleInmateRegistration, formData, handleChange, loading, hasError};
 };
 
 export default useInmateRegistration;
