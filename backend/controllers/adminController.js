@@ -206,15 +206,57 @@ export const generateReports = async (req, res) => {
 
 export const registerInmate = async (req, res) => {
   try {
-    console.log("📥 Received inmate registration data:");
+    const body = req.body;
+    const errors = {};
 
-    console.log("Body Data:", req.body);
+    // Fields that must not be empty
+    const requiredFields = [
+      "firstname",
+      "middleInitial",
+      "lastname",
+      "gender",
+      "dateOfBirth",
+      "nationality",
+      "address",
+      "civilStatus",
+      "height",
+      "weight",
+      "caseNumber",
+      "offense",
+      "sentence",
+      "courtName",
+      "arrestDate",
+      "commitmentDate",
+      "status",
+    ];
 
-    console.log("Uploaded Files:", req.files);
+    // Validate required fields
+    for (const field of requiredFields) {
+      if (!body[field] || String(body[field]).trim() === "")
+        errors[field] = `${field.replace(/([A-Z])/g, " $1")} is required`;
+    }
 
-    res.status(200).json({
-      message: "Inmate data received successfully (logged in console)",
+    // Extra rule for firstname
+    if (body.firstname && body.firstname.length < 2)
+      errors.firstname = "Firstname must be at least 2 characters";
+
+    // Validate mugshots
+    const mugshots = ["mugshot_front", "mugshot_left", "mugshot_right"];
+    for (const shot of mugshots) {
+      if (!req.files?.[shot]) errors[shot] = `${shot.replace("_", " ")} is required`;
+    }
+
+    if (Object.keys(errors).length) return res.status(400).json({ errors });
+
+    console.log("📥 Received inmate registration data:", {
+      body,
+      files: req.files,
     });
+
+    // Example: save to DB later
+    // await InmateModel.create({ ...body, mugshots: req.files });
+
+    res.status(200).json({ message: "Inmate registered successfully!" });
   } catch (error) {
     console.error("Error logging inmate data:", error);
     res.status(500).json({ message: "Error logging inmate data" });

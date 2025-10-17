@@ -8,7 +8,39 @@ import {
 } from "../helpers/mockData";
 
 const InmateRegistration = () => {
-  const { handleInmateRegistration, formData, handleChange, loading, hasError } = useInmateRegistration();
+  const {
+    handleInmateRegistration,
+    formData,
+    handleChange,
+    loading,
+    hasError,
+  } = useInmateRegistration();
+
+  const getInputClass = (name) =>
+    `border p-2 rounded w-full ${
+      hasError[name] ? "border-red-500 focus:ring-red-300" : "border-gray-300"
+    }`;
+
+  const renderError = (name) =>
+    hasError[name] && (
+      <p className="text-red-500 text-sm mt-1">{hasError[name]}</p>
+    );
+
+  const fields = [
+    { name: "firstname", type: "text", placeholder: "Firstname" },
+    { name: "middleInitial", type: "text", placeholder: "Middle Initial" },
+    { name: "lastname", type: "text", placeholder: "Lastname" },
+    { name: "dateOfBirth", type: "date", placeholder: "Date of Birth" },
+    { name: "address", type: "text", placeholder: "Address" },
+    { name: "height", type: "text", placeholder: "Height" },
+    { name: "weight", type: "text", placeholder: "Weight" },
+    { name: "caseNumber", type: "text", placeholder: "Case Number" },
+    { name: "sentence", type: "text", placeholder: "Sentence" },
+    { name: "courtName", type: "text", placeholder: "Court Name" },
+    { name: "arrestDate", type: "date", placeholder: "Arrest Date" },
+    { name: "commitmentDate", type: "date", placeholder: "Commitment Date" },
+    { name: "remarks", type: "text", placeholder: "Remarks" },
+  ];
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
@@ -22,110 +54,136 @@ const InmateRegistration = () => {
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input className="border p-2 rounded w-full" type="text" name="firstname" placeholder="Firstname" onChange={handleChange} value={formData.firstname} />
-          <input className="border p-2 rounded w-full" type="text" name="middleInitial" placeholder="Middle Initial" onChange={handleChange} value={formData.middleInitial} />
-          <input className="border p-2 rounded w-full" type="text" name="lastname" placeholder="Lastname" onChange={handleChange} value={formData.lastname} />
+          {/* Text Inputs */}
+          {fields.map(({ name, type, placeholder }) => (
+            <div key={name}>
+              <input
+                className={getInputClass(name)}
+                type={type}
+                name={name}
+                placeholder={placeholder}
+                onChange={handleChange}
+                value={formData[name]}
+              />
+              {renderError(name)}
+            </div>
+          ))}
 
-          {/* Gender Dropdown */}
-          <select
-            className="border p-2 rounded w-full"
-            name="gender"
-            onChange={handleChange}
-            value={formData.gender}
-          >
-            <option value="">Select Gender</option>
-            {genderOptions.map((option) => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </select>
+          {/* Selects */}
+          <div>
+            <select
+              className={getInputClass("gender")}
+              name="gender"
+              onChange={handleChange}
+              value={formData.gender}
+            >
+              <option value="">Select Gender</option>
+              {genderOptions.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
+            {renderError("gender")}
+          </div>
 
-          <input className="border p-2 rounded w-full" type="date" name="dateOfBirth" placeholder="Date of Birth" onChange={handleChange} value={formData.dateOfBirth} />
+          <div>
+            <select
+              className={getInputClass("nationality")}
+              name="nationality"
+              onChange={handleChange}
+              value={formData.nationality}
+            >
+              <option value="">Select Nationality</option>
+              {nationalityOptions.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
+            {renderError("nationality")}
+          </div>
 
-          {/* Nationality Dropdown */}
-          <select
-            className="border p-2 rounded w-full"
-            name="nationality"
-            onChange={handleChange}
-            value={formData.nationality}
-          >
-            <option value="">Select Nationality</option>
-            {nationalityOptions.map((option) => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </select>
+          <div>
+            <select
+              className={getInputClass("civilStatus")}
+              name="civilStatus"
+              onChange={handleChange}
+              value={formData.civilStatus}
+            >
+              <option value="">Select Civil Status</option>
+              {civilStatusOptions.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
+            {renderError("civilStatus")}
+          </div>
 
-          <input className="border p-2 rounded w-full" type="text" name="address" placeholder="Address" onChange={handleChange} value={formData.address} />
+          <div>
+            <select
+              className={getInputClass("offense")}
+              name="offense"
+              onChange={handleChange}
+              value={formData.offense}
+            >
+              <option value="">Select Offense</option>
+              {offenseOptions.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
+            {renderError("offense")}
+          </div>
 
-          {/* Civil Status Dropdown */}
-          <select
-            className="border p-2 rounded w-full"
-            name="civilStatus"
-            onChange={handleChange}
-            value={formData.civilStatus}
-          >
-            <option value="">Select Civil Status</option>
-            {civilStatusOptions.map((option) => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </select>
-
-          <input className="border p-2 rounded w-full" type="text" name="height" placeholder="Height" onChange={handleChange} value={formData.height} />
-          <input className="border p-2 rounded w-full" type="text" name="weight" placeholder="Weight" onChange={handleChange} value={formData.weight} />
-          <input className="border p-2 rounded w-full" type="text" name="caseNumber" placeholder="Case Number" onChange={handleChange} value={formData.caseNumber} />
-
-          {/* Offense Dropdown */}
-          <select
-            className="border p-2 rounded w-full"
-            name="offense"
-            onChange={handleChange}
-            value={formData.offense}
-          >
-            <option value="">Select Offense</option>
-            {offenseOptions.map((option) => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </select>
-
-          <input className="border p-2 rounded w-full" type="text" name="sentence" placeholder="Sentence (e.g. 6 months imprisonment)" onChange={handleChange} value={formData.sentence} />
-          <input className="border p-2 rounded w-full" type="text" name="courtName" placeholder="Court Handling the Case" onChange={handleChange} value={formData.courtName} />
-          <input className="border p-2 rounded w-full" type="date" name="arrestDate" placeholder="Arrest Date" onChange={handleChange} value={formData.arrestDate} />
-          <input className="border p-2 rounded w-full" type="date" name="commitmentDate" placeholder="Commitment Date" onChange={handleChange} value={formData.commitmentDate} />
-
-          {/* Status Dropdown */}
-          <select
-            className="border p-2 rounded w-full"
-            name="status"
-            onChange={handleChange}
-            value={formData.status}
-          >
-            <option value="">Select Status</option>
-            {statusOptions.map((option) => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </select>
-
-          <input className="border p-2 rounded w-full" type="text" name="remarks" placeholder="Remarks" onChange={handleChange} value={formData.remarks} />
-        </div>
-
-        <div className="mt-6">
-          <p className="font-medium text-gray-700 mb-2">Upload Mugshots (3 pictures)</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <label className="flex flex-col items-start">
-              <span className="text-sm text-gray-600 mb-1">Front View</span>
-              <input className="border p-2 rounded w-full" type="file" name="mugshot_front" accept="image/*" onChange={handleChange} />
-            </label>
-
-            <label className="flex flex-col items-start">
-              <span className="text-sm text-gray-600 mb-1">Left View</span>
-              <input className="border p-2 rounded w-full" type="file" name="mugshot_left" accept="image/*" onChange={handleChange} />
-            </label>
-
-            <label className="flex flex-col items-start">
-              <span className="text-sm text-gray-600 mb-1">Right View</span>
-              <input className="border p-2 rounded w-full" type="file" name="mugshot_right" accept="image/*" onChange={handleChange} />
-            </label>
+          <div>
+            <select
+              className={getInputClass("status")}
+              name="status"
+              onChange={handleChange}
+              value={formData.status}
+            >
+              <option value="">Select Status</option>
+              {statusOptions.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
+            {renderError("status")}
           </div>
         </div>
+
+        {/* Mugshots */}
+        <div className="mt-6">
+          <p className="font-medium text-gray-700 mb-2">
+            Upload Mugshots (3 pictures)
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {["mugshot_front", "mugshot_left", "mugshot_right"].map((side) => (
+              <label key={side} className="flex flex-col items-start">
+                <span className="text-sm text-gray-600 mb-1 capitalize">
+                  {side.replace("mugshot_", "")} View
+                </span>
+                <input
+                  className={getInputClass(side)}
+                  type="file"
+                  name={side}
+                  accept="image/*"
+                  onChange={handleChange}
+                />
+                {renderError(side)}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* General Error */}
+        {hasError.general && (
+          <p className="text-red-500 text-center mt-4">{hasError.general}</p>
+        )}
 
         <button
           disabled={loading}

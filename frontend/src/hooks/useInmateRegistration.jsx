@@ -67,7 +67,8 @@ const useInmateRegistration = () => {
       mugshot_front: null,
       mugshot_left: null,
       mugshot_right: null,
-    })
+    }),
+    setHasError({});
   }
 
   const handleInmateRegistration = async (e) => {
