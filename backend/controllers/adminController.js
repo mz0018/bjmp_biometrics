@@ -1,6 +1,8 @@
 import argon2 from "argon2";
 import Admin from "../models/AdminModel.js";
-import RecognitionLog from "../models/RecognitionLogSchema.js"
+import RecognitionLog from "../models/RecognitionLogSchema.js";
+import InmateModel from "../models/InmateModel.js";
+import { saveMugshotAsWebP } from "../helper/uploadMugshots.js";
 
 export const signupAdmin = async (req, res) => {
   const { first_name, last_name, username, password, retype_password } = req.body;
@@ -209,7 +211,6 @@ export const registerInmate = async (req, res) => {
     const body = req.body;
     const errors = {};
 
-    // Fields that must not be empty
     const requiredFields = [
       "firstname",
       "middleInitial",
@@ -230,36 +231,38 @@ export const registerInmate = async (req, res) => {
       "status",
     ];
 
-    // Validate required fields
     for (const field of requiredFields) {
       if (!body[field] || String(body[field]).trim() === "")
         errors[field] = `${field.replace(/([A-Z])/g, " $1")} is required`;
     }
 
-    // Extra rule for firstname
-    if (body.firstname && body.firstname.length < 2)
-      errors.firstname = "Firstname must be at least 2 characters";
-
-    // Validate mugshots
     const mugshots = ["mugshot_front", "mugshot_left", "mugshot_right"];
     for (const shot of mugshots) {
-      if (!req.files?.[shot]) errors[shot] = `${shot.replace("_", " ")} is required`;
+      if (!req.files?.[shot])
+        errors[shot] = `${shot.replace("_", " ")} is required`;
     }
 
-    if (Object.keys(errors).length) return res.status(400).json({ errors });
+    if (Object.keys(errors).length)
+      return res.status(400).json({ errors });
 
-    console.log("📥 Received inmate registration data:", {
-      body,
-      files: req.files,
+    const frontPath = await saveMugshotAsWebP(req.files.mugshot_front[0], "front-" + Date.now());
+    const leftPath = await saveMugshotAsWebP(req.files.mugshot_left[0], "left-" + Date.now());
+    const rightPath = await saveMugshotAsWebP(req.files.mugshot_right[0], "right-" + Date.now());
+
+    const inmate = await InmateModel.create({
+      ...body,
+      mugshot_front: frontPath,
+      mugshot_left: leftPath,
+      mugshot_right: rightPath,
     });
 
-    // Example: save to DB later
-    // await InmateModel.create({ ...body, mugshots: req.files });
-
-    res.status(200).json({ message: "Inmate registered successfully!" });
+    res.status(200).json({
+      message: "Inmate registered successfully!",
+      inmate,
+    });
   } catch (error) {
-    console.error("Error logging inmate data:", error);
-    res.status(500).json({ message: "Error logging inmate data" });
+    console.error("Error registering inmate:", error);
+    res.status(500).json({ message: "Error registering inmate" });
   }
 };
 
