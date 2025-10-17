@@ -1,4 +1,11 @@
 import useInmateRegistration from "../hooks/useInmateRegistration";
+import {
+  genderOptions,
+  nationalityOptions,
+  civilStatusOptions,
+  offenseOptions,
+  statusOptions,
+} from "../helpers/mockData";
 
 const InmateRegistration = () => {
   const { handleInmateRegistration, formData, handleChange } = useInmateRegistration();
@@ -8,7 +15,7 @@ const InmateRegistration = () => {
       <form
         onSubmit={handleInmateRegistration}
         encType="multipart/form-data"
-        className="bg-white p-8 rounded-2xl shadow-md w-full max-w-3xl"
+        className="bg-white p-8 rounded-2xl shadow-md w-full max-w-3xl pr-6"
       >
         <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
           Inmate Registration
@@ -18,23 +25,85 @@ const InmateRegistration = () => {
           <input className="border p-2 rounded w-full" type="text" name="firstname" placeholder="Firstname" onChange={handleChange} value={formData.firstname} />
           <input className="border p-2 rounded w-full" type="text" name="middleInitial" placeholder="Middle Initial" onChange={handleChange} value={formData.middleInitial} />
           <input className="border p-2 rounded w-full" type="text" name="lastname" placeholder="Lastname" onChange={handleChange} value={formData.lastname} />
-          <input className="border p-2 rounded w-full" type="text" name="gender" placeholder="Gender" onChange={handleChange} value={formData.gender} />
+
+          {/* Gender Dropdown */}
+          <select
+            className="border p-2 rounded w-full"
+            name="gender"
+            onChange={handleChange}
+            value={formData.gender}
+          >
+            <option value="">Select Gender</option>
+            {genderOptions.map((option) => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
 
           <input className="border p-2 rounded w-full" type="date" name="dateOfBirth" placeholder="Date of Birth" onChange={handleChange} value={formData.dateOfBirth} />
-          <input className="border p-2 rounded w-full" type="text" name="nationality" placeholder="Nationality" onChange={handleChange} value={formData.nationality} />
+
+          {/* Nationality Dropdown */}
+          <select
+            className="border p-2 rounded w-full"
+            name="nationality"
+            onChange={handleChange}
+            value={formData.nationality}
+          >
+            <option value="">Select Nationality</option>
+            {nationalityOptions.map((option) => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
+
           <input className="border p-2 rounded w-full" type="text" name="address" placeholder="Address" onChange={handleChange} value={formData.address} />
-          <input className="border p-2 rounded w-full" type="text" name="civilStatus" placeholder="Civil Status" onChange={handleChange} value={formData.civilStatus} />
+
+          {/* Civil Status Dropdown */}
+          <select
+            className="border p-2 rounded w-full"
+            name="civilStatus"
+            onChange={handleChange}
+            value={formData.civilStatus}
+          >
+            <option value="">Select Civil Status</option>
+            {civilStatusOptions.map((option) => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
 
           <input className="border p-2 rounded w-full" type="text" name="height" placeholder="Height" onChange={handleChange} value={formData.height} />
           <input className="border p-2 rounded w-full" type="text" name="weight" placeholder="Weight" onChange={handleChange} value={formData.weight} />
-
           <input className="border p-2 rounded w-full" type="text" name="caseNumber" placeholder="Case Number" onChange={handleChange} value={formData.caseNumber} />
-          <input className="border p-2 rounded w-full" type="text" name="offense" placeholder="Offense" onChange={handleChange} value={formData.offense} />
+
+          {/* Offense Dropdown */}
+          <select
+            className="border p-2 rounded w-full"
+            name="offense"
+            onChange={handleChange}
+            value={formData.offense}
+          >
+            <option value="">Select Offense</option>
+            {offenseOptions.map((option) => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
+
           <input className="border p-2 rounded w-full" type="text" name="sentence" placeholder="Sentence (e.g. 6 months imprisonment)" onChange={handleChange} value={formData.sentence} />
           <input className="border p-2 rounded w-full" type="text" name="courtName" placeholder="Court Handling the Case" onChange={handleChange} value={formData.courtName} />
-          <input className="border p-2 rounded w-full" type="text" name="arrestDate" placeholder="Arrest Date" onChange={handleChange} value={formData.arrestDate} />
-          <input className="border p-2 rounded w-full" type="text" name="commitmentDate" placeholder="Commitment Date" onChange={handleChange} value={formData.commitmentDate} />
-          <input className="border p-2 rounded w-full" type="text" name="status" placeholder="Status (Detained, Released, Transferred)" onChange={handleChange} value={formData.status} />
+          <input className="border p-2 rounded w-full" type="date" name="arrestDate" placeholder="Arrest Date" onChange={handleChange} value={formData.arrestDate} />
+          <input className="border p-2 rounded w-full" type="date" name="commitmentDate" placeholder="Commitment Date" onChange={handleChange} value={formData.commitmentDate} />
+
+          {/* Status Dropdown */}
+          <select
+            className="border p-2 rounded w-full"
+            name="status"
+            onChange={handleChange}
+            value={formData.status}
+          >
+            <option value="">Select Status</option>
+            {statusOptions.map((option) => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
+
           <input className="border p-2 rounded w-full" type="text" name="remarks" placeholder="Remarks" onChange={handleChange} value={formData.remarks} />
         </div>
 
@@ -43,35 +112,17 @@ const InmateRegistration = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <label className="flex flex-col items-start">
               <span className="text-sm text-gray-600 mb-1">Front View</span>
-              <input
-                className="border p-2 rounded w-full"
-                type="file"
-                name="mugshot_front"
-                accept="image/*"
-                onChange={handleChange}
-              />
+              <input className="border p-2 rounded w-full" type="file" name="mugshot_front" accept="image/*" onChange={handleChange} />
             </label>
 
             <label className="flex flex-col items-start">
               <span className="text-sm text-gray-600 mb-1">Left View</span>
-              <input
-                className="border p-2 rounded w-full"
-                type="file"
-                name="mugshot_left"
-                accept="image/*"
-                onChange={handleChange}
-              />
+              <input className="border p-2 rounded w-full" type="file" name="mugshot_left" accept="image/*" onChange={handleChange} />
             </label>
 
             <label className="flex flex-col items-start">
               <span className="text-sm text-gray-600 mb-1">Right View</span>
-              <input
-                className="border p-2 rounded w-full"
-                type="file"
-                name="mugshot_right"
-                accept="image/*"
-                onChange={handleChange}
-              />
+              <input className="border p-2 rounded w-full" type="file" name="mugshot_right" accept="image/*" onChange={handleChange} />
             </label>
           </div>
         </div>
