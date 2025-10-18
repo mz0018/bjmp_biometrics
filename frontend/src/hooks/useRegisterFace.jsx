@@ -17,9 +17,8 @@ const useRegisterFace = () => {
   const [visitorContact, setVisitorContact] = useState("");
   const [visitorGender, setVisitorGender] = useState("");
 
-  const [visitorListOfInmates, setVisitorListOfInmates] = useState([
-    { inmate_name: "", relationship: "" },
-  ]);
+  // 1) start with an empty array (your SelectInmates will set this)
+  const [visitorListOfInmates, setVisitorListOfInmates] = useState([]);
 
   useEffect(() => {
     const storedAdmin = localStorage.getItem("admin");
@@ -33,7 +32,8 @@ const useRegisterFace = () => {
     setVisitorAddress("");
     setVisitorContact("");
     setVisitorGender("");
-    setVisitorListOfInmates([{ inmate_name: "", relationship: "" }]);
+    // 2) reset to empty array
+    setVisitorListOfInmates([]);
   };
 
   const startCamera = async () => {
@@ -66,6 +66,25 @@ const useRegisterFace = () => {
     setHasErrors({});
 
     try {
+      // 3a) Validate relationships (optional — enforce if required)
+      if (visitorListOfInmates.length > 0) {
+        const missingRel = visitorListOfInmates.some((v) => !v.relationship || v.relationship.trim() === "");
+        if (missingRel) {
+          setHasErrors({ general: "Please set relationship for all selected inmates." });
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // 3b) Map to clear payload shape before sending
+      const inmatesPayload = visitorListOfInmates.map((v) => ({
+        // include id so backend can identify the inmate if needed
+        id: v.id ?? null,
+        inmate_name: v.inmate_name ?? "",
+        caseNumber: v.caseNumber ?? "",
+        relationship: v.relationship ?? "",
+      }));
+
       const response = await api.post("/register-face", {
         images: capturedImages,
         id: admin._id || admin.id,
@@ -75,7 +94,7 @@ const useRegisterFace = () => {
         visitor_address: visitorAddress,
         visitor_contact: visitorContact,
         visitor_gender: visitorGender,
-        inmates: visitorListOfInmates,
+        inmates: inmatesPayload,
       });
 
       if (response.data.status === "error") {
@@ -89,7 +108,6 @@ const useRegisterFace = () => {
         resetForm();
         console.log("Server response:", response.data);
       }
-
     } catch (err) {
       console.error("Error sending images:", err);
 
@@ -123,7 +141,7 @@ const useRegisterFace = () => {
     setVisitorGender,
     visitorListOfInmates,
     setVisitorListOfInmates,
-    setCapturedImages
+    setCapturedImages,
   };
 };
 

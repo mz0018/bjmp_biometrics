@@ -135,74 +135,80 @@ const RegisterFace = () => {
               </div>
             </div>
 
-            {/* Inmates */}
-            {/* <div>
-              <label className="font-semibold mb-2 block">
-                Inmates to Visit — relation to visitor
-              </label>
+            {/* Selected inmates preview (shows on top of Add Inmate button) */}
+            {visitorListOfInmates && visitorListOfInmates.length > 0 && (
+              <div className="space-y-2">
+                <label className="font-semibold block">Inmates to Visit</label>
 
-              {visitorListOfInmates.map((inmate, index) => (
-                <div key={index} className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    placeholder="Inmate name (e.g. Juan Dela Cruz)"
-                    value={inmate.inmate_name}
-                    onChange={(e) => {
-                      const updated = [...visitorListOfInmates];
-                      updated[index].inmate_name = e.target.value;
-                      setVisitorListOfInmates(updated);
-                    }}
-                    className="flex-1 border border-gray-300 rounded-sm p-2 focus:outline-none focus:ring-2 focus:ring-[#002868]"
-                  />
-                  <select
-                    value={inmate.relationship}
-                    onChange={(e) => {
-                      const updated = [...visitorListOfInmates];
-                      updated[index].relationship = e.target.value;
-                      setVisitorListOfInmates(updated);
-                    }}
-                    className="flex-1 border border-gray-300 rounded-sm p-2 focus:outline-none focus:ring-2 focus:ring-[#002868]"
-                  >
-                    <option value="">Select relationship</option>
-                    <option value="Father">Father</option>
-                    <option value="Mother">Mother</option>
-                    <option value="Brother">Brother</option>
-                    <option value="Sister">Sister</option>
-                    <option value="Son">Son</option>
-                    <option value="Daughter">Daughter</option>
-                    <option value="Spouse">Spouse</option>
-                    <option value="Friend">Friend</option>
-                    <option value="Other">Other</option>
-                  </select>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setVisitorListOfInmates(
-                        visitorListOfInmates.filter((_, i) => i !== index)
-                      )
-                    }
-                    className="bg-red-500 text-white px-3 rounded-sm hover:bg-red-600 flex items-center justify-center cursor-pointer"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                <div className="space-y-2">
+                  {visitorListOfInmates.map((v, i) => (
+                    <div
+                      key={v.id ?? i}
+                      className="flex items-center justify-between gap-2 bg-gray-100 p-2 rounded"
+                    >
+                      <div>
+                        <div className="font-medium leading-none">{v.inmate_name}</div>
+                        <div className="text-xs text-gray-500 leading-none">Case: {v.caseNumber}</div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={v.relationship ?? ""}
+                          onChange={(e) =>
+                            setVisitorListOfInmates((prev) => {
+                              const copy = [...prev];
+                              copy[i] = { ...copy[i], relationship: e.target.value };
+                              return copy;
+                            })
+                          }
+                          className="border border-gray-300 rounded px-2 py-1 text-sm bg-white"
+                          aria-label={`Relationship of ${v.inmate_name}`}
+                        >
+                          <option value="">Relationship</option>
+                          <option value="Father">Father</option>
+                          <option value="Mother">Mother</option>
+                          <option value="Brother">Brother</option>
+                          <option value="Sister">Sister</option>
+                          <option value="Son">Son</option>
+                          <option value="Daughter">Daughter</option>
+                          <option value="Spouse">Spouse</option>
+                          <option value="Friend">Friend</option>
+                          <option value="Other">Other</option>
+                        </select>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setVisitorListOfInmates((prev) => prev.filter((_, idx) => idx !== i))
+                          }
+                          className="text-red-500 p-1"
+                          aria-label={`Remove ${v.inmate_name}`}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+            )}
 
-              <button
-                type="button"
-                className="mt-2 bg-[#002868] text-white px-4 py-2 rounded-sm hover:bg-blue-900 flex items-center gap-2 cursor-pointer"
-                onClick={() =>
-                  setVisitorListOfInmates([
-                    ...visitorListOfInmates,
-                    { inmate_name: "", relationship: "" },
-                  ])
-                }
-              >
-                <PlusCircle size={18} />
-                <span>Add Inmate</span>
-              </button>
-            </div> */}
-            <SelectInmates setIsSelectInmateClicked={setIsSelectInmateClicked} isSelectInmateClicked={isSelectInmateClicked} />
+            {/* Add Inmate button + modal */}
+            <div className="mt-2">
+              <SelectInmates
+                setIsSelectInmateClicked={setIsSelectInmateClicked}
+                isSelectInmateClicked={isSelectInmateClicked}
+                onAdd={(selectedInmates) => {
+                  const mapped = selectedInmates.map((i) => ({
+                    id: i._id,
+                    inmate_name: `${i.firstname}${i.middleInitial ? " " + i.middleInitial + "." : ""} ${i.lastname}`.trim(),
+                    caseNumber: i.caseNumber,
+                    relationship: "",
+                  }));
+                  setVisitorListOfInmates(mapped);
+                }}
+              />
+            </div>
 
             {/* Next Step */}
             <p className="text-gray-600 text-sm mt-4">

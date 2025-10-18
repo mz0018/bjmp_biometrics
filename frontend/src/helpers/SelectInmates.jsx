@@ -1,8 +1,13 @@
+// SelectInmates.jsx
 import { useState } from "react";
 import { PlusCircle, X } from "lucide-react";
 import axios from "axios";
 
-const SelectInmates = ({ setIsSelectInmateClicked, isSelectInmateClicked }) => {
+const SelectInmates = ({
+  setIsSelectInmateClicked,
+  isSelectInmateClicked,
+  onAdd, // <-- accept callback
+}) => {
   const [list, setList] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -47,8 +52,9 @@ const SelectInmates = ({ setIsSelectInmateClicked, isSelectInmateClicked }) => {
 
   const handleAdd = () => {
     const selectedInmates = list.filter((i) => selectedIds.includes(i._id));
+    // send selected inmates to parent if callback provided
+    if (typeof onAdd === "function") onAdd(selectedInmates);
     console.log("Selected inmates:", selectedInmates);
-    // optional: do something with selectedInmates (pass to parent, send to API, etc.)
     handleClose();
   };
 
@@ -74,15 +80,8 @@ const SelectInmates = ({ setIsSelectInmateClicked, isSelectInmateClicked }) => {
           <div className="bg-white p-6 rounded-md shadow-lg w-[90%] max-w-md">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">
-                Add New Inmate
-              </h2>
-              <button
-                type="button"
-                onClick={handleClose}
-                className="text-gray-500 hover:text-gray-700"
-                aria-label="Close modal"
-              >
+              <h2 className="text-lg font-semibold text-gray-800">Add New Inmate</h2>
+              <button type="button" onClick={handleClose} className="text-gray-500 hover:text-gray-700" aria-label="Close">
                 <X size={20} />
               </button>
             </div>
@@ -138,9 +137,7 @@ const SelectInmates = ({ setIsSelectInmateClicked, isSelectInmateClicked }) => {
                 onClick={handleAdd}
                 disabled={selectedIds.length === 0}
                 className={`px-4 py-2 rounded-sm transition text-white ${
-                  selectedIds.length === 0
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-[#002868] hover:bg-blue-900"
+                  selectedIds.length === 0 ? "bg-gray-400 cursor-not-allowed" : "bg-[#002868] hover:bg-blue-900"
                 }`}
               >
                 Add
