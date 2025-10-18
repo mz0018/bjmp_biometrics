@@ -266,5 +266,16 @@ export const registerInmate = async (req, res) => {
   }
 };
 
+export const getInmates = async (req, res) => {
+  try {
+    const inmates = await InmateModel.find({}, '_id firstname lastname middleInitial caseNumber').sort({ createdAt: -1 });
+
+    res.status(200).json(inmates);
+  } catch (err) {
+    console.error("Backend Error:", err);
+    res.status(500).json({ error: "Failed to fetch inmates" });
+  }
+};
+
 
 

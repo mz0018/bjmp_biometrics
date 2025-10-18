@@ -472,7 +472,6 @@ const InmateRegistration = () => {
           <p className="text-red-500 text-center mt-4 mb-2 capitalize">{hasError.general}</p>
         )}
 
-        {/* Only the original submit button — no extras */}
         <button
           disabled={loading}
           type="submit"

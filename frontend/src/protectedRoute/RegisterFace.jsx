@@ -1,23 +1,12 @@
 import { useState } from "react";
 import useRegisterFace from "../hooks/useRegisterFace";
 import TakenPictureFallback from "../fallback/TakenPictureFallbackj";
-import {
-  PlusCircle,
-  Trash2,
-  Camera,
-  CameraOff,
-  Save,
-  ArrowLeft,
-  ArrowRight,
-  User,
-  Phone,
-  MapPin,
-  Venus,
-  Mars,
-} from "lucide-react";
+import SelectInmates from "../helpers/SelectInmates";
+import { Trash2, Camera, CameraOff, Save, ArrowLeft, ArrowRight, User, Phone, MapPin, Venus, Mars } from "lucide-react";
 
 const RegisterFace = () => {
   const [openCameraSection, setOpenCameraSection] = useState(false);
+  const [isSelectInmateClicked, setIsSelectInmateClicked] = useState(false);
 
   const {
     isLoading,
@@ -147,7 +136,7 @@ const RegisterFace = () => {
             </div>
 
             {/* Inmates */}
-            <div>
+            {/* <div>
               <label className="font-semibold mb-2 block">
                 Inmates to Visit — relation to visitor
               </label>
@@ -212,7 +201,8 @@ const RegisterFace = () => {
                 <PlusCircle size={18} />
                 <span>Add Inmate</span>
               </button>
-            </div>
+            </div> */}
+            <SelectInmates setIsSelectInmateClicked={setIsSelectInmateClicked} isSelectInmateClicked={isSelectInmateClicked} />
 
             {/* Next Step */}
             <p className="text-gray-600 text-sm mt-4">
