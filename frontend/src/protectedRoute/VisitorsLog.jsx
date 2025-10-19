@@ -72,7 +72,7 @@ const VisitorsLog = () => {
     );
 
   return (
-    <section className="p-6">
+    <section className="p-6 min-h-[100dvh] flex flex-col overflow-hidden">
       <header className="flex flex-col mb-6 gap-3">
         <div className="w-full">
           <h1 className="text-2xl font-bold mb-4 text-start">Visitors Log</h1>

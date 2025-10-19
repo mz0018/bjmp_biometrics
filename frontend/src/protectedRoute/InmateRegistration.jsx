@@ -37,7 +37,7 @@ const InmateRegistration = () => {
     );
 
   return (
-    <section className="p-6">
+    <section className="p-6 min-h-[100dvh] flex flex-col overflow-hidden">
       <form
         onSubmit={handleInmateRegistration}
         encType="multipart/form-data"

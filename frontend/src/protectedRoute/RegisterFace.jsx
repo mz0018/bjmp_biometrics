@@ -31,7 +31,7 @@ const RegisterFace = () => {
   } = useRegisterFace();
 
   return (
-    <div className="p-6">
+    <section className="p-6 min-h-[100dvh] flex flex-col overflow-hidden">
       <h1 className="text-2xl font-bold mb-4 text-start">
         Visitor Registration
       </h1>
@@ -317,7 +317,7 @@ const RegisterFace = () => {
           </div>
         )}
       </div>
-    </div>
+    </section>
   );
 };
 
