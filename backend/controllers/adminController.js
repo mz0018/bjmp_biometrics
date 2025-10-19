@@ -123,10 +123,20 @@ export const signinAdmin = async (req, res) => {
 
 export const getVisitorsLog = async (req, res) => {
   try {
-    const logs = await RecognitionLog.find().sort({ timestamp: -1 });
-    return res.status(200).json(logs)
+    const { search } = req.query;
+    const filter = search
+      ? {
+          "visitor_info.name": { $regex: search, $options: "i" },
+        }
+      : {};
+
+    const logs = await RecognitionLog.find(filter)
+      .sort({ timestamp: -1 })
+      .limit(15);
+
+    return res.status(200).json(logs);
   } catch (err) {
-    console.error('Backend Error: ', err);
+    console.error("Backend Error:", err);
     res.status(500).json({ error: "Failed to fetch logs", err });
   }
 };
@@ -268,7 +278,40 @@ export const registerInmate = async (req, res) => {
 
 export const getInmates = async (req, res) => {
   try {
-    const inmates = await InmateModel.find({}, '_id firstname lastname middleInitial caseNumber').sort({ createdAt: -1 });
+    const { search } = req.query;
+    let filter = {};
+
+    if (search) {
+      filter = {
+        $or: [
+          { firstname: { $regex: search, $options: "i" } },
+          { lastname: { $regex: search, $options: "i" } },
+          { caseNumber: { $regex: search, $options: "i" } },
+          {
+            $expr: {
+              $regexMatch: {
+                input: {
+                  $concat: [
+                    { $ifNull: ["$firstname", ""] },
+                    " ",
+                    { $ifNull: ["$middleInitial", ""] },
+                    " ",
+                    { $ifNull: ["$lastname", ""] },
+                  ],
+                },
+                regex: search,
+                options: "i",
+              },
+            },
+          },
+        ],
+      };
+    }
+
+    const inmates = await InmateModel.find(
+      filter,
+      "_id firstname lastname middleInitial caseNumber"
+    ).sort({ createdAt: -1 });
 
     res.status(200).json(inmates);
   } catch (err) {

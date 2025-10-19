@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const useVisitorsLogs = () => {
+const useVisitorsLogs = (search = "") => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasErrors, setHasErrors] = useState(null);
   const [logs, setLogs] = useState([]);
@@ -9,9 +9,13 @@ const useVisitorsLogs = () => {
   const getLogs = async () => {
     try {
       setIsLoading(true);
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/visitorsLogs`);
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/admin/visitorsLogs`,
+        {
+          params: { search },
+        }
+      );
       setLogs(res.data);
-      console.log("Fetched logs:", res.data);
     } catch (err) {
       if (err.response && err.response.data) {
         console.error("Error response:", err.response.data);

@@ -22,9 +22,21 @@ const TableHeaderCell = ({ icon: Icon, label }) => (
 );
 
 const VisitorsLog = () => {
-  const { isLoading, hasErrors, logs } = useVisitorsLogs();
-  const { handleStop, countdowns, stopped } = useSaveToReports(logs);
+  // normal search input
   const [search, setSearch] = useState("");
+  // debounced search value
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  const { isLoading, hasErrors, logs } = useVisitorsLogs(debouncedSearch);
+  const { handleStop, countdowns, stopped } = useSaveToReports(logs);
+
+  // debounce logic
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 300); // wait 300ms after typing stops
+    return () => clearTimeout(handler);
+  }, [search]);
 
   const formatTime = useCallback((ms) => {
     const totalSec = Math.floor(ms / 1000);
@@ -38,9 +50,9 @@ const VisitorsLog = () => {
       logs.filter((log) =>
         log.visitor_info?.name
           ?.toLowerCase()
-          .includes(search.toLowerCase())
+          .includes(debouncedSearch.toLowerCase())
       ),
-    [logs, search]
+    [logs, debouncedSearch]
   );
 
   if (isLoading)
@@ -64,13 +76,13 @@ const VisitorsLog = () => {
       <header className="flex flex-col mb-6 gap-3">
         <div className="w-full">
           <h1 className="text-2xl font-bold mb-4 text-start">Visitors Log</h1>
-
           <p className="text-sm text-gray-500 max-w-2xl leading-relaxed">
             Restricted visitor records encrypted, access-limited, and audit-logged.
           </p>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+          {/* 🔍 Debounced Search Input */}
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-2.5 text-gray-400 w-4 h-4" />
             <input
@@ -100,31 +112,11 @@ const VisitorsLog = () => {
               <table className="min-w-full table-fixed border-collapse bg-white">
                 <thead className="bg-bjmp-blue bg-white shadow-lg text-sm uppercase sticky top-0 z-10">
                   <tr>
-                    <th className="px-4 py-3 w-[18%] text-left font-semibold tracking-wide whitespace-nowrap">
-                      <div className="flex items-center gap-1">
-                        <User className="w-4 h-4" /> Name
-                      </div>
-                    </th>
-                    <th className="px-4 py-3 w-[25%] text-left font-semibold tracking-wide whitespace-nowrap">
-                      <div className="flex items-center gap-1">
-                        <Home className="w-4 h-4" /> Inmate
-                      </div>
-                    </th>
-                    <th className="px-4 py-3 w-[20%] text-left font-semibold tracking-wide whitespace-nowrap">
-                      <div className="flex items-center gap-1">
-                        <MapPin className="w-4 h-4" /> Address
-                      </div>
-                    </th>
-                    <th className="px-4 py-3 w-[20%] text-left font-semibold tracking-wide whitespace-nowrap">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" /> Timestamp
-                      </div>
-                    </th>
-                    <th className="px-4 py-3 w-[10%] text-left font-semibold tracking-wide whitespace-nowrap">
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" /> Time Left
-                      </div>
-                    </th>
+                    <TableHeaderCell icon={User} label="Name" />
+                    <TableHeaderCell icon={Home} label="Inmate" />
+                    <TableHeaderCell icon={MapPin} label="Address" />
+                    <TableHeaderCell icon={Calendar} label="Timestamp" />
+                    <TableHeaderCell icon={Clock} label="Time Left" />
                     <th className="px-4 py-3 w-[7%] text-center font-semibold tracking-wide whitespace-nowrap">
                       Actions
                     </th>
@@ -134,7 +126,8 @@ const VisitorsLog = () => {
                 <tbody className="text-gray-700 text-sm leading-relaxed">
                   {filteredLogs.map((log, index) => {
                     const timeLeft =
-                      countdowns[log._id] ?? new Date(log.expiresAt).getTime() - Date.now();
+                      countdowns[log._id] ??
+                      new Date(log.expiresAt).getTime() - Date.now();
 
                     return (
                       <tr
