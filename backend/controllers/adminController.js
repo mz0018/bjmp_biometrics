@@ -124,20 +124,20 @@ export const signinAdmin = async (req, res) => {
 export const getVisitorsLog = async (req, res) => {
   try {
     const { search } = req.query;
+
     const filter = search
-      ? {
-          "visitor_info.name": { $regex: search, $options: "i" },
-        }
+      ? { "visitor_info.name": { $regex: search, $options: "i" } }
       : {};
 
-    const logs = await RecognitionLog.find(filter)
-      .sort({ timestamp: -1 })
-      .limit(15);
+    let query = RecognitionLog.find(filter).sort({ timestamp: -1 });
+    if (!search) query = query.limit(15);
+
+    const logs = await query.lean();
 
     return res.status(200).json(logs);
   } catch (err) {
     console.error("Backend Error:", err);
-    res.status(500).json({ error: "Failed to fetch logs", err });
+    res.status(500).json({ error: "Failed to fetch logs", err: err.message });
   }
 };
 

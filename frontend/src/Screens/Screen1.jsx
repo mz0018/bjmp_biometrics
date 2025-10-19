@@ -108,7 +108,7 @@ const Screen1 = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
-      <div className="relative w-[600px] h-[400px] bg-black rounded-xl shadow-2xl overflow-hidden">
+      <div className="relative w-[700px] h-[500px] bg-black rounded-xl shadow-2xl overflow-hidden">
         <Header />
 
         <video
