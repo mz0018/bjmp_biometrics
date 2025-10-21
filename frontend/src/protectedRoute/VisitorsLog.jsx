@@ -27,7 +27,7 @@ const VisitorsLog = () => {
   // debounced search value
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  const { isLoading, hasErrors, logs } = useVisitorsLogs(debouncedSearch);
+  const { isLoading, hasErrors, logs, isWsConnected } = useVisitorsLogs(debouncedSearch);
   const { handleStop, countdowns, stopped } = useSaveToReports(logs);
 
   // debounce logic
@@ -75,7 +75,16 @@ const VisitorsLog = () => {
     <section className="p-6 min-h-[100dvh] flex flex-col overflow-hidden">
       <header className="flex flex-col mb-6 gap-3">
         <div className="w-full">
-          <h1 className="text-2xl font-bold mb-4 text-start">Visitors Log</h1>
+          <div className="flex items-center gap-2 mt-4 mb-4">
+            <div
+              className={`w-3 h-3 rounded-full ${
+                isWsConnected ? "bg-green-500 animate-pulse" : "bg-red-500"
+              }`}
+              title={isWsConnected ? "Connected to server" : "Disconnected from server"}
+            ></div>
+            <h1 className="text-2xl font-bold text-start">Visitors Log</h1>
+          </div>
+
           <p className="text-sm text-gray-500 max-w-2xl leading-relaxed">
             Restricted visitor records encrypted, access-limited, and audit-logged.
           </p>
@@ -185,6 +194,7 @@ const VisitorsLog = () => {
           </div>
         </div>
       )}
+
     </section>
   );
 };

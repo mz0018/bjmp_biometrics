@@ -5,6 +5,7 @@ const useVisitorsLogs = (search = "") => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasErrors, setHasErrors] = useState(null);
   const [logs, setLogs] = useState([]);
+  const [isWsConnected, setIsWsConnected] = useState(false);
 
   const searchRef = useRef(search);
   useEffect(() => {
@@ -80,39 +81,51 @@ const useVisitorsLogs = (search = "") => {
   }, [search, getLogs]);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:5001/ws");
+    let ws;
     let pingInterval = null;
 
-    ws.onopen = () => {
-      console.log("WebSocket connected");
-      pingInterval = setInterval(() => {
-        if (ws.readyState === WebSocket.OPEN) ws.send("ping");
-      }, 5000);
+    const connectWebSocket = () => {
+      try {
+        ws = new WebSocket("ws://localhost:5001/ws");
+
+        ws.onopen = () => {
+          setIsWsConnected(true);
+          pingInterval = setInterval(() => {
+            if (ws.readyState === WebSocket.OPEN) ws.send("ping");
+          }, 5000);
+        };
+
+        ws.onmessage = () => {
+          getLogs(searchRef.current).catch(() => {});
+        };
+
+        ws.onerror = () => {
+          setIsWsConnected(false);
+        };
+
+        ws.onclose = () => {
+          setIsWsConnected(false);
+          if (pingInterval) clearInterval(pingInterval);
+
+          setTimeout(connectWebSocket, 5000);
+        };
+      } catch {
+        setIsWsConnected(false);
+        setTimeout(connectWebSocket, 5000);
+      }
     };
 
-    ws.onmessage = () => {
-      getLogs(searchRef.current).catch(() => {});
-    };
-
-    ws.onerror = (e) => {
-      console.error("WebSocket error:", e);
-    };
-
-    ws.onclose = () => {
-      if (pingInterval) clearInterval(pingInterval);
-      console.log("WebSocket closed");
-    };
+    connectWebSocket();
 
     return () => {
       if (pingInterval) clearInterval(pingInterval);
       try {
-        ws.close();
-      } catch (e) {
-      }
+        ws?.close();
+      } catch {}
     };
   }, [getLogs]);
 
-  return { isLoading, hasErrors, logs };
-};
+    return { isLoading, hasErrors, logs, isWsConnected };
+  };
 
 export default useVisitorsLogs;
