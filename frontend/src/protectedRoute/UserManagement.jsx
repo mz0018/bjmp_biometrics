@@ -1,4 +1,5 @@
 import useUserManagement from "../hooks/useUserManagement";
+import ButtonUpdate from "../helpers/ButtonUpdate";
 
 const UserManagement = () => {
   const { activeTab, setActiveTab, searchQuery, setSearchQuery, filteredData } = useUserManagement();
@@ -43,6 +44,7 @@ const UserManagement = () => {
                 <tr>
                   <th className="p-2 border">Name</th>
                   <th className="p-2 border">Case Number</th>
+                  <th className="p-2 border">Options</th>
                 </tr>
               </thead>
               <tbody>
@@ -50,6 +52,7 @@ const UserManagement = () => {
                   <tr key={inmate._id} className="hover:bg-gray-50">
                     <td className="p-2 border capitalize">{inmate.lastname}, {inmate.firstname} {inmate.middleInitial}.</td>
                     <td className="p-2 border">{inmate.caseNumber}</td>
+                    <td className="p-2 border"><ButtonUpdate id={inmate._id} userType={"inmate"} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -64,6 +67,7 @@ const UserManagement = () => {
                 <tr>
                   <th className="p-2 border">Name</th>
                   <th className="p-2 border">Contact</th>
+                  <th className="p-2 border">Options</th>
                 </tr>
               </thead>
               <tbody>
@@ -71,6 +75,7 @@ const UserManagement = () => {
                   <tr key={visitor._id} className="hover:bg-gray-50">
                     <td className="p-2 border capitalize">{visitor.visitor_info.name}</td>
                     <td className="p-2 border">{visitor.visitor_info.contact}</td>
+                    <td className="p-2 border"><ButtonUpdate id={visitor._id} userType={"visitor"} /></td>
                   </tr>
                 ))}
               </tbody>
