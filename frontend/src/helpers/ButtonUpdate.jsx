@@ -2,7 +2,7 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import useButtonUpdate from "../hooks/useButtonUpdate";
 
-const ButtonUpdate = ({ id, userType }) => {
+const ButtonUpdate = ({ id, userType, inmate }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { findAndUpdate } = useButtonUpdate(id, userType);
 
@@ -35,8 +35,30 @@ const ButtonUpdate = ({ id, userType }) => {
             </div>
 
             <div className="space-y-2 text-sm text-gray-700">
-              <p><strong>ID:</strong> {id}</p>
+              <p><strong>ID:</strong> {inmate._id}</p>
               <p><strong>User Type:</strong> {userType}</p>
+              <p><strong>First Name:</strong> {inmate.firstname}</p>
+              <p><strong>Last Name:</strong> {inmate.lastname}</p>
+              <p><strong>Middle Initial:</strong> {inmate.middleInitial}</p>
+
+              <p><strong>Gender:</strong> {inmate.gender}</p>
+
+              <p><strong>Birthdate:</strong> {inmate.dateOfBirth}</p>
+              <p><strong>Nationality:</strong> {inmate.nationality}</p>
+              <p><strong>Address:</strong> {inmate.address}</p>
+
+              <p><strong>Civil Status:</strong> {inmate.civilStatus}</p>
+              <p><strong>Height:</strong> {inmate.height}</p>
+              <p><strong>Weight:</strong> {inmate.weight}</p>
+              <p><strong>Case Number:</strong> {inmate.caseNumber}</p>
+              <p><strong>Offense:</strong> {inmate.offense}</p>
+              <p><strong>Sentence:</strong> {inmate.sentence}</p>
+              <p><strong>Court Name:</strong> {inmate.courtName}</p>
+              <p><strong>Arrest Date:</strong> {inmate.arrestDate}</p>
+              <p><strong>Commitment Date:</strong> {inmate.commitmentDate}</p>
+              <p><strong>Status:</strong> {inmate.status}</p>
+              <p><strong>Remarks:</strong> {inmate.remarks}</p>
+
             </div>
 
             <div className="flex justify-end gap-2 mt-6">

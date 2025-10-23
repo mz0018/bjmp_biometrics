@@ -310,7 +310,6 @@ export const getInmates = async (req, res) => {
 
     const inmates = await InmateModel.find(
       filter,
-      "_id firstname lastname middleInitial caseNumber"
     ).sort({ createdAt: -1 });
 
     res.status(200).json(inmates);
