@@ -320,5 +320,24 @@ export const getInmates = async (req, res) => {
   }
 };
 
+export const updateUsers = async (req, res) => {
+  try {
+    const { userType } = req.body;
+    const id = req.params.id;
+    
+    if (userType === "inmate") {
+      const inmate = await InmateModel.findById(id);
+      console.log(inmate);
+    }
 
+    if (userType === "visitor") {
+      const visitor = await RecognitionLog.findById(id);
+      console.log(visitor);
+    }
+
+  } catch (err) {
+    console.error("Backend Error:", err);
+    res.status(500).json({ error: "Failed to fetch inmates" });
+  }
+}
 

@@ -7,6 +7,7 @@ import { generateReports } from "../controllers/adminController.js";
 import { registerInmate } from "../controllers/adminController.js";
 import { uploadMugshots } from "../helper/uploadMugshots.js";
 import { getInmates } from "../controllers/adminController.js";
+import { updateUsers } from "../controllers/adminController.js";
 
 const router = express.Router();
 
@@ -17,5 +18,6 @@ router.patch("/logs/:id", updateSaveToLogs);
 router.post("/generate", generateReports);
 router.post("/inmates", uploadMugshots, registerInmate);
 router.get("/listofinmates", getInmates);
+router.patch("/update/:id", updateUsers);
 
 export default router;

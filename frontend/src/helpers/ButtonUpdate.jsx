@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { X } from "lucide-react";
+import useButtonUpdate from "../hooks/useButtonUpdate";
 
 const ButtonUpdate = ({ id, userType }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { findAndUpdate } = useButtonUpdate(id, userType);
 
   const handleOpen = () => {
-    console.log(id, userType);
+    findAndUpdate();
     setIsModalOpen(true);
   };
 
