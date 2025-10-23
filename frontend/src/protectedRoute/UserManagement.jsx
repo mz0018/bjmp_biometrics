@@ -75,7 +75,7 @@ const UserManagement = () => {
                   <tr key={visitor._id} className="hover:bg-gray-50">
                     <td className="p-2 border capitalize">{visitor.visitor_info.name}</td>
                     <td className="p-2 border">{visitor.visitor_info.contact}</td>
-                    <td className="p-2 border"><ButtonUpdate id={visitor._id} userType={"visitor"} /></td>
+                    <td className="p-2 border"><ButtonUpdate id={visitor._id} userType={"visitor"} visitor={visitor} /></td>
                   </tr>
                 ))}
               </tbody>

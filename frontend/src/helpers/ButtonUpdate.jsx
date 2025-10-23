@@ -1,19 +1,120 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import useButtonUpdate from "../hooks/useButtonUpdate";
 
-const ButtonUpdate = ({ id, userType, inmate }) => {
+const inmateFields = [
+  "firstname",
+  "lastname",
+  "middleInitial",
+  "gender",
+  "dateOfBirth",
+  "nationality",
+  "address",
+  "civilStatus",
+  "height",
+  "weight",
+  "caseNumber",
+  "offense",
+  "sentence",
+  "courtName",
+  "arrestDate",
+  "commitmentDate",
+  "status",
+  "remarks",
+];
+
+const visitorFields = ["visitor_id", "name", "address", "contact", "inmate"];
+
+const ButtonUpdate = ({ id, userType, inmate, visitor }) => {
+
+  // console.log("Check Visitors: ", JSON.stringify(visitor, null, 2));
+
+  const initialFormData = userType === "visitor" 
+  ? {
+      visitor_id: visitor?.visitor_id || "",
+      name: visitor?.visitor_info?.name || "",
+      address: visitor?.visitor_info?.address || "",
+      contact: visitor?.visitor_info?.contact || "",
+      inmate: visitor?.visitor_info?.selected_inmate?.inmate_name || "",
+    }
+  : inmate || {};
+
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { findAndUpdate } = useButtonUpdate(id, userType);
+  const [formData, setFormData] = useState(initialFormData);
+  const [dirtyFields, setDirtyFields] = useState({});
+  const { findAndUpdate } = useButtonUpdate(id);
+  const [isChanged, setIsChanged] = useState(false);
+
+  useEffect(() => {
+    if (userType === "visitor") {
+      setFormData({
+        visitor_id: visitor?.visitor_id || "",
+        name: visitor?.visitor_info?.name || "",
+        address: visitor?.visitor_info?.address || "",
+        contact: visitor?.visitor_info?.contact || "",
+        inmate: visitor?.selected_inmate?.inmate_name || "",
+      });
+    } else {
+      setFormData(inmate || {});
+    }
+  }, [inmate, visitor, userType]);
 
   const handleOpen = () => {
-    findAndUpdate();
+    if (userType === "visitor") {
+      setFormData({
+        visitor_id: visitor?.visitor_id || "",
+        name: visitor?.visitor_info?.name || "",
+        address: visitor?.visitor_info?.address || "",
+        contact: visitor?.visitor_info?.contact || "",
+        inmate: visitor?.selected_inmate?.inmate_name || "",
+      });
+    } else {
+      setFormData(inmate || {});
+    }
+    setDirtyFields({});
     setIsModalOpen(true);
   };
 
   const handleClose = () => {
     setIsModalOpen(false);
   };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (value !== (userType === "visitor" ? visitor?.visitor_info?.[name] : inmate?.[name])) {
+      setDirtyFields((prev) => ({ ...prev, [name]: value }));
+    } else {
+      const newDirty = { ...dirtyFields };
+      delete newDirty[name];
+      setDirtyFields(newDirty);
+    }
+  };
+
+  useEffect(() => {
+    setIsChanged(Object.keys(dirtyFields).length === 0);
+  }, [dirtyFields]);
+
+  const handleSave = async () => {
+    try {
+      if (isChanged) {
+        alert("No changes made.");
+        return;
+      }
+
+      const updatePayload = userType === "visitor" ? { visitor: dirtyFields } : dirtyFields;
+
+      await findAndUpdate(updatePayload);
+      alert("Updated successfully!");
+      setIsModalOpen(false);
+    } catch (err) {
+      console.error(err);
+      alert("Update failed.");
+    }
+  };
+
+  const fields = userType === "visitor" ? visitorFields : inmateFields;
 
   return (
     <>
@@ -34,31 +135,21 @@ const ButtonUpdate = ({ id, userType, inmate }) => {
               </button>
             </div>
 
-            <div className="space-y-2 text-sm text-gray-700">
-              <p><strong>ID:</strong> {inmate._id}</p>
-              <p><strong>User Type:</strong> {userType}</p>
-              <p><strong>First Name:</strong> {inmate.firstname}</p>
-              <p><strong>Last Name:</strong> {inmate.lastname}</p>
-              <p><strong>Middle Initial:</strong> {inmate.middleInitial}</p>
-
-              <p><strong>Gender:</strong> {inmate.gender}</p>
-
-              <p><strong>Birthdate:</strong> {inmate.dateOfBirth}</p>
-              <p><strong>Nationality:</strong> {inmate.nationality}</p>
-              <p><strong>Address:</strong> {inmate.address}</p>
-
-              <p><strong>Civil Status:</strong> {inmate.civilStatus}</p>
-              <p><strong>Height:</strong> {inmate.height}</p>
-              <p><strong>Weight:</strong> {inmate.weight}</p>
-              <p><strong>Case Number:</strong> {inmate.caseNumber}</p>
-              <p><strong>Offense:</strong> {inmate.offense}</p>
-              <p><strong>Sentence:</strong> {inmate.sentence}</p>
-              <p><strong>Court Name:</strong> {inmate.courtName}</p>
-              <p><strong>Arrest Date:</strong> {inmate.arrestDate}</p>
-              <p><strong>Commitment Date:</strong> {inmate.commitmentDate}</p>
-              <p><strong>Status:</strong> {inmate.status}</p>
-              <p><strong>Remarks:</strong> {inmate.remarks}</p>
-
+            <div className="space-y-2 text-sm text-gray-700 max-h-[70vh] overflow-y-auto">
+              {fields.map((field) => (
+                <div key={field} className="flex flex-col">
+                  <label className="font-semibold capitalize">{field}</label>
+                  <input
+                    type="text"
+                    name={field}
+                    value={formData[field] || ""}
+                    onChange={handleChange}
+                    className={`border px-2 py-1 rounded-sm ${
+                      dirtyFields[field] ? "border-yellow-400" : "border-gray-300"
+                    }`}
+                  />
+                </div>
+              ))}
             </div>
 
             <div className="flex justify-end gap-2 mt-6">
@@ -67,6 +158,16 @@ const ButtonUpdate = ({ id, userType, inmate }) => {
                 className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-sm"
               >
                 Close
+              </button>
+
+              <button
+                disabled={isChanged}
+                onClick={handleSave}
+                className={`bg-blue-500 text-white px-4 py-2 rounded-sm ${
+                  isChanged ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-blue-600"
+                }`}
+              >
+                Save Changes
               </button>
             </div>
           </div>
