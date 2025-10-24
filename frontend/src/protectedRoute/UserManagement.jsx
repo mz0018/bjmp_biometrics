@@ -52,7 +52,7 @@ const UserManagement = () => {
                   <tr key={inmate._id} className="hover:bg-gray-50">
                     <td className="p-2 border capitalize">{inmate.lastname}, {inmate.firstname} {inmate.middleInitial}.</td>
                     <td className="p-2 border">{inmate.caseNumber}</td>
-                    <td className="p-2 border"><ButtonUpdate id={inmate._id} userType={"inmate"} inmate={inmate} /></td>
+                    <td className="p-2 border"><ButtonUpdate userType={"inmate"} inmate={inmate} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -75,7 +75,7 @@ const UserManagement = () => {
                   <tr key={visitor._id} className="hover:bg-gray-50">
                     <td className="p-2 border capitalize">{visitor.visitor_info.name}</td>
                     <td className="p-2 border">{visitor.visitor_info.contact}</td>
-                    <td className="p-2 border"><ButtonUpdate id={visitor._id} userType={"visitor"} visitor={visitor} /></td>
+                    <td className="p-2 border"><ButtonUpdate userType={"visitor"} visitor={visitor} /></td>
                   </tr>
                 ))}
               </tbody>

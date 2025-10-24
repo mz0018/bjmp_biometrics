@@ -25,24 +25,24 @@ const inmateFields = [
 
 const visitorFields = ["visitor_id", "name", "address", "contact", "inmate"];
 
-const ButtonUpdate = ({ id, userType, inmate, visitor }) => {
+const ButtonUpdate = ({ userType, inmate, visitor }) => {
+  const recordId = userType === "visitor" ? visitor?._id : inmate?._id;
 
-  // console.log("Check Visitors: ", JSON.stringify(visitor, null, 2));
-
-  const initialFormData = userType === "visitor" 
-  ? {
-      visitor_id: visitor?.visitor_id || "",
-      name: visitor?.visitor_info?.name || "",
-      address: visitor?.visitor_info?.address || "",
-      contact: visitor?.visitor_info?.contact || "",
-      inmate: visitor?.visitor_info?.selected_inmate?.inmate_name || "",
-    }
-  : inmate || {};
+  const initialFormData =
+    userType === "visitor"
+      ? {
+          visitor_id: visitor?.visitor_id || "",
+          name: visitor?.visitor_info?.name || "",
+          address: visitor?.visitor_info?.address || "",
+          contact: visitor?.visitor_info?.contact || "",
+          inmate: visitor?.visitor_info?.selected_inmate?.inmate_name || "",
+        }
+      : inmate || {};
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState(initialFormData);
   const [dirtyFields, setDirtyFields] = useState({});
-  const { findAndUpdate } = useButtonUpdate(id);
+  const { findAndUpdate } = useButtonUpdate(recordId, inmate, visitor);
   const [isChanged, setIsChanged] = useState(false);
 
   useEffect(() => {
@@ -75,9 +75,7 @@ const ButtonUpdate = ({ id, userType, inmate, visitor }) => {
     setIsModalOpen(true);
   };
 
-  const handleClose = () => {
-    setIsModalOpen(false);
-  };
+  const handleClose = () => setIsModalOpen(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
