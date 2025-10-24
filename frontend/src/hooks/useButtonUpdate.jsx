@@ -1,19 +1,19 @@
 import axios from "axios";
 
-const useButtonUpdate = (id, inmate, visitor) => {
+const useButtonUpdate = (userType, inmate, visitor) => {
   const findAndUpdate = async (updatedFields) => {
     try {
-      console.log("Inmate _id:", inmate?._id);
-      console.log("Visitor _id (ObjectId):", visitor?._id);
-      console.log("Visitor visitor_id:", visitor?.visitor_id);
-      console.log("ID used for update:", id);
 
-      const response = await axios.patch(
-        `${import.meta.env.VITE_API_URL}/admin/update/${id}`,
-        updatedFields
-      );
-      console.log("Update response:", response.data);
-      return response.data;
+      const inmateObjectId = inmate?._id;
+      const visitorObjectId = visitor?._id;
+
+      const url = 
+      userType === "visitor" ?
+       `${import.meta.env.VITE_API_URL}/admin/update/visitor/${visitorObjectId}`
+        : `${import.meta.env.VITE_API_URL}/admin/update/inmate/${inmateObjectId}`;
+
+        const response = await axios.patch(url, updatedFields);
+        console.log(response.data);
     } catch (err) {
       console.error("Something went wrong!", err);
       throw err;

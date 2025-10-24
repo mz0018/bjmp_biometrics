@@ -42,7 +42,7 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState(initialFormData);
   const [dirtyFields, setDirtyFields] = useState({});
-  const { findAndUpdate } = useButtonUpdate(recordId, inmate, visitor);
+  const { findAndUpdate } = useButtonUpdate(userType, inmate, visitor);
   const [isChanged, setIsChanged] = useState(false);
 
   useEffect(() => {
