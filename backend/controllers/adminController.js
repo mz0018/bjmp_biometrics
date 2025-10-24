@@ -322,10 +322,17 @@ export const getInmates = async (req, res) => {
 export const updateInmateUsers = async (req, res) => {
   try {
     const id = req.params.id;
+    const updateData = req.body;
 
-    const inmate = await InmateModel.findById(id);
-    console.log(inmate);
+    const inmate = await InmateModel.findByIdAndUpdate(id, updateData, {
+      new: true,
+    });
 
+    if (!inmate) {
+      return res.status(404).json({ error: "Inmate not found." });
+    }
+    
+    res.json({ message: "Inmate updated successfully", inmate });
   } catch (err) {
     console.error("Backend Error:", err);
     res.status(500).json({ error: "Failed to fetch inmates" });
@@ -335,13 +342,32 @@ export const updateInmateUsers = async (req, res) => {
 export const updateVisitorUsers = async (req, res) => {
   try {
     const id = req.params.id;
+    const updateData = req.body;
 
-    const visitor = await RecognitionLog.findById(id);
+    const formattedUpdate = {};
+
+    for (const key in updateData) {
+      formattedUpdate[`visitor.${key}`] = updateData[key];
+    }
+
+    const visitor = await RecognitionLog.findByIdAndUpdate(
+      id,
+      { $set: formattedUpdate },
+      { new: true }
+    );
+
+    if (!visitor) {
+      return res.status(404).json({ error: "Visitor not found" });
+    }
+
+    console.log(formattedUpdate);
     console.log(visitor);
 
+    res.json({ message: "Visitor updated successfully", visitor });
   } catch (err) {
     console.error("Backend Error:", err);
-    res.status(500).json({ error: "Failed to fetch inmates" });
+    res.status(500).json({ error: "Failed to update visitor" });
   }
-}
+};
+
 
