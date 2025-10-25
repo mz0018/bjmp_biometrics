@@ -17,7 +17,6 @@ const useRegisterFace = () => {
   const [visitorContact, setVisitorContact] = useState("");
   const [visitorGender, setVisitorGender] = useState("");
 
-  // 1) start with an empty array (your SelectInmates will set this)
   const [visitorListOfInmates, setVisitorListOfInmates] = useState([]);
 
   useEffect(() => {
@@ -32,7 +31,6 @@ const useRegisterFace = () => {
     setVisitorAddress("");
     setVisitorContact("");
     setVisitorGender("");
-    // 2) reset to empty array
     setVisitorListOfInmates([]);
   };
 
@@ -57,69 +55,59 @@ const useRegisterFace = () => {
   };
 
   const saveImages = async () => {
-    if (!admin) {
-      alert("Admin details not found. Please log in again.");
-      return;
-    }
 
-    setIsLoading(true);
-    setHasErrors({});
+  if (!admin) {
+    console.warn("No admin found in localStorage");
+    alert("Admin details not found. Please log in again.");
+    return;
+  }
 
-    try {
-      // 3a) Validate relationships (optional — enforce if required)
-      if (visitorListOfInmates.length > 0) {
-        const missingRel = visitorListOfInmates.some((v) => !v.relationship || v.relationship.trim() === "");
-        if (missingRel) {
-          setHasErrors({ general: "Please set relationship for all selected inmates." });
-          setIsLoading(false);
-          return;
-        }
-      }
+  setIsLoading(true);
+  setHasErrors({});
 
-      // 3b) Map to clear payload shape before sending
-      const inmatesPayload = visitorListOfInmates.map((v) => ({
-        // include id so backend can identify the inmate if needed
-        id: v.id ?? null,
-        inmate_name: v.inmate_name ?? "",
-        caseNumber: v.caseNumber ?? "",
-        relationship: v.relationship ?? "",
-      }));
-
-      const response = await api.post("/register-face", {
-        images: capturedImages,
-        id: admin._id || admin.id,
-        first_name: admin.first_name,
-        last_name: admin.last_name,
-        visitor_name: visitorName,
-        visitor_address: visitorAddress,
-        visitor_contact: visitorContact,
-        visitor_gender: visitorGender,
-        inmates: inmatesPayload,
-      });
-
-      if (response.data.status === "error") {
-        setHasErrors(response.data.errors);
+  try {
+    if (visitorListOfInmates.length > 0) {
+      const missingRel = visitorListOfInmates.some((v) => !v.relationship || v.relationship.trim() === "");
+      if (missingRel) {
+        console.warn("Missing relationship in selected inmates");
+        setHasErrors({ general: "Please set relationship for all selected inmates." });
         setIsLoading(false);
         return;
       }
-
-      if (response.data.status === "success") {
-        alert("Images and visitor details sent to backend!");
-        resetForm();
-        console.log("Server response:", response.data);
-      }
-    } catch (err) {
-      console.error("Error sending images:", err);
-
-      if (err.response && err.response.data && err.response.data.errors) {
-        setHasErrors(err.response.data.errors);
-      } else {
-        alert("Failed to send data!");
-      }
-    } finally {
-      setIsLoading(false);
     }
-  };
+
+    const inmatesPayload = visitorListOfInmates.map((v) => ({
+      id: v.id ?? null,
+      inmate_name: v.inmate_name ?? "",
+      caseNumber: v.caseNumber ?? "",
+      relationship: v.relationship ?? "",
+    }));
+
+    if (response.data.status === "error") {
+      console.error("Backend validation errors:", response.data.errors);
+      setHasErrors(response.data.errors);
+      setIsLoading(false);
+      return;
+    }
+
+    if (response.data.status === "success") {
+      alert("Images and visitor details sent to backend!");
+      resetForm();
+    }
+
+  } catch (err) {
+    console.error("ERROR sending images:", err);
+
+    if (err.response && err.response.data && err.response.data.errors) {
+      setHasErrors(err.response.data.errors);
+    } else {
+      alert("Failed to send data!");
+    }
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return {
     isLoading,

@@ -22,9 +22,11 @@ logs_collection = db["visitorsLogs"]
 SAVE_FOLDER = "./saved_faces"
 os.makedirs(SAVE_FOLDER, exist_ok=True)
 
-
 @router.post("/register-face")
 async def register_face(data: FaceData):
+    logs = []  # <-- collect logs here
+    logs.append("✅ Register face request received")
+
     # --- Validation ---
     required_fields = {
         "id": "Admin ID",
@@ -40,11 +42,16 @@ async def register_face(data: FaceData):
         errors["images"] = "At least one image is required"
 
     if errors:
-        return json_response({"status": "error", "errors": errors})
+        logs.append("❌ Validation failed")
+        return json_response({"status": "error", "errors": errors, "logs": logs})
+
+    logs.append("✅ Validation passed")
 
     # Unique visitor ID
     visitor_id = str(uuid.uuid4())
     converted_images_info, embeddings = [], []
+
+    logs.append(f"🆔 Generated visitor_id: {visitor_id}")
 
     # Core visitor metadata
     visitor_data = {
@@ -57,36 +64,40 @@ async def register_face(data: FaceData):
     }
 
     for idx, img_base64 in enumerate(data.images):
-        # Convert base64 → WebP
+        logs.append(f"🖼 Processing image {idx+1}/{len(data.images)}")
+
         webp_file = base64_to_webp(img_base64)
 
-        # Save image
         filename = generate_filename(data.id)
         file_path = os.path.join(SAVE_FOLDER, filename)
         with open(file_path, "wb") as f:
             f.write(webp_file.getvalue())
 
-        # Embedding (compute in threadpool)
+        logs.append(f"💾 Image saved: {filename}")
+
         webp_file.seek(0)
         embedding = await run_in_threadpool(get_embedding, webp_file)
         embeddings.append(embedding)
 
-        # Update in-memory cache (per-visitor, multiple embeddings)
+        logs.append(f"🔐 Embedding generated for image {idx+1}")
+
         embedding_cache.setdefault(visitor_id, {"meta": visitor_data, "embeddings": []})
         embedding_cache[visitor_id]["embeddings"].append(embedding)
 
-        # Save to visitor JSON on disk (full metadata)
         save_visitor_data(visitor_data, filename, embedding)
 
-        # Info for API response
         converted_images_info.append({
             "image_index": idx,
             "size_bytes": len(webp_file.getvalue()),
             "saved_filename": filename,
         })
 
+    logs.append("✅ All images processed")
+    logs.append("✅ Visitor registration completed")
+
     return json_response({
         "status": "success",
+        "logs": logs,  # <-- send logs to frontend
         "admin": {
             "id": data.id,
             "first_name": data.first_name,
@@ -96,7 +107,6 @@ async def register_face(data: FaceData):
         "converted_images": converted_images_info,
         "embeddings": embeddings,
     })
-
 
 @router.post("/recognize-face")
 async def recognize_face(data: dict):
