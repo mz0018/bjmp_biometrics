@@ -1,29 +1,18 @@
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
+import { Notyf } from "notyf";
+import "notyf/notyf.min.css";
 import useButtonUpdate from "../hooks/useButtonUpdate";
 
 const inmateFields = [
-  "firstname",
-  "lastname",
-  "middleInitial",
-  "gender",
-  "dateOfBirth",
-  "nationality",
-  "address",
-  "civilStatus",
-  "height",
-  "weight",
-  "caseNumber",
-  "offense",
-  "sentence",
-  "courtName",
-  "arrestDate",
-  "commitmentDate",
-  "status",
-  "remarks",
+  "firstname","lastname","middleInitial","gender","dateOfBirth","nationality",
+  "address","civilStatus","height","weight","caseNumber","offense","sentence",
+  "courtName","arrestDate","commitmentDate","status","remarks",
 ];
 
 const visitorFields = ["visitor_id", "name", "address", "contact", "inmate"];
+
+const notyf = new Notyf();
 
 const ButtonUpdate = ({ userType, inmate, visitor }) => {
   const recordId = userType === "visitor" ? visitor?._id : inmate?._id;
@@ -45,6 +34,9 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
   const { findAndUpdate } = useButtonUpdate(userType, inmate, visitor);
   const [isChanged, setIsChanged] = useState(false);
 
+  // Loading state for save operation
+  const [isSaving, setIsSaving] = useState(false);
+
   useEffect(() => {
     if (userType === "visitor") {
       setFormData({
@@ -60,6 +52,7 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
   }, [inmate, visitor, userType]);
 
   const handleOpen = () => {
+    if (isSaving) return; // prevent open while saving
     if (userType === "visitor") {
       setFormData({
         visitor_id: visitor?.visitor_id || "",
@@ -75,7 +68,10 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
     setIsModalOpen(true);
   };
 
-  const handleClose = () => setIsModalOpen(false);
+  const handleClose = () => {
+    if (isSaving) return; // block close while saving
+    setIsModalOpen(false);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -97,18 +93,23 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
   const handleSave = async () => {
     try {
       if (isChanged) {
-        alert("No changes made.");
+        notyf.open({ type: "info", message: "No changes made." });
         return;
       }
-      
-      const updatePayload = dirtyFields;
+
+      const updatePayload = dirtyFields; // unchanged logic
+      setIsSaving(true);
 
       await findAndUpdate(updatePayload);
-      alert("Updated successfully!");
+
+      notyf.success("Updated successfully!");
       setIsModalOpen(false);
+      setDirtyFields({});
     } catch (err) {
       console.error(err);
-      alert("Update failed.");
+      notyf.error("Update failed.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -117,9 +118,13 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
   return (
     <>
       <button
-        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-sm"
+        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-sm flex items-center gap-2"
         onClick={handleOpen}
+        disabled={isSaving}
+        aria-disabled={isSaving}
+        title={isSaving ? "Saving..." : "Update"}
       >
+        {isSaving ? <Loader2 className="animate-spin w-4 h-4" /> : null}
         Update
       </button>
 
@@ -128,7 +133,7 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
           <div className="bg-white p-6 rounded-md shadow-lg w-[90%] max-w-md">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold text-gray-800">Update Info</h2>
-              <button onClick={handleClose}>
+              <button onClick={handleClose} disabled={isSaving} aria-disabled={isSaving}>
                 <X className="w-5 h-5 text-gray-600 hover:text-gray-800" />
               </button>
             </div>
@@ -142,6 +147,7 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
                     name={field}
                     value={formData[field] || ""}
                     onChange={handleChange}
+                    disabled={isSaving}
                     className={`border px-2 py-1 rounded-sm ${
                       dirtyFields[field] ? "border-yellow-400" : "border-gray-300"
                     }`}
@@ -154,18 +160,26 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
               <button
                 onClick={handleClose}
                 className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-sm"
+                disabled={isSaving}
               >
                 Close
               </button>
 
               <button
-                disabled={isChanged}
+                disabled={isChanged || isSaving}
                 onClick={handleSave}
                 className={`bg-blue-500 text-white px-4 py-2 rounded-sm ${
-                  isChanged ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-blue-600"
+                  isChanged || isSaving ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-blue-600"
                 }`}
               >
-                Save Changes
+                {isSaving ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="animate-spin w-4 h-4" />
+                    Saving...
+                  </span>
+                ) : (
+                  "Save Changes"
+                )}
               </button>
             </div>
           </div>

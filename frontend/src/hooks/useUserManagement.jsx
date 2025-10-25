@@ -23,13 +23,11 @@ const useUserManagement = () => {
             params: { search: debouncedQuery },
             });
             setInmatesList(res.data);
-            console.log("Inmates: ", res.data);
         } else {
             const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/visitorsLogs`, {
             params: { search: debouncedQuery },
             });
             setVisitorsList(res.data);
-            console.log("Visitors: ", res.data);
         }
         } catch (err) {
         console.error("Error fetching data:", err);
