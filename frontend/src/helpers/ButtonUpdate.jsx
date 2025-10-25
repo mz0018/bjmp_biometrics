@@ -100,8 +100,8 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
         alert("No changes made.");
         return;
       }
-
-      const updatePayload = userType === "visitor" ? { visitor: dirtyFields } : dirtyFields;
+      
+      const updatePayload = dirtyFields;
 
       await findAndUpdate(updatePayload);
       alert("Updated successfully!");

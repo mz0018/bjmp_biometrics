@@ -345,9 +345,8 @@ export const updateVisitorUsers = async (req, res) => {
     const updateData = req.body;
 
     const formattedUpdate = {};
-
     for (const key in updateData) {
-      formattedUpdate[`visitor.${key}`] = updateData[key];
+      formattedUpdate[`visitor_info.${key}`] = updateData[key];
     }
 
     const visitor = await RecognitionLog.findByIdAndUpdate(
@@ -360,14 +359,9 @@ export const updateVisitorUsers = async (req, res) => {
       return res.status(404).json({ error: "Visitor not found" });
     }
 
-    console.log(formattedUpdate);
-    console.log(visitor);
-
     res.json({ message: "Visitor updated successfully", visitor });
   } catch (err) {
     console.error("Backend Error:", err);
     res.status(500).json({ error: "Failed to update visitor" });
   }
 };
-
-

@@ -26,7 +26,6 @@ const UserManagement = () => {
         </button>
       </div>
 
-      {/* Search Bar */}
       <input
         type="text"
         placeholder={`Search ${activeTab}...`}
@@ -35,7 +34,6 @@ const UserManagement = () => {
         className="mb-4 px-4 py-2 border rounded-sm w-full focus:outline-none focus:ring-2 focus:ring-[#002868]"
       />
 
-      {/* Separate Tables */}
       <div className="overflow-auto">
         {activeTab === "inmates" ? (
           filteredData.length > 0 ? (
