@@ -85,7 +85,6 @@ const useRegisterFace = () => {
         relationship: v.relationship ?? "",
       }));
 
-      // ✅ You were missing this line — now response is defined
       const response = await api.post("/register-face", {
         id: admin.id,
         first_name: admin.first_name,

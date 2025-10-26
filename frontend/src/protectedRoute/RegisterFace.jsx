@@ -135,7 +135,6 @@ const RegisterFace = () => {
               </div>
             </div>
 
-            {/* Selected inmates preview (shows on top of Add Inmate button) */}
             {visitorListOfInmates && visitorListOfInmates.length > 0 && (
               <div className="space-y-2">
                 <label className="font-semibold block">Inmates to Visit</label>

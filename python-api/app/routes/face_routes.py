@@ -1,4 +1,3 @@
-# app/routes/face_routes.py
 from fastapi import APIRouter
 from fastapi.concurrency import run_in_threadpool
 from app.models.face_model import FaceData
@@ -24,10 +23,9 @@ os.makedirs(SAVE_FOLDER, exist_ok=True)
 
 @router.post("/register-face")
 async def register_face(data: FaceData):
-    logs = []  # <-- collect logs here
-    logs.append("✅ Register face request received")
+    logs = []
+    logs.append("Register face request received")
 
-    # --- Validation ---
     required_fields = {
         "id": "Admin ID",
         "first_name": "First name",
@@ -42,18 +40,16 @@ async def register_face(data: FaceData):
         errors["images"] = "At least one image is required"
 
     if errors:
-        logs.append("❌ Validation failed")
+        logs.append("Validation failed")
         return json_response({"status": "error", "errors": errors, "logs": logs})
 
-    logs.append("✅ Validation passed")
+    logs.append("Validation passed")
 
-    # Unique visitor ID
     visitor_id = str(uuid.uuid4())
     converted_images_info, embeddings = [], []
 
-    logs.append(f"🆔 Generated visitor_id: {visitor_id}")
+    logs.append(f"Generated visitor_id: {visitor_id}")
 
-    # Core visitor metadata
     visitor_data = {
         "visitor_id": visitor_id,
         "name": data.visitor_name,
@@ -64,7 +60,7 @@ async def register_face(data: FaceData):
     }
 
     for idx, img_base64 in enumerate(data.images):
-        logs.append(f"🖼 Processing image {idx+1}/{len(data.images)}")
+        logs.append(f"Processing image {idx+1}/{len(data.images)}")
 
         webp_file = base64_to_webp(img_base64)
 
@@ -73,13 +69,13 @@ async def register_face(data: FaceData):
         with open(file_path, "wb") as f:
             f.write(webp_file.getvalue())
 
-        logs.append(f"💾 Image saved: {filename}")
+        logs.append(f"Image saved: {filename}")
 
         webp_file.seek(0)
         embedding = await run_in_threadpool(get_embedding, webp_file)
         embeddings.append(embedding)
 
-        logs.append(f"🔐 Embedding generated for image {idx+1}")
+        logs.append(f"Embedding generated for image {idx+1}")
 
         embedding_cache.setdefault(visitor_id, {"meta": visitor_data, "embeddings": []})
         embedding_cache[visitor_id]["embeddings"].append(embedding)
@@ -92,12 +88,12 @@ async def register_face(data: FaceData):
             "saved_filename": filename,
         })
 
-    logs.append("✅ All images processed")
-    logs.append("✅ Visitor registration completed")
+    logs.append("All images processed")
+    logs.append("Visitor registration completed")
 
     return json_response({
         "status": "success",
-        "logs": logs,  # <-- send logs to frontend
+        "logs": logs,
         "admin": {
             "id": data.id,
             "first_name": data.first_name,
@@ -110,24 +106,22 @@ async def register_face(data: FaceData):
 
 @router.post("/recognize-face")
 async def recognize_face(data: dict):
-    """
-    Handles two simple flows:
-    1) Recognition: frontend sends {"image": "<base64>"}.
-       - returns match info (does NOT save image or log).
-       - if no embeddings or no match, returns status "not_found".
-    2) Confirmation/save: frontend sends {"visitor_id": "...", "selected_inmate": {...}, "similarity": ...}
-       - saves a visit log (no image stored) and returns success.
-    """
     try:
         image_base64 = data.get("image")
         visitor_id = data.get("visitor_id")
         selected_inmate = data.get("selected_inmate")
         similarity = data.get("similarity")
 
-        # ------ Confirmation / Save flow (no image needed) ------
         if visitor_id and selected_inmate:
-            # Include full visitor info (name, address, contact, etc.)
-            visitor_info = data.get("visitor_info")  # <-- frontend should send this
+            cached = embedding_cache.get(visitor_id, {}).get("meta", {})
+
+            visitor_info = {
+                "name": cached.get("name", ""),
+                "address": cached.get("address", ""),
+                "contact": cached.get("contact", ""),
+                "gender": cached.get("gender", ""),
+            }
+
             one_hour_ago = datetime.utcnow() - timedelta(hours=1)
 
             existing_log = await logs_collection.find_one({
@@ -144,7 +138,7 @@ async def recognize_face(data: dict):
 
             log_entry = {
                 "visitor_id": visitor_id,
-                "visitor_info": visitor_info,      # <-- save full info
+                "visitor_info": visitor_info,     
                 "selected_inmate": selected_inmate,
                 "similarity": similarity,
                 "timestamp": datetime.utcnow(),
@@ -153,7 +147,6 @@ async def recognize_face(data: dict):
             }
             await logs_collection.insert_one(log_entry)
 
-            # notify websocket clients
             for client in clients:
                 try:
                     await client.send_text("refresh_logs")
@@ -162,23 +155,18 @@ async def recognize_face(data: dict):
 
             return json_response({"status": "success", "log": log_entry})
 
-        # ------ Recognition flow (image provided) ------
         if image_base64:
-            # convert and embed (no file saving)
             webp_file = base64_to_webp(image_base64)
             webp_file.seek(0)
             query_embedding = await run_in_threadpool(get_embedding, webp_file)
 
-            # If embedding cache is empty, we won't crash — just treat as no match
             match = None
             if embedding_cache:
                 match = find_best_match(query_embedding, threshold=0.90)
 
             if not match:
-                # Return not found (frontend can show "Visitor Not Found")
                 return json_response({"status": "not_found", "message": "No match found"})
 
-            # Prepare response object (do NOT save the image or log here)
             response_log = {
                 "visitor_id": match["visitor_id"],
                 "visitor_info": match.get("meta"),
@@ -188,7 +176,6 @@ async def recognize_face(data: dict):
                 "isSaveToLogs": False,
             }
 
-            # notify websocket clients if you still want realtime updates (optional)
             for client in clients:
                 try:
                     await client.send_text("refresh_logs")
@@ -197,7 +184,6 @@ async def recognize_face(data: dict):
 
             return json_response({"status": "success", "log": response_log})
 
-        # If neither image nor confirmation payload, return a simple error
         return json_response({"status": "error", "message": "No image or visitor confirmation provided"})
 
     except Exception as e:
