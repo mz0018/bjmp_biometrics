@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Loader2 } from "lucide-react";
+import { X, Loader2, SquarePen } from "lucide-react";
 import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
 import useButtonUpdate from "../hooks/useButtonUpdate";
@@ -12,7 +12,12 @@ const inmateFields = [
 
 const visitorFields = ["visitor_id", "name", "address", "contact", "inmate"];
 
-const notyf = new Notyf();
+const notyf = new Notyf({
+  position: {
+    x: 'right',
+    y: 'top'
+  }
+});
 
 const ButtonUpdate = ({ userType, inmate, visitor }) => {
   const recordId = userType === "visitor" ? visitor?._id : inmate?._id;
@@ -34,7 +39,6 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
   const { findAndUpdate } = useButtonUpdate(userType, inmate, visitor);
   const [isChanged, setIsChanged] = useState(false);
 
-  // Loading state for save operation
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -97,7 +101,7 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
         return;
       }
 
-      const updatePayload = dirtyFields; // unchanged logic
+      const updatePayload = dirtyFields;
       setIsSaving(true);
 
       await findAndUpdate(updatePayload);
@@ -118,30 +122,31 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
   return (
     <>
       <button
-        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-sm flex items-center gap-2"
+        className="text-gray-700 hover:bg-gray-200 px-4 py-2 rounded-sm flex items-center gap-2 cursor-pointer transition"
         onClick={handleOpen}
         disabled={isSaving}
         aria-disabled={isSaving}
         title={isSaving ? "Saving..." : "Update"}
       >
-        {isSaving ? <Loader2 className="animate-spin w-4 h-4" /> : null}
-        Update
+        {isSaving ? (
+          <Loader2 className="animate-spin w-4 h-4" />
+        ) : (
+          <SquarePen className="w-4 h-4" />
+        )}
+        Edit
       </button>
 
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <div className="bg-white p-6 rounded-md shadow-lg w-[90%] max-w-md">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">Update Info</h2>
-              <button onClick={handleClose} disabled={isSaving} aria-disabled={isSaving}>
-                <X className="w-5 h-5 text-gray-600 hover:text-gray-800" />
-              </button>
+              <h2 className="text-lg font-semibold text-gray-800">Update Information</h2>
             </div>
 
             <div className="space-y-2 text-sm text-gray-700 max-h-[70vh] overflow-y-auto">
               {fields.map((field) => (
                 <div key={field} className="flex flex-col">
-                  <label className="font-semibold capitalize">{field}</label>
+                  <label className="font-semibold capitalize text-left">{field}</label>
                   <input
                     type="text"
                     name={field}
@@ -159,7 +164,7 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
             <div className="flex justify-end gap-2 mt-6">
               <button
                 onClick={handleClose}
-                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-sm"
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-sm cursor-pointer"
                 disabled={isSaving}
               >
                 Close
@@ -168,8 +173,8 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
               <button
                 disabled={isChanged || isSaving}
                 onClick={handleSave}
-                className={`bg-blue-500 text-white px-4 py-2 rounded-sm ${
-                  isChanged || isSaving ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-blue-600"
+                className={`bg-[#002868] text-white px-4 py-2 rounded-sm ${
+                  isChanged || isSaving ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-blue-900"
                 }`}
               >
                 {isSaving ? (
