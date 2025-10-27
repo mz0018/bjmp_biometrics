@@ -3,6 +3,13 @@ import { X, Loader2, SquarePen } from "lucide-react";
 import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
 import useButtonUpdate from "../hooks/useButtonUpdate";
+import {
+  User,
+  MapPin,
+  Phone,
+  FileText,
+  Fingerprint
+} from "lucide-react";
 
 const inmateFields = [
   "firstname","lastname","middleInitial","gender","dateOfBirth","nationality",
@@ -11,6 +18,11 @@ const inmateFields = [
 ];
 
 const visitorFields = ["visitor_id", "name", "address", "contact", "inmate"];
+
+const disabledFields = {
+  visitor: ["visitor_id", "inmate"],
+  inmate: ["gender", "caseNumber"],
+};
 
 const notyf = new Notyf({
   position: {
@@ -21,6 +33,15 @@ const notyf = new Notyf({
 
 const ButtonUpdate = ({ userType, inmate, visitor }) => {
   const recordId = userType === "visitor" ? visitor?._id : inmate?._id;
+
+  const getIconForField = (field) => {
+    if (field.toLowerCase().includes("name")) return <User className="w-4 h-4" />;
+    if (field.toLowerCase().includes("address")) return <MapPin className="w-4 h-4" />;
+    if (field.toLowerCase().includes("contact")) return <Phone className="w-4 h-4" />;
+    if (field.toLowerCase().includes("visitor_id") || field.toLowerCase().includes("case"))
+      return <Fingerprint className="w-4 h-4" />;
+    return <FileText className="w-4 h-4" />;
+  };
 
   const initialFormData =
     userType === "visitor"
@@ -41,6 +62,8 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
 
   const [isSaving, setIsSaving] = useState(false);
 
+  const [missingFields, setMissingFields] = useState({});
+
   useEffect(() => {
     if (userType === "visitor") {
       setFormData({
@@ -56,7 +79,7 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
   }, [inmate, visitor, userType]);
 
   const handleOpen = () => {
-    if (isSaving) return; // prevent open while saving
+    if (isSaving) return;
     if (userType === "visitor") {
       setFormData({
         visitor_id: visitor?.visitor_id || "",
@@ -69,17 +92,24 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
       setFormData(inmate || {});
     }
     setDirtyFields({});
+    setMissingFields({});
     setIsModalOpen(true);
   };
 
   const handleClose = () => {
-    if (isSaving) return; // block close while saving
+    if (isSaving) return;
     setIsModalOpen(false);
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (value && missingFields[name]) {
+      const copy = { ...missingFields };
+      delete copy[name];
+      setMissingFields(copy);
+    }
 
     if (value !== (userType === "visitor" ? visitor?.visitor_info?.[name] : inmate?.[name])) {
       setDirtyFields((prev) => ({ ...prev, [name]: value }));
@@ -94,8 +124,31 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
     setIsChanged(Object.keys(dirtyFields).length === 0);
   }, [dirtyFields]);
 
+  const formatFieldLabel = (f) => {
+    const withSpaces = f.replace(/_/g, " ").replace(/([A-Z])/g, " $1");
+    const trimmed = withSpaces.replace(/\s+/g, " ").trim();
+    return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+  };
+
   const handleSave = async () => {
     try {
+      const emptyFields = {};
+      const fields = userType === "visitor" ? visitorFields : inmateFields;
+      fields.forEach((field) => {
+        const val = formData[field];
+        if (val === undefined || val === null || val.toString().trim() === "") {
+          emptyFields[field] = true;
+        }
+      });
+
+      if (Object.keys(emptyFields).length > 0) {
+        setMissingFields(emptyFields);
+        notyf.error("Please fill the highlighted fields.");
+        return;
+      }
+
+      setMissingFields({});
+
       if (isChanged) {
         notyf.open({ type: "info", message: "No changes made." });
         return;
@@ -146,18 +199,36 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
             <div className="space-y-2 text-sm text-gray-700 max-h-[70vh] overflow-y-auto">
               {fields.map((field) => (
                 <div key={field} className="flex flex-col">
-                  <label className="font-semibold capitalize text-left">{field}</label>
-                  <input
-                    type="text"
-                    name={field}
-                    value={formData[field] || ""}
-                    onChange={handleChange}
-                    disabled={isSaving}
-                    className={`border px-2 py-1 rounded-sm ${
-                      dirtyFields[field] ? "border-yellow-400" : "border-gray-300"
-                    }`}
-                  />
+                  <label className="font-semibold capitalize text-left">{formatFieldLabel(field)}</label>
+
+                  <div className="relative">
+                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                      {getIconForField(field)}
+                    </span>
+
+                    <input
+                      type="text"
+                      name={field}
+                      value={formData[field] || ""}
+                      onChange={handleChange}
+                      disabled={isSaving || disabledFields[userType]?.includes(field)}
+                      className={`border px-8 py-1 rounded-sm w-full disabled:text-gray-500 disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                        missingFields[field]
+                          ? "border-red-500"
+                          : dirtyFields[field]
+                          ? "border-yellow-400"
+                          : "border-gray-300"
+                      }`}
+                    />
+                  </div>
+
+                  {missingFields[field] && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {formatFieldLabel(field)} is empty
+                    </p>
+                  )}
                 </div>
+
               ))}
             </div>
 
