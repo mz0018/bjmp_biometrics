@@ -8,13 +8,14 @@ import {
   MapPin,
   Phone,
   FileText,
-  Fingerprint
+  Fingerprint,
+  AlertTriangle,
 } from "lucide-react";
 
 const inmateFields = [
-  "firstname","lastname","middleInitial","gender","dateOfBirth","nationality",
-  "address","civilStatus","height","weight","caseNumber","offense","sentence",
-  "courtName","arrestDate","commitmentDate","status","remarks",
+  "firstname", "lastname", "middleInitial", "gender", "dateOfBirth", "nationality",
+  "address", "civilStatus", "height", "weight", "caseNumber", "offense", "sentence",
+  "courtName", "arrestDate", "commitmentDate", "status", "remarks",
 ];
 
 const visitorFields = ["visitor_id", "name", "address", "contact", "inmate"];
@@ -25,10 +26,7 @@ const disabledFields = {
 };
 
 const notyf = new Notyf({
-  position: {
-    x: 'right',
-    y: 'top'
-  }
+  position: { x: "right", y: "top" },
 });
 
 const ButtonUpdate = ({ userType, inmate, visitor }) => {
@@ -41,6 +39,18 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
     if (field.toLowerCase().includes("visitor_id") || field.toLowerCase().includes("case"))
       return <Fingerprint className="w-4 h-4" />;
     return <FileText className="w-4 h-4" />;
+  };
+
+  const formatDate = (d) => {
+    if (!d) return "";
+    const date = new Date(d);
+    return isNaN(date)
+      ? d
+      : date.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        });
   };
 
   const initialFormData =
@@ -59,9 +69,7 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
   const [dirtyFields, setDirtyFields] = useState({});
   const { findAndUpdate } = useButtonUpdate(userType, inmate, visitor);
   const [isChanged, setIsChanged] = useState(false);
-
   const [isSaving, setIsSaving] = useState(false);
-
   const [missingFields, setMissingFields] = useState({});
 
   useEffect(() => {
@@ -170,6 +178,13 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
     }
   };
 
+  useEffect(() => {
+    document.body.style.overflow = isModalOpen ? "hidden" : "auto";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isModalOpen]);
+
   const fields = userType === "visitor" ? visitorFields : inmateFields;
 
   return (
@@ -190,62 +205,91 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
       </button>
 
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-          <div className="bg-white p-6 rounded-md shadow-lg w-[90%] max-w-md">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">Update Information</h2>
-            </div>
-
-            <div className="space-y-2 text-sm text-gray-700 max-h-[70vh] overflow-y-auto">
-              {fields.map((field) => (
-                <div key={field} className="flex flex-col">
-                  <label className="font-semibold capitalize text-left">{formatFieldLabel(field)}</label>
-
-                  <div className="relative">
-                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                      {getIconForField(field)}
-                    </span>
-
-                    <input
-                      type="text"
-                      name={field}
-                      value={formData[field] || ""}
-                      onChange={handleChange}
-                      disabled={isSaving || disabledFields[userType]?.includes(field)}
-                      className={`border px-8 py-1 rounded-sm w-full disabled:text-gray-500 disabled:bg-gray-100 disabled:cursor-not-allowed ${
-                        missingFields[field]
-                          ? "border-red-500"
-                          : dirtyFields[field]
-                          ? "border-yellow-400"
-                          : "border-gray-300"
-                      }`}
-                    />
-                  </div>
-
-                  {missingFields[field] && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {formatFieldLabel(field)} is empty
-                    </p>
-                  )}
-                </div>
-
-              ))}
-            </div>
-
-            <div className="flex justify-end gap-2 mt-6">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
+          <div
+            className={`rounded-md shadow-lg w-full max-h-[90vh] ${
+              userType === "visitor" ? "max-w-md" : "max-w-xl"
+            } flex flex-col`}
+          >
+            <div className="bg-[#232023] px-4 py-4 sm:px-6 sm:py-5 rounded-t-md shadow-md sticky top-0 z-10 flex justify-between items-center">
+              <h2 className="text-left text-lg sm:text-xl font-semibold text-white">
+                Update Information
+              </h2>
               <button
-                onClick={handleClose}
-                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-sm cursor-pointer"
-                disabled={isSaving}
+                onClick={() => setIsModalOpen(false)}
+                className="text-white hover:text-gray-300 transition"
+                aria-label="Close"
               >
-                Close
+                <X className="w-5 h-5" />
               </button>
+            </div>
 
+            <div
+              className={`bg-white ${
+                userType === "inmate" ? "overflow-y-auto" : ""
+              } flex-grow max-h-[70vh] p-4 sm:p-6`}
+            >
+              {userType === "inmate" && (
+                <div className="flex justify-center mb-4 px-2">
+                  <div className="bg-yellow-50 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-md flex items-center gap-3 max-w-full sm:max-w-[900px]">
+                    <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0" />
+                    <p className="text-xs sm:text-sm leading-snug m-0">
+                      <strong>Warning:</strong> This section contains confidential information.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-3 text-sm text-gray-700">
+                {fields.map((field) => (
+                  <div key={field} className="flex flex-col">
+                    <label className="font-semibold capitalize text-left text-xs sm:text-sm mb-1">
+                      {formatFieldLabel(field)}
+                    </label>
+
+                    <div className="relative">
+                      <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                        {getIconForField(field)}
+                      </span>
+
+                      <input
+                        type="text"
+                        name={field}
+                        value={
+                          ["dateOfBirth", "arrestDate", "commitmentDate"].includes(field)
+                            ? formatDate(formData[field])
+                            : formData[field] || ""
+                        }
+                        onChange={handleChange}
+                        disabled={isSaving || disabledFields[userType]?.includes(field)}
+                        className={`border px-8 py-2 rounded-md w-full disabled:text-gray-500 disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                          missingFields[field]
+                            ? "border-red-500"
+                            : dirtyFields[field]
+                            ? "border-yellow-400"
+                            : "border-gray-300"
+                        }`}
+                      />
+                    </div>
+
+                    {missingFields[field] && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {formatFieldLabel(field)} is empty
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-[#232023] px-4 py-3 rounded-b-md flex flex-col items-end justify-center text-center space-y-1">
               <button
                 disabled={isChanged || isSaving}
                 onClick={handleSave}
                 className={`bg-[#002868] text-white px-4 py-2 rounded-sm ${
-                  isChanged || isSaving ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-blue-900"
+                  isChanged || isSaving
+                    ? "cursor-not-allowed opacity-50"
+                    : "cursor-pointer hover:bg-blue-900"
                 }`}
               >
                 {isSaving ? (
