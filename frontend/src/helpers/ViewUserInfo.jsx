@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import GenerateInmateInfo from "./GenerateInmateInfo";
 import {
   UserRoundCog,
   X,
@@ -147,13 +148,62 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
                   </div>
 
                   <div>
-                    <h3 className="text-left font-semibold text-gray-700 text-sm sm:text-base">Add this Section</h3>
+                    <h3 className="text-left font-semibold text-gray-700 text-sm sm:text-base">Mugshots</h3>
+                    <hr className="border-gray-300 my-2" />
+
+                    {inmate?.mugshot_front || inmate?.mugshot_left || inmate?.mugshot_right ? (
+                      <div className="flex flex-wrap justify-center gap-4 mt-3">
+                        {inmate?.mugshot_front && (
+                          <div className="flex flex-col items-center">
+                            <img
+                              src={inmate.mugshot_front}
+                              alt="Front Mugshot"
+                              className="w-40 h-48 object-cover rounded-md border border-gray-300 shadow-sm"
+                            />
+                            <span className="text-xs text-gray-600 mt-1">Front</span>
+                          </div>
+                        )}
+
+                        {inmate?.mugshot_left && (
+                          <div className="flex flex-col items-center">
+                            <img
+                              src={inmate.mugshot_left}
+                              alt="Left Mugshot"
+                              className="w-40 h-48 object-cover rounded-md border border-gray-300 shadow-sm"
+                            />
+                            <span className="text-xs text-gray-600 mt-1">Left</span>
+                          </div>
+                        )}
+
+                        {inmate?.mugshot_right && (
+                          <div className="flex flex-col items-center">
+                            <img
+                              src={inmate.mugshot_right}
+                              alt="Right Mugshot"
+                              className="w-40 h-48 object-cover rounded-md border border-gray-300 shadow-sm"
+                            />
+                            <span className="text-xs text-gray-600 mt-1">Right</span>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500 italic mt-2">No mugshots available.</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <h3 className="text-left font-semibold text-gray-700 text-sm sm:text-base">Visitor Related</h3>
                     <hr className="border-gray-300 my-2" />
                     <ul className="list-disc list-inside text-sm space-y-1">
                       <li>Generate this report</li>
                       <li>Visitor(s) related to this specific inmate</li>
                       <li>View Inmate Mugshots</li>
                     </ul>
+                  </div>
+
+                  <div>
+                    <h3 className="text-left font-semibold text-gray-700 text-sm sm:text-base">Generate Document</h3>
+                    <GenerateInmateInfo inmate={inmate} />
                   </div>
                 </div>
               )}
