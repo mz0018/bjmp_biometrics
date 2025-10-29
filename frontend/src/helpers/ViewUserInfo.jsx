@@ -18,8 +18,14 @@ import {
   AlertTriangle,
 } from "lucide-react";
 
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
+
 const ViewUserInfo = ({ userType, inmate, visitor }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [photoIndex, setPhotoIndex] = useState(0);
 
   const formatDate = (d) => (d ? new Date(d).toLocaleDateString() : "N/A");
 
@@ -79,6 +85,12 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
     { label: "Address", value: visitor?.visitor_info?.address, icon: <MapPin className="w-4 h-4" /> },
     { label: "Contact", value: visitor?.visitor_info?.contact, icon: <Phone className="w-4 h-4" /> },
   ];
+
+  const images = [
+    inmate?.mugshot_front && { src: `${import.meta.env.VITE_IMG_URL}/${inmate.mugshot_front}`, title: "Front Mugshot" },
+    inmate?.mugshot_left && { src: `${import.meta.env.VITE_IMG_URL}/${inmate.mugshot_left}`, title: "Left Mugshot" },
+    inmate?.mugshot_right && { src: `${import.meta.env.VITE_IMG_URL}/${inmate.mugshot_right}`, title: "Right Mugshot" },
+  ].filter(Boolean);
 
   return (
     <>
@@ -153,38 +165,30 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
 
                     {inmate?.mugshot_front || inmate?.mugshot_left || inmate?.mugshot_right ? (
                       <div className="flex flex-wrap justify-center gap-4 mt-3">
-                        {inmate?.mugshot_front && (
-                          <div className="flex flex-col items-center">
+                        {images.map((img, index) => (
+                          <div
+                            key={index}
+                            className="flex flex-col items-center cursor-pointer"
+                            onClick={() => {
+                              setPhotoIndex(index);
+                              setLightboxOpen(true);
+                            }}
+                          >
                             <img
-                              src={inmate.mugshot_front}
-                              alt="Front Mugshot"
+                              src={img.src}
+                              alt={img.title}
                               className="w-40 h-48 object-cover rounded-md border border-gray-300 shadow-sm"
                             />
-                            <span className="text-xs text-gray-600 mt-1">Front</span>
+                            <span className="text-xs text-gray-600 mt-1">{img.title.split(" ")[0]}</span>
                           </div>
-                        )}
+                        ))}
 
-                        {inmate?.mugshot_left && (
-                          <div className="flex flex-col items-center">
-                            <img
-                              src={inmate.mugshot_left}
-                              alt="Left Mugshot"
-                              className="w-40 h-48 object-cover rounded-md border border-gray-300 shadow-sm"
-                            />
-                            <span className="text-xs text-gray-600 mt-1">Left</span>
-                          </div>
-                        )}
-
-                        {inmate?.mugshot_right && (
-                          <div className="flex flex-col items-center">
-                            <img
-                              src={inmate.mugshot_right}
-                              alt="Right Mugshot"
-                              className="w-40 h-48 object-cover rounded-md border border-gray-300 shadow-sm"
-                            />
-                            <span className="text-xs text-gray-600 mt-1">Right</span>
-                          </div>
-                        )}
+                        <Lightbox
+                          open={lightboxOpen}
+                          close={() => setLightboxOpen(false)}
+                          index={photoIndex}
+                          slides={images}
+                        />
                       </div>
                     ) : (
                       <p className="text-sm text-gray-500 italic mt-2">No mugshots available.</p>

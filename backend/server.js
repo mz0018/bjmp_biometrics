@@ -3,6 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import adminRoutes from "./routes/admin.js";
 import connectDB from "./config/connection.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
 
@@ -15,6 +17,11 @@ app.use(cors());
 app.use(express.json({ limit: "100mb" }));
 app.use(express.urlencoded({ limit: "100mb", extended: true }));
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
+
 app.use("/api/admin", adminRoutes);
 
 app.get("/", (req, res) => {
@@ -26,8 +33,8 @@ app.listen(PORT, () => {
 });
 
 app.use("/models", express.static("public/models", {
-  setHeaders: (res, path) => {
-    if (path.endsWith(".bin")) {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith(".bin")) {
       res.setHeader("Content-Type", "application/octet-stream");
     }
   }
