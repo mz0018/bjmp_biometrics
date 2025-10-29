@@ -16,11 +16,13 @@ export const uploadMugshots = multer({ storage }).fields([
 ]);
 
 export const saveMugshotAsWebP = async (file, filenameBase) => {
-  const outputPath = path.join(uploadDir, `${filenameBase}.webp`);
+  const filename = `${filenameBase}.webp`;              
+  const outputPath = path.join(uploadDir, filename);  
+
   await sharp(file.buffer)
     .resize(600)
     .toFormat("webp", { quality: 70 })
     .toFile(outputPath);
 
-  return outputPath;
+  return filename;                                     
 };

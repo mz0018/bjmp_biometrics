@@ -87,9 +87,9 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
   ];
 
   const images = [
-    inmate?.mugshot_front && { src: `${import.meta.env.VITE_IMG_URL}/${inmate.mugshot_front}`, title: "Front Mugshot" },
-    inmate?.mugshot_left && { src: `${import.meta.env.VITE_IMG_URL}/${inmate.mugshot_left}`, title: "Left Mugshot" },
-    inmate?.mugshot_right && { src: `${import.meta.env.VITE_IMG_URL}/${inmate.mugshot_right}`, title: "Right Mugshot" },
+    inmate?.mugshot_front && { src: `${import.meta.env.VITE_IMG_URL}/uploads/mugshots/${inmate.mugshot_front}`, title: "Front Mugshot" },
+    inmate?.mugshot_left && { src: `${import.meta.env.VITE_IMG_URL}/uploads/mugshots/${inmate.mugshot_left}`, title: "Left Mugshot" },
+    inmate?.mugshot_right && { src: `${import.meta.env.VITE_IMG_URL}/uploads/mugshots/${inmate.mugshot_right}`, title: "Right Mugshot" },
   ].filter(Boolean);
 
   return (
