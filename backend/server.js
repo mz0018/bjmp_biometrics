@@ -28,6 +28,11 @@ app.get("/", (req, res) => {
   res.send("Backend is running");
 });
 
+app.get('/config', (req, res) => {
+  const origin = `${req.protocol}://${req.get('host')}`;
+  res.json({ backendOrigin: origin });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

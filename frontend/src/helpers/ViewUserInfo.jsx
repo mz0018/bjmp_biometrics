@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import GenerateInmateInfo from "./GenerateInmateInfo";
+import axios from "axios";
 import {
   UserRoundCog,
   X,
@@ -22,6 +23,7 @@ import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 
 const ViewUserInfo = ({ userType, inmate, visitor }) => {
+  const [baseUrl, setBaseUrl] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -51,6 +53,19 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
       document.body.style.overflow = "auto";
     };
   }, [isModalOpen]);
+
+  useEffect(() => {
+    const fetchBackendOrigin = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/config`);
+        setBaseUrl(response.data.backendOrigin)
+      } catch (error) {
+        console.error("Failed to fetch backend origin:", error);
+      }
+    };
+
+    fetchBackendOrigin();
+  }, []);
 
   const personalLeft = [
     { label: "First Name", value: inmate?.firstname, icon: <User className="w-4 h-4" /> },
@@ -87,9 +102,9 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
   ];
 
   const images = [
-    inmate?.mugshot_front && { src: `${import.meta.env.VITE_IMG_URL}/uploads/mugshots/${inmate.mugshot_front}`, title: "Front Mugshot" },
-    inmate?.mugshot_left && { src: `${import.meta.env.VITE_IMG_URL}/uploads/mugshots/${inmate.mugshot_left}`, title: "Left Mugshot" },
-    inmate?.mugshot_right && { src: `${import.meta.env.VITE_IMG_URL}/uploads/mugshots/${inmate.mugshot_right}`, title: "Right Mugshot" },
+    inmate?.mugshot_front && { src: `${baseUrl}/uploads/mugshots/${inmate.mugshot_front}`, title: "Front Mugshot" },
+    inmate?.mugshot_left && { src: `${baseUrl}/uploads/mugshots/${inmate.mugshot_left}`, title: "Left Mugshot" },
+    inmate?.mugshot_right && { src: `${baseUrl}/uploads/mugshots/${inmate.mugshot_right}`, title: "Right Mugshot" },
   ].filter(Boolean);
 
   return (
