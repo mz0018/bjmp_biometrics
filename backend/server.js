@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import adminRoutes from "./routes/admin.js";
-import connectDB from "./config/connection.js";
+import { connectDB } from "./config/connection.js";
 import path from "path";
 import { fileURLToPath } from "url";
 

@@ -1,8 +1,9 @@
 import argon2 from "argon2";
 import Admin from "../models/AdminModel.js";
 import RecognitionLog from "../models/RecognitionLogSchema.js";
-import InmateModel from "../models/InmateModel.js";
-import { saveMugshotAsWebP } from "../helper/uploadMugshots.js";
+import sharp from "sharp";
+import { getInmateModel } from "../models/InmateModel.js";
+import { processMugshot } from "../helper/uploadMugshots.js";
 
 export const signupAdmin = async (req, res) => {
   const { first_name, last_name, username, password, retype_password } = req.body;
@@ -218,27 +219,15 @@ export const generateReports = async (req, res) => {
 
 export const registerInmate = async (req, res) => {
   try {
+    const InmateModel = getInmateModel();
     const body = req.body;
     const errors = {};
 
     const requiredFields = [
-      "firstname",
-      "middleInitial",
-      "lastname",
-      "gender",
-      "dateOfBirth",
-      "nationality",
-      "address",
-      "civilStatus",
-      "height",
-      "weight",
-      "caseNumber",
-      "offense",
-      "sentence",
-      "courtName",
-      "arrestDate",
-      "commitmentDate",
-      "status",
+      "firstname", "middleInitial", "lastname", "gender",
+      "dateOfBirth", "nationality", "address", "civilStatus",
+      "height", "weight", "caseNumber", "offense", "sentence",
+      "courtName", "arrestDate", "commitmentDate", "status"
     ];
 
     for (const field of requiredFields) {
@@ -255,20 +244,19 @@ export const registerInmate = async (req, res) => {
     if (Object.keys(errors).length)
       return res.status(400).json({ errors });
 
-    const frontPath = await saveMugshotAsWebP(req.files.mugshot_front[0], "front-" + Date.now());
-    const leftPath = await saveMugshotAsWebP(req.files.mugshot_left[0], "left-" + Date.now());
-    const rightPath = await saveMugshotAsWebP(req.files.mugshot_right[0], "right-" + Date.now());
+    const frontBuffer = await processMugshot(req.files.mugshot_front[0]);
+    const leftBuffer = await processMugshot(req.files.mugshot_left[0]);
+    const rightBuffer = await processMugshot(req.files.mugshot_right[0]);
 
     const inmate = await InmateModel.create({
       ...body,
-      mugshot_front: frontPath,
-      mugshot_left: leftPath,
-      mugshot_right: rightPath,
+      mugshot_front: frontBuffer,
+      mugshot_left: leftBuffer,
+      mugshot_right: rightBuffer,
     });
 
     res.status(200).json({
       message: "Inmate registered successfully!",
-      inmate,
     });
   } catch (error) {
     console.error("Error registering inmate:", error);
@@ -280,6 +268,7 @@ export const getInmates = async (req, res) => {
   try {
     const { search } = req.query;
     let filter = {};
+    const InmateModel = getInmateModel();
 
     if (search) {
       filter = {
@@ -308,9 +297,7 @@ export const getInmates = async (req, res) => {
       };
     }
 
-    const inmates = await InmateModel.find(
-      filter,
-    ).sort({ createdAt: -1 });
+    const inmates = await InmateModel.find(filter).sort({ createdAt: -1 });
 
     res.status(200).json(inmates);
   } catch (err) {
@@ -323,6 +310,7 @@ export const updateInmateUsers = async (req, res) => {
   try {
     const id = req.params.id;
     const updateData = req.body;
+    const InmateModel = getInmateModel();
 
     const inmate = await InmateModel.findByIdAndUpdate(id, updateData, {
       new: true,

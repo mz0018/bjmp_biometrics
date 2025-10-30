@@ -9,6 +9,7 @@ services:
       - "5000:5000"
     environment:
       - MONGO_URI=mongodb+srv://bjmp_face_recog:LXKGvyAsIaAx32hT@bjmp.kexnzgt.mongodb.net/bjmp_biometrics?retryWrites=true&w=majority&appName=bjmp
+      - MONGO_URI_INMATES=mongodb+srv://bjmp_face_recog:LXKGvyAsIaAx32hT@bjmp.kexnzgt.mongodb.net/Inmates?retryWrites=true&w=majority&appName=bjmp
     volumes:
       - ./uploads/mugshots:/app/uploads/mugshots
 
@@ -21,8 +22,7 @@ services:
     depends_on:
       - backend
     environment:
-      - VITE_API_URL=http://localhost:5000/api
-      - VITE_IMG_URL=http://localhost:5000/uploads
+      - VITE_API_URL=http://backend:5000/api
 
   python-api:
     build: ./python-api

@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import GenerateInmateInfo from "./GenerateInmateInfo";
-import axios from "axios";
 import {
   UserRoundCog,
   X,
@@ -23,9 +22,7 @@ import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 
 const ViewUserInfo = ({ userType, inmate, visitor }) => {
-  const [baseUrl, setBaseUrl] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [photoIndex, setPhotoIndex] = useState(0);
 
@@ -53,19 +50,6 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
       document.body.style.overflow = "auto";
     };
   }, [isModalOpen]);
-
-  useEffect(() => {
-    const fetchBackendOrigin = async () => {
-      try {
-        const response = await axios.get(`http://localhost:5000/config`);
-        setBaseUrl(response.data.backendOrigin)
-      } catch (error) {
-        console.error("Failed to fetch backend origin:", error);
-      }
-    };
-
-    fetchBackendOrigin();
-  }, []);
 
   const personalLeft = [
     { label: "First Name", value: inmate?.firstname, icon: <User className="w-4 h-4" /> },
@@ -102,10 +86,12 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
   ];
 
   const images = [
-    inmate?.mugshot_front && { src: `${baseUrl}/uploads/mugshots/${inmate.mugshot_front}`, title: "Front Mugshot" },
-    inmate?.mugshot_left && { src: `${baseUrl}/uploads/mugshots/${inmate.mugshot_left}`, title: "Left Mugshot" },
-    inmate?.mugshot_right && { src: `${baseUrl}/uploads/mugshots/${inmate.mugshot_right}`, title: "Right Mugshot" },
+    inmate?.mugshot_front ? { src: inmate.mugshot_front, title: "Front Mugshot" } : null,
+    inmate?.mugshot_left ? { src: inmate.mugshot_left, title: "Left Mugshot" } : null,
+    inmate?.mugshot_right ? { src: inmate.mugshot_right, title: "Right Mugshot" } : null,
   ].filter(Boolean);
+
+  console.log(images)
 
   return (
     <>
@@ -139,17 +125,6 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
             </div>
 
             <div className={`bg-white ${userType === "inmate" ? "overflow-y-auto" : ""} flex-grow max-h-[70vh] p-4 sm:p-6`}>
-              {userType === "inmate" && (
-                <div className="flex justify-center mb-4 px-2">
-                  <div className="bg-yellow-50 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-md flex items-center gap-3 max-w-full sm:max-w-[900px]">
-                    <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0" />
-                    <p className="text-xs sm:text-base leading-snug m-0">
-                      <strong>Warning:</strong> This section contains confidential information.
-                    </p>
-                  </div>
-                </div>
-              )}
-
               {userType === "inmate" && inmate && (
                 <div className="space-y-6">
                   <div>
@@ -159,7 +134,6 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
                       <div className="space-y-1">
                         {personalLeft.map((it) => renderProfileItem(it.label, it.value, it.icon))}
                       </div>
-
                       <div className="space-y-1">
                         {personalRight.map((it) => renderProfileItem(it.label, it.value, it.icon))}
                       </div>
@@ -177,8 +151,7 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
                   <div>
                     <h3 className="text-left font-semibold text-gray-700 text-sm sm:text-base">Mugshots</h3>
                     <hr className="border-gray-300 my-2" />
-
-                    {inmate?.mugshot_front || inmate?.mugshot_left || inmate?.mugshot_right ? (
+                    {images.length > 0 ? (
                       <div className="flex flex-wrap justify-center gap-4 mt-3">
                         {images.map((img, index) => (
                           <div
@@ -198,12 +171,14 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
                           </div>
                         ))}
 
-                        <Lightbox
-                          open={lightboxOpen}
-                          close={() => setLightboxOpen(false)}
-                          index={photoIndex}
-                          slides={images}
-                        />
+                        {lightboxOpen && (
+                          <Lightbox
+                            open={lightboxOpen}
+                            close={() => setLightboxOpen(false)}
+                            index={photoIndex}
+                            slides={images}
+                          />
+                        )}
                       </div>
                     ) : (
                       <p className="text-sm text-gray-500 italic mt-2">No mugshots available.</p>
