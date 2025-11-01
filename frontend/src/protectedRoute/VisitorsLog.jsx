@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import useVisitorsLogs from "../hooks/useVisitorsLogs";
 import useSaveToReports from "../hooks/useSaveToReports";
-import GenerateReports from "./GenerateReports";
+import NoLogsFoundFallback from "../fallback/NoLogsFoundFallback";
 import {
   Search,
   Loader2,
@@ -22,19 +22,16 @@ const TableHeaderCell = ({ icon: Icon, label }) => (
 );
 
 const VisitorsLog = () => {
-  // normal search input
   const [search, setSearch] = useState("");
-  // debounced search value
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
   const { isLoading, hasErrors, logs, isWsConnected } = useVisitorsLogs(debouncedSearch);
   const { handleStop, countdowns, stopped } = useSaveToReports(logs);
 
-  // debounce logic
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(search);
-    }, 300); // wait 300ms after typing stops
+    }, 300);
     return () => clearTimeout(handler);
   }, [search]);
 
@@ -74,24 +71,7 @@ const VisitorsLog = () => {
   return (
     <section className="p-6 min-h-[100dvh] flex flex-col overflow-hidden">
       <header className="flex flex-col mb-6 gap-3">
-        <div className="w-full">
-          <div className="flex items-center gap-2 mt-4 mb-4">
-            <div
-              className={`w-3 h-3 rounded-full ${
-                isWsConnected ? "bg-green-500 animate-pulse" : "bg-red-500"
-              }`}
-              title={isWsConnected ? "Connected to server" : "Disconnected from server"}
-            ></div>
-            <h1 className="text-2xl font-bold text-start">Visitors Log</h1>
-          </div>
-
-          <p className="text-sm text-gray-500 max-w-2xl leading-relaxed">
-            Restricted visitor records encrypted, access-limited, and audit-logged.
-          </p>
-        </div>
-
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-          {/* 🔍 Debounced Search Input */}
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-2.5 text-gray-400 w-4 h-4" />
             <input
@@ -102,13 +82,11 @@ const VisitorsLog = () => {
               className="pl-9 pr-3 py-2 border border-gray-300 rounded-sm w-full text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-bjmp-yellow"
             />
           </div>
-
-          <GenerateReports logs={logs} />
         </div>
       </header>
 
       {filteredLogs.length === 0 ? (
-        <p className="text-gray-500 italic">No logs found</p>
+        <NoLogsFoundFallback />
       ) : (
         <div className="shadow-lg rounded-sm border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
@@ -119,11 +97,11 @@ const VisitorsLog = () => {
               }}
             >
               <table className="min-w-full table-fixed border-collapse bg-white">
-                <thead className="bg-bjmp-blue bg-white shadow-lg text-sm uppercase sticky top-0 z-10">
+                <thead className="bg-bjmp-blue bg-white shadow-lg text-sm capitalize">
                   <tr>
-                    <TableHeaderCell icon={User} label="Name" />
-                    <TableHeaderCell icon={Home} label="Inmate" />
-                    <TableHeaderCell icon={MapPin} label="Address" />
+                    <TableHeaderCell icon={User} label="Visitor Name" />
+                    <TableHeaderCell icon={Home} label="Visited Inmate" />
+                    <TableHeaderCell icon={MapPin} label="Visitor Address" />
                     <TableHeaderCell icon={Calendar} label="Timestamp" />
                     <TableHeaderCell icon={Clock} label="Time Left" />
                     <th className="px-4 py-3 w-[7%] text-center font-semibold tracking-wide whitespace-nowrap">

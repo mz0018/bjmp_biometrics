@@ -27,7 +27,7 @@ const GenerateReports = () => {
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
           <div className="rounded-md shadow-lg w-full max-h-[90vh] max-w-md flex flex-col">
-            <div className="bg-[#232023] px-4 py-4 sm:px-6 sm:py-5 rounded-t-md shadow-md sticky top-0 z-10 flex justify-between items-center">
+            <div className="bg-[#232023] px-4 py-4 sm:px-6 sm:py-5 rounded-t-md shadow-md flex justify-between items-center">
               <h2 className="text-left text-lg sm:text-xl font-semibold text-white">Select Date Range</h2>
               <button
                 onClick={() => setIsModalOpen(false)}

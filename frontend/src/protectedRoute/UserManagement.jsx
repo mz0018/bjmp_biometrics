@@ -1,6 +1,7 @@
 import useUserManagement from "../hooks/useUserManagement";
 import ButtonUpdate from "../helpers/ButtonUpdate";
 import ButtonViewUser from "../helpers/ViewUserInfo";
+import NoRecordsFoundFallback from "../fallback/NoRecordsFoundFallback";
 import { User, FileText, Phone, Settings, Eye, EyeOff, Search } from "lucide-react";
 
 const UserManagement = () => {
@@ -10,11 +11,6 @@ const UserManagement = () => {
   return (
     <section className="p-6 min-h-[100dvh] flex flex-col overflow-hidden">
       <header className="flex flex-col mb-6 gap-3">
-        <h2 className="text-2xl font-bold text-start">User Management</h2>
-        <p className="text-gray-500 max-w-2xl leading-relaxed">
-          Access and manage records of registered inmates and visitors.
-        </p>
-
         <div className="relative w-full">
           <input
             type="text"
@@ -71,13 +67,13 @@ const UserManagement = () => {
           >
             {filteredData.length > 0 ? (
               <table className="min-w-full table-fixed border-collapse bg-white">
-                <thead className="bg-white shadow-lg text-sm uppercase sticky top-0 z-10">
+                <thead className="bg-white shadow-lg text-sm capitalize">
                   <tr>
                     {activeTab === "inmates" ? (
                       <>
                         <th className="px-4 py-3 text-start font-semibold tracking-wide">
                           <div className="flex items-center gap-2">
-                            <User size={16} /> Name
+                            <User size={16} /> Inmate Name
                           </div>
                         </th>
                         <th className="px-4 py-3 text-start font-semibold tracking-wide">
@@ -95,7 +91,7 @@ const UserManagement = () => {
                       <>
                         <th className="px-4 py-3 text-start font-semibold tracking-wide">
                           <div className="flex items-center gap-2">
-                            <User size={16} /> Name
+                            <User size={16} /> Visitor Name
                           </div>
                         </th>
                         <th className="px-4 py-3 text-start font-semibold tracking-wide">
@@ -161,7 +157,7 @@ const UserManagement = () => {
                 </tbody>
               </table>
             ) : (
-              <p className="text-gray-500 italic p-4">No records found.</p>
+              <NoRecordsFoundFallback activeTab={activeTab} />
             )}
           </div>
         </div>

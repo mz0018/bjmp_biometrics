@@ -32,18 +32,6 @@ const RegisterFace = () => {
 
   return (
     <section className="p-6 min-h-[100dvh] flex flex-col overflow-hidden">
-      <h1 className="text-2xl font-bold mb-4 text-start">
-        Visitor Registration
-      </h1>
-      {!openCameraSection ? (
-        <p className="text-gray-500">
-          Please provide the required details to register a new visitor.
-        </p>
-      ) : (
-        <p className="text-gray-500">
-          Please ensure your camera has <span className="font-semibold">adequate lighting</span> and <span className="font-semibold">high resolution</span> for accurate face registration. Capture up to a <span className="font-semibold">maximum of five clear images</span> from <span className="font-semibold">different angles</span> for best recognition accuracy.
-        </p>
-      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {!openCameraSection && (

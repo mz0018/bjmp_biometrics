@@ -189,9 +189,7 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
                     <h3 className="text-left font-semibold text-gray-700 text-sm sm:text-base">Visitor Related</h3>
                     <hr className="border-gray-300 my-2" />
                     <ul className="list-disc list-inside text-sm space-y-1">
-                      <li>Generate this report</li>
-                      <li>Visitor(s) related to this specific inmate</li>
-                      <li>View Inmate Mugshots</li>
+                      <li>List of Visitor(s) related to this specific inmate</li>
                     </ul>
                   </div>
 

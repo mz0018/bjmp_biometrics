@@ -1,3 +1,4 @@
+import { useState } from "react";
 import useInmateRegistration from "../hooks/useInmateRegistration";
 import {
   genderOptions,
@@ -17,6 +18,9 @@ import {
   Venus,
 } from "lucide-react";
 
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
+
 const InmateRegistration = () => {
   const {
     handleInmateRegistration,
@@ -26,6 +30,14 @@ const InmateRegistration = () => {
     hasError,
   } = useInmateRegistration();
 
+  const [previewImages, setPreviewImages] = useState({
+    mugshot_front: null,
+    mugshot_left: null,
+    mugshot_right: null,
+  });
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [currentImage, setCurrentImage] = useState(null);
+  
   const getInputClass = (name) =>
     `border p-2 rounded w-full text-sm focus:outline-none focus:ring-2 text-[#002868] placeholder-[#002868] ${
       hasError[name] ? "border-red-500 focus:ring-red-300" : "border-gray-300"
@@ -36,6 +48,20 @@ const InmateRegistration = () => {
       <p className="text-red-500 text-xs mt-1 capitalize">{hasError[name]}</p>
     );
 
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    if (files && files[0]) {
+      handleChange(e);
+
+      const previewUrl = URL.createObjectURL(files[0]);
+      setPreviewImages((prev) => ({
+        ...prev,
+        [name]: previewUrl,
+      }));
+      return () => URL.revokeObjectURL(previewUrl);
+    }
+  };
+
   return (
     <section className="p-6 min-h-[100dvh] flex flex-col overflow-hidden">
       <form
@@ -43,14 +69,7 @@ const InmateRegistration = () => {
         encType="multipart/form-data"
         className="space-y-5"
       >
-        <h2 className="text-2xl font-bold mb-4 text-start">
-          Inmate Registration
-        </h2>
-        <p className="text-gray-500">
-          Please fill out the necessary information to register a new inmate in the system.
-        </p>
 
-        {/* Top small box: case + dates */}
         <div className="mb-2 rounded-md bg-white">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <div>
@@ -440,7 +459,7 @@ const InmateRegistration = () => {
           </div>
         </div>
 
-        {/* Mugshots — only your three inputs */}
+        {/* Mugshots — only your three inputs + preview */}
         <div className="mb-2 rounded-md bg-white">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {["mugshot_front", "mugshot_left", "mugshot_right"].map((side) => (
@@ -448,18 +467,33 @@ const InmateRegistration = () => {
                 <label className="text-xs text-gray-600 capitalize block mb-1">
                   {side.replace("mugshot_", "")} view
                 </label>
-                <div className="relative mt-1">
-                  <ImageIcon
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                    size={18}
-                  />
-                  <input
-                    className={`${getInputClass(side)} pl-10`}
-                    type="file"
-                    name={side}
-                    accept="image/*"
-                    onChange={handleChange}
-                  />
+                <div className="relative mt-1 flex flex-col gap-2">
+                  <div className="relative">
+                    <ImageIcon
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      size={18}
+                    />
+                    <input
+                      className={`${getInputClass(side)} pl-10`}
+                      type="file"
+                      name={side}
+                      accept="image/*"
+                      onChange={handleFileChange}
+                    />
+                  </div>
+
+                  {/* ✅ Thumbnail Preview */}
+                  {previewImages[side] && (
+                    <img
+                      src={previewImages[side]}
+                      alt={`${side} preview`}
+                      className="w-32 h-32 object-cover rounded border cursor-pointer hover:opacity-80"
+                      onClick={() => {
+                        setCurrentImage(previewImages[side]);
+                        setLightboxOpen(true);
+                      }}
+                    />
+                  )}
                 </div>
                 {renderError(side)}
               </div>
@@ -480,6 +514,13 @@ const InmateRegistration = () => {
           {loading ? "Registering..." : "Register Inmate"}
         </button>
       </form>
+
+      {lightboxOpen && (
+        <Lightbox
+          mainSrc={currentImage}
+          onCloseRequest={() => setLightboxOpen(false)}
+        />
+      )}
     </section>
   );
 };

@@ -39,23 +39,18 @@ const Sidebar = () => {
 
   return (
     <aside
-      className="w-64 min-h-[100dvh] min-h-screen flex-shrink-0 bg-[#232023] shadow-xl p-6 flex flex-col justify-between border border-gray-200 text-white overflow-y-auto"
+      className="w-74 h-full flex-shrink-0 bg-[#232023] shadow-xl p-6 flex flex-col justify-between text-white overflow-y-auto"
       aria-label="Admin Sidebar"
     >
       <div>
         {admin && (
           <div className="flex flex-col items-center gap-2 mb-8">
             <img
+              loading="lazy"
               src="/img/BJMP-icon.png"
               alt={`${admin.first_name} avatar`}
               className="h-40 w-40 md:h-48 md:w-48 rounded-full object-cover border-2 border-white/20"
             />
-            <div className="text-center">
-              <div className="text-lg font-semibold capitalize">{admin.first_name}</div>
-              {admin.last_name && (
-                <div className="text-sm text-white/80 capitalize">{admin.last_name}</div>
-              )}
-            </div>
           </div>
         )}
 
