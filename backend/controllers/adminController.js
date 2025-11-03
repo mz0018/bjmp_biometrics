@@ -1,6 +1,7 @@
 import argon2 from "argon2";
 import Admin from "../models/AdminModel.js";
 import RecognitionLog from "../models/RecognitionLogSchema.js";
+import Counter from "../models/Counter.js";
 import sharp from "sharp";
 import { getInmateModel } from "../models/InmateModel.js";
 import { processMugshot } from "../helper/uploadMugshots.js";
@@ -226,7 +227,7 @@ export const registerInmate = async (req, res) => {
     const requiredFields = [
       "firstname", "middleInitial", "lastname", "gender",
       "dateOfBirth", "nationality", "address", "civilStatus",
-      "height", "weight", "caseNumber", "offense", "sentence",
+      "height", "weight", "offense", "sentence",
       "courtName", "arrestDate", "commitmentDate", "status"
     ];
 
@@ -244,20 +245,29 @@ export const registerInmate = async (req, res) => {
     if (Object.keys(errors).length)
       return res.status(400).json({ errors });
 
+    const counter = await Counter.findOneAndUpdate(
+      { name: "caseNumber" },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+
+    const formattedNumber = counter.seq.toString().padStart(3, 0);
+    const generatedCaseNumber = `CRM-${formattedNumber}`;
+
     const frontBuffer = await processMugshot(req.files.mugshot_front[0]);
     const leftBuffer = await processMugshot(req.files.mugshot_left[0]);
     const rightBuffer = await processMugshot(req.files.mugshot_right[0]);
 
     const inmate = await InmateModel.create({
       ...body,
+      caseNumber: generatedCaseNumber,
       mugshot_front: frontBuffer,
       mugshot_left: leftBuffer,
       mugshot_right: rightBuffer,
     });
 
-    res.status(200).json({
-      message: "Inmate registered successfully!",
-    });
+    res.status(200).json({ message: "Inmate registered successfully!", });
+
   } catch (error) {
     console.error("Error registering inmate:", error);
     res.status(500).json({ message: "Error registering inmate" });

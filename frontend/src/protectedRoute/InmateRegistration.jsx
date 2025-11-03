@@ -80,11 +80,12 @@ const InmateRegistration = () => {
                   size={18}
                 />
                 <input
-                  className={`${getInputClass("caseNumber")} pl-10`}
+                  className={`${getInputClass("caseNumber")} pl-10 bg-gray-100 cursor-not-allowed`}
                   name="caseNumber"
-                  value={formData.caseNumber}
+                  value={formData.caseNumber || "Auto-generated"}
                   onChange={handleChange}
                   placeholder="Case Number"
+                  disabled
                 />
               </div>
               {renderError("caseNumber")}

@@ -38,7 +38,6 @@ const useUserManagement = () => {
           }));
 
           setInmatesList(inmatesWithImages);
-          console.table(inmatesWithImages);
         } else {
           const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/visitorsLogs`, {
             params: { search: debouncedQuery },
