@@ -70,7 +70,7 @@ const SelectInmates = ({ setIsSelectInmateClicked, isSelectInmateClicked, onAdd 
         className={`inline-flex items-center gap-2 px-4 py-2 rounded-sm transition ${
           isLoading
             ? "bg-gray-400 text-gray-200 cursor-not-allowed"
-            : "bg-[#002868] hover:bg-blue-900 text-white"
+            : "bg-[#002868] hover:bg-blue-900 text-white cursor-pointer"
         }`}
       >
         <PlusCircle className="w-4 h-4" />
@@ -128,7 +128,7 @@ const SelectInmates = ({ setIsSelectInmateClicked, isSelectInmateClicked, onAdd 
                           className="w-4 h-4 mt-1"
                         />
                         <label htmlFor={`inmate-${inmate._id}`} className="flex-1 cursor-pointer">
-                          <div className="font-medium text-sm text-gray-800">
+                          <div className="font-medium text-sm text-gray-800 capitalize">
                             {inmate.firstname} {inmate.middleInitial ? `${inmate.middleInitial}. ` : ""}
                             {inmate.lastname}
                           </div>

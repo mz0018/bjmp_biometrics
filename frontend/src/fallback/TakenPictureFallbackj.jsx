@@ -1,11 +1,14 @@
 import React from "react";
 import { X, Image as ImageIcon } from "lucide-react";
 
-const TakenPictureFallback = ({ capturedImages, setCapturedImages }) => {
+const TakenPictureFallback = ({
+  capturedImages = [], 
+  setCapturedImages = () => {}, 
+}) => {
   const hasNoPictures = capturedImages.length === 0;
 
   return (
-    <div className="flex-[1.2] rounded-md p-4 sm:p-6 w-full shadow-lg">
+    <div className="flex-[1.2] rounded-md p-4 sm:p-6 w-full border border-gray-300 bg-gray-50">
       <div
         className={`overflow-y-auto pr-2 ${
           hasNoPictures ? "flex items-center justify-center" : ""
@@ -15,7 +18,7 @@ const TakenPictureFallback = ({ capturedImages, setCapturedImages }) => {
         {hasNoPictures ? (
           <div className="flex flex-col items-center justify-center text-gray-400">
             <ImageIcon size={48} className="mb-3 opacity-70" />
-            <p className="text-xl text-center">
+            <p className="text-xs text-center">
               No pictures yet. <br /> Captured photos will appear here.
             </p>
           </div>
