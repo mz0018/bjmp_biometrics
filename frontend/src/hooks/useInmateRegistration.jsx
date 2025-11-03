@@ -87,9 +87,15 @@ const useInmateRegistration = () => {
       resetForm();
     } catch (error) {
       if (error.response?.data?.errors) {
-        setHasError(error.response.data.errors);
+        const errors = error.response.data.errors;
+        setHasError(errors);
+
+        if (errors.username) {
+          notyf.error(errors.username)
+        }
       } else {
         setHasError({ general: "Something went wrong, please try again." });
+        notyf.error("Something went wrong, please try again.")
       }
     } finally {
       setLoading(false);

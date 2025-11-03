@@ -245,6 +245,16 @@ export const registerInmate = async (req, res) => {
     if (Object.keys(errors).length)
       return res.status(400).json({ errors });
 
+    const existingInmate = await InmateModel.findOne({ 
+      firstname: body.firstname,
+      middleInitial: body.middleInitial,
+      lastname: body.lastname,
+    });
+
+    if (existingInmate) {
+      return res.status(400).json({ errors: { username: "Inmate already exists" } });
+    }
+
     const counter = await Counter.findOneAndUpdate(
       { name: "caseNumber" },
       { $inc: { seq: 1 } },
