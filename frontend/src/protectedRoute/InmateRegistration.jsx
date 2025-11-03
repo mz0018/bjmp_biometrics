@@ -21,6 +21,10 @@ import {
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 
+const TextHelper = ({ text }) => (
+  <p className="text-gray-500 text-xs mt-1">{text}</p>
+);
+
 const InmateRegistration = () => {
   const {
     handleInmateRegistration,
@@ -37,7 +41,7 @@ const InmateRegistration = () => {
   });
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
-  
+
   const getInputClass = (name) =>
     `border p-2 rounded w-full text-sm focus:outline-none focus:ring-2 text-[#002868] placeholder-[#002868] ${
       hasError[name] ? "border-red-500 focus:ring-red-300" : "border-gray-300"
@@ -69,7 +73,7 @@ const InmateRegistration = () => {
         encType="multipart/form-data"
         className="space-y-5"
       >
-
+        {/* Case & Court Info */}
         <div className="mb-2 rounded-md bg-white">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <div>
@@ -89,6 +93,7 @@ const InmateRegistration = () => {
                 />
               </div>
               {renderError("caseNumber")}
+              <TextHelper text="Automatically generated upon submission" />
             </div>
 
             <div>
@@ -147,7 +152,7 @@ const InmateRegistration = () => {
           </div>
         </div>
 
-        {/* Personal info box */}
+        {/* Personal Info */}
         <div className="mb-2 rounded-md bg-white">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <div>
@@ -223,6 +228,7 @@ const InmateRegistration = () => {
             </div>
           </div>
 
+          {/* Address, Nationality */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
             <div className="md:col-span-2">
               <label className="font-medium text-gray-700">Address</label>
@@ -267,6 +273,7 @@ const InmateRegistration = () => {
             </div>
           </div>
 
+          {/* Gender, Civil Status, Height, Weight */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mt-4">
             <div>
               <label className="font-medium text-gray-700">Gender</label>
@@ -344,6 +351,7 @@ const InmateRegistration = () => {
                 />
               </div>
               {renderError("height")}
+              <TextHelper text="Specify the height of the inmate in centimeters (cm)" />
             </div>
 
             <div>
@@ -362,11 +370,13 @@ const InmateRegistration = () => {
                 />
               </div>
               {renderError("weight")}
+              <TextHelper text="Specify the weight of the inmate in kilograms (kg)" />
             </div>
+
           </div>
         </div>
 
-        {/* Offense & sentence box */}
+        {/* Offense & Sentence */}
         <div className="mb-2 rounded-md bg-white">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
@@ -396,7 +406,7 @@ const InmateRegistration = () => {
             <div>
               <label className="font-medium text-gray-700">Sentence</label>
               <div className="relative mt-1">
-                <FileText
+                <Clipboard
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
                   size={18}
                 />
@@ -405,7 +415,7 @@ const InmateRegistration = () => {
                   name="sentence"
                   value={formData.sentence}
                   onChange={handleChange}
-                  placeholder="Sentence"
+                  placeholder="e.g. 2 years"
                 />
               </div>
               {renderError("sentence")}
@@ -434,92 +444,86 @@ const InmateRegistration = () => {
               </div>
               {renderError("status")}
             </div>
-          </div>
 
-          <div className="mt-4">
-            <div className="flex items-center justify-between">
-              <label className="font-medium text-gray-700">Remarks <span className="text-xs text-gray-500">(Optional)</span></label>
-              
+            <div>
+              <label className="font-medium text-gray-700">Remarks</label>
+              <div className="relative mt-1">
+                <FileText
+                  className="absolute left-3 top-2 text-gray-400"
+                  size={18}
+                />
+                <textarea
+                  className={`${getInputClass("remarks")} pl-10 resize-none`}
+                  name="remarks"
+                  value={formData.remarks}
+                  onChange={handleChange}
+                  placeholder="Any additional notes or remarks"
+                  rows={3}
+                />
+              </div>
+              {renderError("remarks")}
+              <TextHelper text="Optional field for extra information about the inmate" />
             </div>
 
-            <div className="relative mt-1">
-              <Clipboard
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                size={18}
-              />
-              <input
-                className={`${getInputClass("remarks")} pl-10`}
-                name="remarks"
-                value={formData.remarks}
-                onChange={handleChange}
-                placeholder="Remarks"
-              />
-            </div>
-
-            {renderError("remarks")}
           </div>
         </div>
 
-        {/* Mugshots — only your three inputs + preview */}
-        <div className="mb-2 rounded-md bg-white">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {["mugshot_front", "mugshot_left", "mugshot_right"].map((side) => (
-              <div key={side}>
-                <label className="text-xs text-gray-600 capitalize block mb-1">
-                  {side.replace("mugshot_", "")} view
-                </label>
-                <div className="relative mt-1 flex flex-col gap-2">
-                  <div className="relative">
-                    <ImageIcon
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                      size={18}
-                    />
-                    <input
-                      className={`${getInputClass(side)} pl-10`}
-                      type="file"
-                      name={side}
-                      accept="image/*"
-                      onChange={handleFileChange}
-                    />
-                  </div>
-
-                  {/* ✅ Thumbnail Preview */}
-                  {previewImages[side] && (
+        {/* Mugshots */}
+        <div className="mb-2 rounded-md bg-white p-3">
+          <label className="font-medium text-gray-700">Mugshots</label>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
+            {["mugshot_front", "mugshot_left", "mugshot_right"].map((key) => (
+              <div key={key} className="flex flex-col items-center">
+                <label
+                  htmlFor={key}
+                  className="w-24 h-24 border border-gray-300 rounded cursor-pointer flex items-center justify-center overflow-hidden relative bg-gray-50 hover:bg-gray-100"
+                >
+                  {previewImages[key] ? (
                     <img
-                      src={previewImages[side]}
-                      alt={`${side} preview`}
-                      className="w-32 h-32 object-cover rounded border cursor-pointer hover:opacity-80"
-                      onClick={() => {
-                        setCurrentImage(previewImages[side]);
+                      src={previewImages[key]}
+                      alt={key}
+                      className="w-full h-full object-cover"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setCurrentImage(previewImages[key]);
                         setLightboxOpen(true);
                       }}
                     />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-gray-400">
+                      <ImageIcon size={24} />
+                      <span className="text-xs mt-1">Upload</span>
+                    </div>
                   )}
-                </div>
-                {renderError(side)}
+                </label>
+
+                <input
+                  id={key}
+                  type="file"
+                  accept="image/*"
+                  name={key}
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
               </div>
             ))}
           </div>
         </div>
 
-        {/* General error */}
-        {hasError.general && (
-          <p className="text-red-500 text-center mt-4 mb-2 capitalize">{hasError.general}</p>
-        )}
-
         <button
-          disabled={loading}
           type="submit"
-          className="mt-2 bg-[#002868] text-white px-4 py-2 rounded-sm hover:bg-blue-900 flex items-center gap-2 cursor-pointer"
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          disabled={loading}
         >
           {loading ? "Registering..." : "Register Inmate"}
         </button>
       </form>
 
-      {lightboxOpen && (
+      {lightboxOpen && currentImage && (
         <Lightbox
-          mainSrc={currentImage}
-          onCloseRequest={() => setLightboxOpen(false)}
+          open={lightboxOpen}
+          close={() => setLightboxOpen(false)}
+          slides={[{ src: currentImage }]}
         />
       )}
     </section>

@@ -94,7 +94,7 @@ const RegisterFace = () => {
   return (
     <section className="sm:p-6 min-h-[100dvh] flex flex-col">
       {/* ---------------- VISITOR INFO ---------------- */}
-      <div className="md:p-8 max-w-5xl w-full space-y-3">
+      <div className="max-w-5xl mx-auto w-full p-6 md:p-8 space-y-3">
         <h2 className="text-2xl font-semibold text-[#002868] border-b border-gray-200 pb-2">
           1. Visitor Information
         </h2>
@@ -236,7 +236,7 @@ const RegisterFace = () => {
       </div>
 
       {/* ---------------- FACE RECOGNITION STEP ---------------- */}
-      <div className="max-w-5xl mx-auto w-full p-6 md:p-8 space-y-6">
+      <div className="max-w-5xl mx-auto w-full p-6 md:p-8 space-y-3">
         <h2 className="text-2xl font-semibold text-[#002868] border-b border-gray-200 pb-2">
           2. Face Recognition Step
         </h2>
