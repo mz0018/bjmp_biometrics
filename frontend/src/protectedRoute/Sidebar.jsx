@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { UserPlus, TableCellsSplit, UserLock, Users } from "lucide-react";
 import LogoutButton from "../protectedRoute/LogoutButton";
+import GenerateReports from "../protectedRoute/GenerateReports";
 import { useEffect, useState } from "react";
 
 const Sidebar = () => {
@@ -32,7 +33,7 @@ const Sidebar = () => {
     },
     {
       to: "manage-user",
-      label: "User Management",
+      label: "Information Management",
       icon: Users,
     }
   ];
@@ -78,6 +79,7 @@ const Sidebar = () => {
       </div>
 
       <div className="mt-8 border-t border-gray-700 pt-4">
+        <GenerateReports />
         <LogoutButton firstName={admin?.first_name ?? ""} />
       </div>
     </aside>

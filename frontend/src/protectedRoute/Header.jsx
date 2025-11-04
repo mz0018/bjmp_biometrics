@@ -64,9 +64,9 @@ const Header = () => {
         </span>
         </div>
         </div>
-        <div className="text-sm text-gray-600">
+        {/* <div className="text-sm text-gray-600">
           <GenerateReports />
-        </div>
+        </div> */}
         </>
       )}
     </header>

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import useUserManagement from "../hooks/useUserManagement";
 import ButtonUpdate from "../helpers/ButtonUpdate";
 import ButtonViewUser from "../helpers/ViewUserInfo";
@@ -167,6 +168,35 @@ const UserManagement = () => {
           {filteredData.length === 1 ? "entry" : "entries"}
         </div>
       </div>
+        {activeTab === "inmates" ? (
+          <div className="relative group flex justify-end mt-2">
+            <Link
+              to="/protectedRoute/register-inmate"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-sm text-[#002868] hover:bg-blue-100 hover:text-blue-700 transition cursor-pointer text-sm font-medium tracking-wider"
+              aria-label="Go to Inmate Registration"
+            >
+              <User size={16} />
+              Go to Inmate Registration
+            </Link>
+            <span className="absolute bottom-full mb-1 right-0 w-max px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              Add a new inmate
+            </span>
+          </div>
+        ) : (
+          <div className="relative group flex justify-end mt-2">
+            <Link
+              to="/protectedRoute/register-face"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-sm text-[#002868] hover:bg-blue-100 hover:text-blue-700 transition cursor-pointer text-sm font-medium tracking-wider"
+              aria-label="Go to Visitor Registration"
+            >
+              <User size={16} />
+              Go to Visitor Registration
+            </Link>
+            <span className="absolute bottom-full mb-1 right-0 w-max px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              Add a new visitor
+            </span>
+          </div>
+        )}
     </section>
   );
 };
