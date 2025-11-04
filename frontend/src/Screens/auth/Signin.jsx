@@ -51,16 +51,16 @@ const Signin = () => {
   const { formData, handleChange, handleSubmit, isLoading, errors } = useSigninAdmin();
   const [showPassword, setShowPassword] = useState(false);
 
-  const notyf = useRef(new Notyf({ duration: 3000, position: { x: "right", y: "top" } }));
-  const prevErrors = useRef({});
+  const notyf = useRef(new Notyf({ duration: 5000, position: { x: "right", y: "top" } }));
+  const shownErrors = useRef(new Set());
 
   useEffect(() => {
-    Object.entries(errors).forEach(([key, err]) => {
-      if (err && err !== prevErrors.current[key]) {
+    Object.values(errors).forEach((err) => {
+      if (err && !shownErrors.current.has(err)) {
         notyf.current.error(err);
+        shownErrors.current.add(err);
       }
     });
-    prevErrors.current = errors;
   }, [errors]);
 
   return (

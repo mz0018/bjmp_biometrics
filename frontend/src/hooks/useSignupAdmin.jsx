@@ -5,7 +5,7 @@ import "notyf/notyf.min.css";
 
 const notyf = new Notyf({ duration: 5000, position: { x: "right", y: "top" } });
 
-const useSignupAdmin = () => {
+const useSignupAdmin = (setIsSignupOpen) => {
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -47,7 +47,7 @@ const useSignupAdmin = () => {
         formData
       );
       notyf.success(response.data.message);
-
+      setIsSignupOpen(prev => !prev);
       resetForm();
     } catch (err) {
       if (err.response?.data?.errors) {
