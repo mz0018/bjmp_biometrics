@@ -373,3 +373,9 @@ export const updateVisitorUsers = async (req, res) => {
     res.status(500).json({ error: "Failed to update visitor" });
   }
 };
+
+export const changeAdminPassword = async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  console.log(currentPassword, newPassword);
+}

@@ -9,6 +9,7 @@ import { uploadMugshots } from "../helper/uploadMugshots.js";
 import { getInmates } from "../controllers/adminController.js";
 import { updateInmateUsers } from "../controllers/adminController.js";
 import { updateVisitorUsers } from "../controllers/adminController.js";
+import { changeAdminPassword } from "../controllers/adminController.js";
 
 const router = express.Router();
 
@@ -21,5 +22,6 @@ router.post("/inmates", uploadMugshots, registerInmate);
 router.get("/listofinmates", getInmates);
 router.patch("/update/inmate/:id", updateInmateUsers);
 router.patch("/update/visitor/:id", updateVisitorUsers);
+router.post("/confirm", changeAdminPassword);
 
 export default router;
