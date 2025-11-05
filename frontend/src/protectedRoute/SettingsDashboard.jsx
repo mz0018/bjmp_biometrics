@@ -19,7 +19,7 @@ const SettingsDashboard = () => {
       title: "Password and security",
       subtitle:
         "Manage your passwords, login preferences and recovery methods.",
-      content: <PasswordSecurity />,
+      content: <PasswordSecurity admin={admin} />,
       icon: <Shield size={28} className="text-[#002868]" />,
     },
     {
@@ -43,7 +43,7 @@ const SettingsDashboard = () => {
                 <h2 className="text-lg font-semibold text-[#002868] leading-none">
                   {tab.title}
                 </h2>
-                <span className="text-xs text-gray-600 pb-2 border-b border-gray-400">
+                <span className="text-xs text-gray-600">
                   {tab.subtitle}
                 </span>
               </div>
