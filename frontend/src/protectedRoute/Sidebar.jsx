@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { UserPlus, TableCellsSplit, UserLock, Users } from "lucide-react";
+import { UserPlus, TableCellsSplit, UserLock, Users, Settings } from "lucide-react";
 import LogoutButton from "../protectedRoute/LogoutButton";
 import GenerateReports from "../protectedRoute/GenerateReports";
 import { useEffect, useState } from "react";
@@ -35,6 +35,11 @@ const Sidebar = () => {
       to: "manage-user",
       label: "Information Management",
       icon: Users,
+    },
+    {
+      to: "account-settings",
+      label: "Settings & Privacy",
+      icon: Settings,
     }
   ];
 

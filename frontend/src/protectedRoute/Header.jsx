@@ -29,9 +29,12 @@ const Header = () => {
         "Please fill out the necessary information to register a new inmate in the system.",
     },
     "/protectedRoute/manage-user": {
-      title: "User Management",
+      title: "Information Management",
       subtitle:
         "Access and manage records of registered inmates and visitors.",
+    },
+    "/protectedRoute/account-settings": {
+      title: "Account settings",
     },
   };
 

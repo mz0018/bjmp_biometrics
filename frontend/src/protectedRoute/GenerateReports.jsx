@@ -21,7 +21,7 @@ const GenerateReports = () => {
         aria-label="Open generate reports modal"
       >
         <FileText className="w-4 h-4" />
-        <span>Generate Reports</span>
+        <span>Generate Log Reports</span>
       </button>
 
       {isModalOpen && (

@@ -184,19 +184,11 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
                       <p className="text-sm text-gray-500 italic mt-2">No mugshots available.</p>
                     )}
                   </div>
-
-                  <div>
-                    <h3 className="text-left font-semibold text-gray-700 text-sm sm:text-base">Visitor Related</h3>
-                    <hr className="border-gray-300 my-2" />
-                    <ul className="list-disc list-inside text-sm space-y-1">
-                      <li>List of Visitor(s) related to this specific inmate</li>
-                    </ul>
-                  </div>
-
-                  <div>
-                    <h3 className="text-left font-semibold text-gray-700 text-sm sm:text-base">Generate Document</h3>
+           
+                  <div className="flex justify-end">
                     <GenerateInmateInfo inmate={inmate} />
                   </div>
+
                 </div>
               )}
 
