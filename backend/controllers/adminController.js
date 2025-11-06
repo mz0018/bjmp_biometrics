@@ -375,7 +375,34 @@ export const updateVisitorUsers = async (req, res) => {
 };
 
 export const changeAdminPassword = async (req, res) => {
-  const { currentPassword, newPassword } = req.body;
+  try {
+    const { id } = req.params;
+    const { currentPassword, newPassword } = req.body;
 
-  console.log(currentPassword, newPassword);
-}
+    if (!currentPassword)
+      return res.status(400).json({ field: "oldPassword", error: "Current password is required." });
+
+    if (!newPassword)
+      return res.status(400).json({ field: "newPassword", error: "New password is required." });
+
+    if (newPassword.length < 8)
+      return res.status(400).json({ field: "newPassword", error: "Password must be at least 8 characters." });
+
+    const admin = await Admin.findById(id);
+    if (!admin)
+      return res.status(404).json({ field: "oldPassword", error: "Admin not found." });
+
+    const passwordMatches = await argon2.verify(admin.password, currentPassword);
+    if (!passwordMatches)
+      return res.status(400).json({ field: "oldPassword", error: "Current password is incorrect." });
+
+    const hashedPassword = await argon2.hash(newPassword);
+    admin.password = hashedPassword;
+    await admin.save();
+
+    return res.status(200).json({ message: "Password changed successfully!" });
+  } catch (err) {
+    console.error("Backend Error:", err);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};

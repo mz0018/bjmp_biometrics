@@ -1,18 +1,17 @@
 import { Eye, EyeOff, Lock, Pen } from "lucide-react";
 import usePasswordSecurity from "../hooks/usePasswordSecurity";
 
-const PasswordSecurity = () => {
+const PasswordSecurity = ({ admin }) => {
   const {
     data,
     visible,
     loading,
     fieldErrors,
-    success,
     inputs,
     handleChange,
     toggleVisibility,
     handleSubmit,
-  } = usePasswordSecurity();
+  } = usePasswordSecurity({ admin });
 
   return (
     <section
@@ -91,9 +90,6 @@ const PasswordSecurity = () => {
             <p className="col-span-2 text-sm text-red-600 mt-2">
               {fieldErrors.general}
             </p>
-          )}
-          {success && (
-            <p className="col-span-2 text-sm text-green-600 mt-2">{success}</p>
           )}
 
           <div className="col-span-2 flex items-center justify-between mt-4">

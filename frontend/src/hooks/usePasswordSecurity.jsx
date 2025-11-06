@@ -1,7 +1,12 @@
 import { useState } from "react";
 import axios from "axios";
 
-const usePasswordSecurity = () => {
+import { Notyf } from "notyf";
+import "notyf/notyf.min.css";
+
+const notyf = new Notyf({ duration: 5000, position: { x: "right", y: "top" } });
+
+const usePasswordSecurity = ({ admin }) => {
   const [data, setData] = useState({
     oldPassword: "",
     newPassword: "",
@@ -16,7 +21,6 @@ const usePasswordSecurity = () => {
 
   const [loading, setLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
-  const [success, setSuccess] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -30,7 +34,7 @@ const usePasswordSecurity = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSuccess("");
+
     setFieldErrors({});
 
     const newErrors = {};
@@ -55,30 +59,35 @@ const usePasswordSecurity = () => {
     }
 
     try {
-    setLoading(true);
+      setLoading(true);
 
-    const res = await axios.post(`${import.meta.env.VITE_API_URL}/admin/confirm`, {
-        currentPassword: data.oldPassword,
-        newPassword: data.newPassword,
-    });
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/admin/confirm/${admin.id}`,
+        {
+          currentPassword: data.oldPassword,
+          newPassword: data.newPassword,
+        }
+      );
 
-    setSuccess("Password changed successfully!");
-    setData({ oldPassword: "", newPassword: "", retypeNewPassword: "" });
+      notyf.success("Password changed successfully!");
+      setData({ oldPassword: "", newPassword: "", retypeNewPassword: "" });
     } catch (err) {
-    if (err.response?.data) {
+      if (err.response?.status === 429) {
+        setFieldErrors({ general: err.response.data.error || "Too many attempts. Try again later." });
+      } else if (err.response?.data) {
         const { field, error } = err.response.data;
         if (field && error) {
-        setFieldErrors({ [field]: error });
+          setFieldErrors({ [field]: error });
         } else {
-        setFieldErrors({
+          setFieldErrors({
             oldPassword: err.response.data.error || "Failed to change password",
-        });
+          });
         }
-    } else {
+      } else {
         setFieldErrors({ general: "Network error, please try again." });
-    }
+      }
     } finally {
-    setLoading(false);
+      setLoading(false);
     }
   };
 
@@ -114,7 +123,6 @@ const usePasswordSecurity = () => {
     visible,
     loading,
     fieldErrors,
-    success,
     inputs,
     handleChange,
     toggleVisibility,

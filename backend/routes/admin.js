@@ -11,6 +11,8 @@ import { updateInmateUsers } from "../controllers/adminController.js";
 import { updateVisitorUsers } from "../controllers/adminController.js";
 import { changeAdminPassword } from "../controllers/adminController.js";
 
+import { ipLimiter, userLimiter } from "../helper/rateLimiter.js";
+
 const router = express.Router();
 
 router.post("/signup", signupAdmin);
@@ -22,6 +24,6 @@ router.post("/inmates", uploadMugshots, registerInmate);
 router.get("/listofinmates", getInmates);
 router.patch("/update/inmate/:id", updateInmateUsers);
 router.patch("/update/visitor/:id", updateVisitorUsers);
-router.post("/confirm", changeAdminPassword);
+router.post("/confirm/:id", [ipLimiter, userLimiter, changeAdminPassword]);
 
 export default router;
