@@ -10,11 +10,12 @@ import { getInmates } from "../controllers/adminController.js";
 import { updateInmateUsers } from "../controllers/adminController.js";
 import { updateVisitorUsers } from "../controllers/adminController.js";
 import { changeAdminPassword } from "../controllers/adminController.js";
-
+import { googleSignInAdmin } from "../controllers/adminController.js";
 import { ipLimiter, userLimiter } from "../helper/rateLimiter.js";
 
 const router = express.Router();
 
+router.post("/google-signin", googleSignInAdmin);
 router.post("/signup", signupAdmin);
 router.post("/signin", signinAdmin);
 router.get("/visitorsLogs", getVisitorsLog);

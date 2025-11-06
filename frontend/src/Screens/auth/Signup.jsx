@@ -4,13 +4,12 @@ import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
 import useSignupAdmin from "../../hooks/useSignupAdmin";
 
-// Function to calculate password strength
 const calculateStrength = (password) => {
   let score = 0;
   if (password.length >= 8) score++;
   if (/[A-Z]/.test(password)) score++;
   if (/[0-9]/.test(password)) score++;
-  if (/[\W_]/.test(password)) score++; // special characters
+  if (/[\W_]/.test(password)) score++;
   return score;
 };
 

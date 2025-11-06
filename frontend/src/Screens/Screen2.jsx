@@ -1,6 +1,7 @@
 import { lazy, useState, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { Home } from "lucide-react";
+import GoogleButton from "../helpers/GoogleButton";
 
 const Signup = lazy(() => import("./auth/Signup"));
 const Signin = lazy(() => import("./auth/Signin"));
@@ -37,6 +38,8 @@ const Screen2 = () => {
         <Suspense fallback={isSignupOpen ? <SignupFallback /> : <SigninFallback />}>
           {isSignupOpen ? <Signup setIsSignupOpen={setIsSignupOpen} /> : <Signin />}
         </Suspense>
+
+        <GoogleButton />
 
         <p className="mt-4 text-sm text-[#002868] tracking-widest">
           {isSignupOpen ? (

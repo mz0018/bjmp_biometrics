@@ -1,10 +1,54 @@
 import argon2 from "argon2";
+import adminSDK from "../helper/firebaseAdmin.js";
 import Admin from "../models/AdminModel.js";
 import RecognitionLog from "../models/RecognitionLogSchema.js";
 import Counter from "../models/Counter.js";
 import sharp from "sharp";
 import { getInmateModel } from "../models/InmateModel.js";
 import { processMugshot } from "../helper/uploadMugshots.js";
+
+export const googleSignInAdmin = async (req, res) => {
+  const { idToken } = req.body;
+
+  if (!idToken) {
+    return res.status(400).json({ errors: { idToken: "ID token is required" } });
+  }
+
+  try {
+    const decodedToken = await adminSDK.auth().verifyIdToken(idToken);
+
+    const { uid, email, name, picture } = decodedToken;
+
+    let adminUser = await Admin.findOne({ email });
+
+    if (!adminUser) {
+      const nameParts = name?.split(" ") || ["Admin"];
+      adminUser = new Admin({
+        first_name: nameParts[0],
+        last_name: nameParts.slice(1).join(" ") || "",
+        username: email.split("@")[0],
+        email,
+        googleId: uid,
+      });
+      await adminUser.save();
+    }
+
+    return res.status(200).json({
+      message: "Google sign-in successful",
+      data: {
+        id: adminUser._id,
+        first_name: adminUser.first_name,
+        last_name: adminUser.last_name,
+        username: adminUser.username,
+        email: adminUser.email,
+        photoURL: picture || null,
+      },
+    });
+  } catch (err) {
+    console.error("Google Sign-in Error:", err);
+    return res.status(500).json({ errors: { general: "Invalid or expired token" } });
+  }
+};
 
 export const signupAdmin = async (req, res) => {
   const { first_name, last_name, username, password, retype_password } = req.body;
