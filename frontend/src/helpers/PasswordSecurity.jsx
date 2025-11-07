@@ -95,6 +95,7 @@ const PasswordSecurity = ({ admin }) => {
           <div className="col-span-2 flex items-center justify-between mt-4">
             <a
               href="/forgot-password"
+              rel="noopener noreferrer"
               className="text-xs text-[#002868] hover:font-semibold flex items-center gap-1 tracking-widest transition"
             >
               Forgot your password?

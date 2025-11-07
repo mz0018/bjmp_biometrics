@@ -12,6 +12,7 @@ const RegisterFace = lazy(() => import("./protectedRoute/RegisterFace.jsx"));
 const InmateRegistration = lazy(() => import("./protectedRoute/InmateRegistration.jsx"));
 const UserManagement = lazy(() => import("./protectedRoute/UserManagement.jsx"));
 const Settings = lazy(() => import("./protectedRoute/SettingsDashboard.jsx"));
+const ForgotPassword = lazy(() => import("./protectedRoute/ForgotPassword.jsx"));
 
 const router = createBrowserRouter([
   { path: "/", element: <App /> },
@@ -25,10 +26,10 @@ const router = createBrowserRouter([
       { path: "register-face", element: <RegisterFace /> },
       { path: "register-inmate", element: <InmateRegistration /> }, 
       { path: "manage-user", element: <UserManagement />},
-      { path: "account-settings", element: <Settings />}
-
+      { path: "account-settings", element: <Settings />},
     ],
   },
+  { path: "/forgot-password", element: <ForgotPassword /> }
 ]);
 
 createRoot(document.getElementById("root")).render(

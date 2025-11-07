@@ -12,6 +12,7 @@ import { updateVisitorUsers } from "../controllers/adminController.js";
 import { changeAdminPassword } from "../controllers/adminController.js";
 import { googleSignInAdmin } from "../controllers/adminController.js";
 import { ipLimiter, userLimiter } from "../helper/rateLimiter.js";
+import { forgotPassword } from "../controllers/adminController.js";
 
 const router = express.Router();
 
@@ -26,5 +27,6 @@ router.get("/listofinmates", getInmates);
 router.patch("/update/inmate/:id", updateInmateUsers);
 router.patch("/update/visitor/:id", updateVisitorUsers);
 router.post("/confirm/:id", [ipLimiter, userLimiter, changeAdminPassword]);
+router.post("/forgot-password", forgotPassword);
 
 export default router;

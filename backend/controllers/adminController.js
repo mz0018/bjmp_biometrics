@@ -1,4 +1,5 @@
 import argon2 from "argon2";
+import crypto from "crypto";
 import adminSDK from "../helper/firebaseAdmin.js";
 import Admin from "../models/AdminModel.js";
 import RecognitionLog from "../models/RecognitionLogSchema.js";
@@ -6,6 +7,8 @@ import Counter from "../models/Counter.js";
 import sharp from "sharp";
 import { getInmateModel } from "../models/InmateModel.js";
 import { processMugshot } from "../helper/uploadMugshots.js";
+import validator from "validator";
+import { sendEmail } from "../helper/sendEmail.js";
 
 export const googleSignInAdmin = async (req, res) => {
   const { idToken } = req.body;
@@ -445,6 +448,50 @@ export const changeAdminPassword = async (req, res) => {
     await admin.save();
 
     return res.status(200).json({ message: "Password changed successfully!" });
+  } catch (err) {
+    console.error("Backend Error:", err);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email)
+      return res.status(400).json({ error: "Email is required." });
+
+    if (!validator.isEmail(email))
+      return res.status(400).json({ error: "Please enter a valid email address." });
+
+    const user = await Admin.findOne({ email });
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const tokenExpiry = Date.now() + 3600000;
+
+    if (user) {
+      const hashedToken = await argon2.hash(resetToken);
+
+      user.passwordResetToken = hashedToken;
+      user.passwordResetExpires = tokenExpiry;
+      await user.save();
+
+      const resetURL = `${process.env.ORIGIN_URL}/reset-password?token=${resetToken}&email=${email}`;
+      await sendEmail({
+        to: email,
+        subject: "Password Reset",
+        text: `Click here to reset your password: ${resetURL}`,
+      });
+
+      console.log(`Password reset requested for: ${email}`);
+    } else {
+      console.warn(`Password reset requested for non-existent email: ${email}`);
+    }
+
+    return res.json({
+      message: "If an account exists for that email, a reset link has been sent.",
+    });
+
   } catch (err) {
     console.error("Backend Error:", err);
     return res.status(500).json({ error: "Internal server error." });
