@@ -13,6 +13,7 @@ const InmateRegistration = lazy(() => import("./protectedRoute/InmateRegistratio
 const UserManagement = lazy(() => import("./protectedRoute/UserManagement.jsx"));
 const Settings = lazy(() => import("./protectedRoute/SettingsDashboard.jsx"));
 const ForgotPassword = lazy(() => import("./protectedRoute/ForgotPassword.jsx"));
+const ResetPasswordForm = lazy(() => import("./protectedRoute/ResetPasswordForm.jsx"));
 
 const router = createBrowserRouter([
   { path: "/", element: <App /> },
@@ -29,7 +30,8 @@ const router = createBrowserRouter([
       { path: "account-settings", element: <Settings />},
     ],
   },
-  { path: "/forgot-password", element: <ForgotPassword /> }
+  { path: "/forgot-password", element: <ForgotPassword /> },
+  { path: "/reset-password", element: <ResetPasswordForm /> }
 ]);
 
 createRoot(document.getElementById("root")).render(
