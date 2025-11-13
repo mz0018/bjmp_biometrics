@@ -13,6 +13,8 @@ const PasswordSecurity = ({ admin }) => {
     handleSubmit,
   } = usePasswordSecurity({ admin });
 
+  console.table(admin)
+
   return (
     <section
       className="flex flex-col gap-6 mt-4"

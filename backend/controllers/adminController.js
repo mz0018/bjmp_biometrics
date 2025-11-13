@@ -34,6 +34,10 @@ export const googleSignInAdmin = async (req, res) => {
         googleId: uid,
       });
       await adminUser.save();
+
+      console.log("Created new admin with Google ID:", adminUser.googleId);
+    } else {
+      console.log("Existing admin found with Google ID:", adminUser.googleId);
     }
 
     return res.status(200).json({
@@ -45,6 +49,7 @@ export const googleSignInAdmin = async (req, res) => {
         username: adminUser.username,
         email: adminUser.email,
         photoURL: picture || null,
+        googleId: adminUser.googleId,
       },
     });
   } catch (err) {

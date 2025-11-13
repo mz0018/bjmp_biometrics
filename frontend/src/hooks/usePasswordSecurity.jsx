@@ -69,6 +69,8 @@ const usePasswordSecurity = ({ admin }) => {
         }
       );
 
+      console.log("Response Data: ", res.data);
+
       notyf.success("Password changed successfully!");
       setData({ oldPassword: "", newPassword: "", retypeNewPassword: "" });
     } catch (err) {
