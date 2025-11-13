@@ -13,14 +13,20 @@ const PasswordSecurity = ({ admin }) => {
     handleSubmit,
   } = usePasswordSecurity({ admin });
 
-  console.table(admin)
+  const isGoogleAdmin = !!admin.googleId;
+
+  console.table(admin.googleId);
 
   return (
     <section
       className="flex flex-col gap-6 mt-4"
       aria-labelledby="password-section-title"
     >
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 w-full max-w-3xl">
+      <div
+        className={`bg-white border border-gray-200 rounded-lg shadow-sm p-6 w-full max-w-3xl ${
+          isGoogleAdmin ? "opacity-50 pointer-events-none" : ""
+        }`}
+      >
         <form
           onSubmit={handleSubmit}
           className="grid grid-cols-2 gap-4"
@@ -33,6 +39,13 @@ const PasswordSecurity = ({ admin }) => {
             <Lock size={18} className="text-[#002868]" />
             Change Password
           </h2>
+
+          {isGoogleAdmin && (
+            <div className="col-span-2 text-sm text-gray-700 italic mb-2 bg-yellow-50 border-l-4 border-yellow-400 p-2 rounded">
+              This account was created using Google sign-in. Password changes are only available for accounts
+              created manually with email and password.
+            </div>
+          )}
 
           {inputs.map((input) => (
             <div key={input.id} className="col-span-2 md:col-span-1">
@@ -50,6 +63,7 @@ const PasswordSecurity = ({ admin }) => {
                   name={input.name}
                   value={data[input.name]}
                   onChange={handleChange}
+                  disabled={isGoogleAdmin}
                   className={`border p-2 rounded-md w-full text-sm placeholder-[#002868] focus:outline-none focus:ring-2 pr-10
                     ${
                       fieldErrors[input.name]
@@ -61,6 +75,7 @@ const PasswordSecurity = ({ admin }) => {
                 <button
                   type="button"
                   onClick={() => toggleVisibility(input.key)}
+                  disabled={isGoogleAdmin}
                   className={`absolute right-2 top-1/2 -translate-y-1/2 ${
                     fieldErrors[input.name]
                       ? "text-red-500 hover:text-red-700"
@@ -68,11 +83,7 @@ const PasswordSecurity = ({ admin }) => {
                   }`}
                   aria-label={`Toggle visibility for ${input.label}`}
                 >
-                  {visible[input.key] ? (
-                    <EyeOff size={18} />
-                  ) : (
-                    <Eye size={18} />
-                  )}
+                  {visible[input.key] ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
 
@@ -105,9 +116,9 @@ const PasswordSecurity = ({ admin }) => {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || isGoogleAdmin}
               className={`bg-[#002868] text-white text-sm font-medium px-5 py-2 rounded-md hover:bg-[#001b4d] transition-colors flex items-center gap-2 ${
-                loading ? "opacity-70 cursor-not-allowed" : ""
+                loading || isGoogleAdmin ? "opacity-70 cursor-not-allowed" : ""
               }`}
             >
               <Pen size={14} className="text-white" />
