@@ -15,8 +15,6 @@ const PasswordSecurity = ({ admin }) => {
 
   const isGoogleAdmin = !!admin.googleId;
 
-  console.table(admin.googleId);
-
   return (
     <section
       className="flex flex-col gap-6 mt-4"
@@ -122,8 +120,9 @@ const PasswordSecurity = ({ admin }) => {
               }`}
             >
               <Pen size={14} className="text-white" />
-              {loading ? "Updating..." : "Change Password"}
+              {loading ? "Updating..." : isGoogleAdmin ? "Managed by Google" : "Change Password"}
             </button>
+
           </div>
         </form>
       </div>

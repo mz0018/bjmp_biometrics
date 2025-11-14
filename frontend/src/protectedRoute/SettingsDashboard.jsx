@@ -26,7 +26,7 @@ const SettingsDashboard = () => {
       title: "Personal details",
       subtitle:
         "Our System uses this information to verify your identity and to keep our community safe.",
-      content: <PersonalDetails />,
+      content: <PersonalDetails admin={admin} />,
       icon: <BookUser size={28} className="text-[#002868]" />,
     },
   ];
