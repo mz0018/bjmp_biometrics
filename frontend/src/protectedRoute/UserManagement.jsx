@@ -3,7 +3,7 @@ import useUserManagement from "../hooks/useUserManagement";
 import ButtonUpdate from "../helpers/ButtonUpdate";
 import ButtonViewUser from "../helpers/ViewUserInfo";
 import NoRecordsFoundFallback from "../fallback/NoRecordsFoundFallback";
-import { User, FileText, Phone, Settings, Eye, EyeOff, Search } from "lucide-react";
+import { User, FileText, Phone, Settings, Eye, EyeOff, Search, Navigation } from "lucide-react";
 
 const UserManagement = () => {
   const { activeTab, setActiveTab, searchQuery, setSearchQuery, filteredData } =
@@ -24,37 +24,73 @@ const UserManagement = () => {
           <Search className="absolute left-3 top-2.5 text-gray-400 w-4 h-4 pointer-events-none" />
         </div>
 
-        <div className="flex gap-2">
-          <button
-            className={`px-4 py-2 rounded-sm text-sm font-medium cursor-pointer flex items-center gap-2 ${
-              activeTab === "inmates"
-                ? "bg-bjmp-blue text-gray-700 shadow-lg"
-                : "bg-gray-200 text-gray-500"
-            }`}
-            onClick={() => setActiveTab("inmates")}
-          >
-            {activeTab === "inmates" ? (
-              <Eye size={16} />
-            ) : (
-              <EyeOff size={16} />
+        <div className="flex justify-between gap-2 items-center">
+          <div className="flex gap-2">
+            <button
+              className={`px-4 py-2 rounded-sm text-sm font-medium cursor-pointer flex items-center gap-2 ${
+                activeTab === "inmates"
+                  ? "bg-bjmp-blue text-gray-700 shadow-lg"
+                  : "bg-gray-200 text-gray-500"
+              }`}
+              onClick={() => setActiveTab("inmates")}
+            >
+              {activeTab === "inmates" ? (
+                <Eye size={16} />
+              ) : (
+                <EyeOff size={16} />
+              )}
+              Inmates
+            </button>
+            <button
+              className={`px-4 py-2 rounded-sm text-sm font-medium cursor-pointer flex items-center gap-2 ${
+                activeTab === "visitors"
+                  ? "bg-bjmp-blue text-gray-700 shadow-lg"
+                  : "bg-gray-200 text-gray-500"
+              }`}
+              onClick={() => setActiveTab("visitors")}
+            >
+              {activeTab === "visitors" ? (
+                <Eye size={16} />
+              ) : (
+                <EyeOff size={16} />
+              )}
+              Visitors
+            </button>
+          </div>
+
+          <div className="flex gap-2">
+            {activeTab === "inmates" && (
+              <div className="relative group">
+                <Link
+                  to="/protectedRoute/register-inmate"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-sm text-[#002868] hover:bg-blue-100 hover:text-blue-700 transition cursor-pointer text-xs tracking-wider"
+                  aria-label="Go to Inmate Registration"
+                >
+                  <Navigation size={16} />
+                  Go to Inmate Registration
+                </Link>
+                <span className="absolute bottom-full mb-1 right-0 w-max px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                  Add a new inmate
+                </span>
+              </div>
             )}
-            Inmates
-          </button>
-          <button
-            className={`px-4 py-2 rounded-sm text-sm font-medium cursor-pointer flex items-center gap-2 ${
-              activeTab === "visitors"
-                ? "bg-bjmp-blue text-gray-700 shadow-lg"
-                : "bg-gray-200 text-gray-500"
-            }`}
-            onClick={() => setActiveTab("visitors")}
-          >
-            {activeTab === "visitors" ? (
-              <Eye size={16} />
-            ) : (
-              <EyeOff size={16} />
+
+            {activeTab === "visitors" && (
+              <div className="relative group">
+                <Link
+                  to="/protectedRoute/register-face"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-sm text-[#002868] hover:bg-blue-100 hover:text-blue-700 transition cursor-pointer text-xs tracking-wider"
+                  aria-label="Go to Visitor Registration"
+                >
+                  <Navigation size={16} />
+                  Go to Visitor Registration
+                </Link>
+                <span className="absolute bottom-full mb-1 right-0 w-max px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                  Add a new visitor
+                </span>
+              </div>
             )}
-            Visitors
-          </button>
+          </div>
         </div>
       </header>
 
@@ -168,35 +204,6 @@ const UserManagement = () => {
           {filteredData.length === 1 ? "entry" : "entries"}
         </div>
       </div>
-        {activeTab === "inmates" ? (
-          <div className="relative group flex justify-end mt-2">
-            <Link
-              to="/protectedRoute/register-inmate"
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-sm text-[#002868] hover:bg-blue-100 hover:text-blue-700 transition cursor-pointer text-sm font-medium tracking-wider"
-              aria-label="Go to Inmate Registration"
-            >
-              <User size={16} />
-              Go to Inmate Registration
-            </Link>
-            <span className="absolute bottom-full mb-1 right-0 w-max px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-              Add a new inmate
-            </span>
-          </div>
-        ) : (
-          <div className="relative group flex justify-end mt-2">
-            <Link
-              to="/protectedRoute/register-face"
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-sm text-[#002868] hover:bg-blue-100 hover:text-blue-700 transition cursor-pointer text-sm font-medium tracking-wider"
-              aria-label="Go to Visitor Registration"
-            >
-              <User size={16} />
-              Go to Visitor Registration
-            </Link>
-            <span className="absolute bottom-full mb-1 right-0 w-max px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-              Add a new visitor
-            </span>
-          </div>
-        )}
     </section>
   );
 };

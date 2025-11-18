@@ -1,5 +1,7 @@
 import { Eye, EyeOff, Lock, Pen } from "lucide-react";
 import usePasswordSecurity from "../hooks/usePasswordSecurity";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const PasswordSecurity = ({ admin }) => {
   const {
@@ -11,7 +13,22 @@ const PasswordSecurity = ({ admin }) => {
     handleChange,
     toggleVisibility,
     handleSubmit,
+    forceLogout,
   } = usePasswordSecurity({ admin });
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (forceLogout) {
+      const timer = setTimeout(() => {
+        localStorage.removeItem("adminToken");
+        localStorage.removeItem("admin");
+        navigate("/admin", { replace: true });
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [forceLogout, navigate]);
 
   const isGoogleAdmin = !!admin.googleId;
 
@@ -40,8 +57,9 @@ const PasswordSecurity = ({ admin }) => {
 
           {isGoogleAdmin && (
             <div className="col-span-2 text-sm text-gray-700 italic mb-2 bg-yellow-50 border-l-4 border-yellow-400 p-2 rounded">
-              This account was created using Google sign-in. Password changes are only available for accounts
-              created manually with email and password.
+              This account was created using Google sign-in. Password changes
+              are only available for accounts created manually with email and
+              password.
             </div>
           )}
 
@@ -62,12 +80,11 @@ const PasswordSecurity = ({ admin }) => {
                   value={data[input.name]}
                   onChange={handleChange}
                   disabled={isGoogleAdmin}
-                  className={`border p-2 rounded-md w-full text-sm placeholder-[#002868] focus:outline-none focus:ring-2 pr-10
-                    ${
-                      fieldErrors[input.name]
-                        ? "border-red-500 focus:ring-red-400"
-                        : "border-gray-300 text-[#002868] focus:ring-[#002868]/60"
-                    }`}
+                  className={`border p-2 rounded-md w-full text-sm placeholder-[#002868] focus:outline-none focus:ring-2 pr-10 ${
+                    fieldErrors[input.name]
+                      ? "border-red-500 focus:ring-red-400"
+                      : "border-gray-300 text-[#002868] focus:ring-[#002868]/60"
+                  }`}
                   placeholder={input.placeholder}
                 />
                 <button
@@ -116,16 +133,28 @@ const PasswordSecurity = ({ admin }) => {
               type="submit"
               disabled={loading || isGoogleAdmin}
               className={`bg-[#002868] text-white text-sm font-medium px-5 py-2 rounded-md hover:bg-[#001b4d] transition-colors flex items-center gap-2 ${
-                loading || isGoogleAdmin ? "opacity-70 cursor-not-allowed" : ""
+                loading || isGoogleAdmin
+                  ? "opacity-70 cursor-not-allowed"
+                  : ""
               }`}
             >
               <Pen size={14} className="text-white" />
-              {loading ? "Updating..." : isGoogleAdmin ? "Managed by Google" : "Change Password"}
+              {loading
+                ? "Updating..."
+                : isGoogleAdmin
+                ? "Managed by Google"
+                : "Change Password"}
             </button>
-
           </div>
         </form>
       </div>
+
+      {forceLogout && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex flex-col justify-center items-center text-white text-lg font-semibold z-50">
+          <div className="animate-spin mb-4 border-4 border-white border-t-transparent rounded-full w-12 h-12"></div>
+          <p>Password updated. Please log in again...</p>
+        </div>
+      )}
     </section>
   );
 };

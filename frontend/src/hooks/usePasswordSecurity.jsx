@@ -22,6 +22,8 @@ const usePasswordSecurity = ({ admin }) => {
   const [loading, setLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
 
+  const [forceLogout, setForceLogout] = useState(false);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setData((prev) => ({ ...prev, [name]: value }));
@@ -72,10 +74,16 @@ const usePasswordSecurity = ({ admin }) => {
       console.log("Response Data: ", res.data);
 
       notyf.success("Password changed successfully!");
+
       setData({ oldPassword: "", newPassword: "", retypeNewPassword: "" });
+
+      setForceLogout(true);
+
     } catch (err) {
       if (err.response?.status === 429) {
-        setFieldErrors({ general: err.response.data.error || "Too many attempts. Try again later." });
+        setFieldErrors({
+          general: err.response.data.error || "Too many attempts. Try again later.",
+        });
       } else if (err.response?.data) {
         const { field, error } = err.response.data;
         if (field && error) {
@@ -129,6 +137,7 @@ const usePasswordSecurity = ({ admin }) => {
     handleChange,
     toggleVisibility,
     handleSubmit,
+    forceLogout,
   };
 };
 

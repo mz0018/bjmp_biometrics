@@ -1,4 +1,4 @@
-import { lazy, useState, Suspense } from "react";
+import { lazy, useState, Suspense, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Home } from "lucide-react";
 import GoogleButton from "../helpers/GoogleButton";
@@ -12,24 +12,52 @@ const SignupFallback = lazy(() => import("../fallback/SignupFallback"));
 const Screen2 = () => {
   const navigate = useNavigate();
   const [isSignupOpen, setIsSignupOpen] = useState(false);
+  const [admin, setAdmin] = useState(null);
 
   const handleGoClick = () => {
-    navigate("/")
+    navigate("/");
   };
+
+  useEffect(() => {
+    const storedAdmin = localStorage.getItem("admin");
+    if (storedAdmin) {
+      setAdmin(JSON.parse(storedAdmin));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!admin) {
+      const handlePopState = (event) => {
+        navigate("/admin", { replace: true });
+      };
+
+      window.addEventListener("popstate", handlePopState);
+
+      return () => {
+        window.removeEventListener("popstate", handlePopState);
+      };
+    }
+  }, [admin, navigate]);
 
   return (
     <div className="flex min-h-screen relative">
-
-      <div className="hidden xl:flex w-1/2 bg-gray-100 relative cursor-pointer" onClick={handleGoClick}>
-        <img src="/img/office.webp" loading="lazy" className="w-full h-full object-cover" />
+      <div
+        className="hidden xl:flex w-1/2 bg-gray-100 relative cursor-pointer"
+        onClick={handleGoClick}
+      >
+        <img
+          src="/img/office.webp"
+          loading="lazy"
+          className="w-full h-full object-cover"
+        />
         <div className="absolute inset-0 bg-black/55"></div>
 
         <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[200px] bg-red-500/40 flex items-center justify-center px-6">
-          <img 
-            src="/img/banner-v2.png" 
-            alt="banner" 
+          <img
+            src="/img/banner-v2.png"
+            alt="banner"
             loading="lazy"
-            className="w-full h-full object-contain" 
+            className="w-full h-full object-contain"
           />
         </div>
       </div>

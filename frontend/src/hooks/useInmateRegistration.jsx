@@ -85,6 +85,7 @@ const useInmateRegistration = () => {
       });
       notyf.success(response.data.message);
       resetForm();
+      window.history.back();
     } catch (error) {
       if (error.response?.data?.errors) {
         const errors = error.response.data.errors;

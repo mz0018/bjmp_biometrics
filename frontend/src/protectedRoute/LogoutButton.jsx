@@ -9,56 +9,46 @@ const LogoutButton = ({ firstName = "" }) => {
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("admin");
+
     navigate("/admin", { replace: true });
+    window.location.reload();
   };
 
   return (
     <>
       <button
         onClick={() => setConfirmOpen(true)}
-        className="mt-4 flex items-center justify-center gap-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 w-full cursor-pointer"
+        className="mt-4 flex items-center justify-center font-semibold gap-2 text-red-400 px-4 py-2 rounded w-full cursor-pointer tracking-wider"
         aria-label="Logout"
         title={firstName ? `Logout, ${firstName}` : "Logout"}
       >
         <LogOut size={18} />
-        <span>Logout</span>
+        <span>Sign out</span>
       </button>
 
       {confirmOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
           <div className="rounded-md shadow-lg w-full max-w-md flex flex-col">
-            <div className="bg-[#232023] px-4 py-4 sm:px-6 sm:py-5 rounded-t-md shadow-md flex justify-between items-center">
-              <h2 className="text-left text-lg sm:text-xl font-semibold text-white">
-                Confirm Logout
-              </h2>
-              <button
-                onClick={() => setConfirmOpen(false)}
-                className="text-white hover:text-gray-300 transition"
-                aria-label="Close"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="bg-white flex-grow max-h-[70vh] p-4 sm:p-6 overflow-y-auto text-gray-700">
-              <p>
-                {`Are you sure you want to logout${firstName ? `, ${firstName}` : ""}?`}
+            <div className="bg-white flex-grow max-h-[70vh] p-4 sm:p-6 overflow-y-auto text-gray-700 flex flex-col justify-center items-center text-center">
+              <h1 className="text-2xl font-medium tracking-wider mb-2">Are you sure?</h1>
+              <p className="text-sm text-gray-500">
+                You will be logged out and will need to log in again if you want to continue using the app.
               </p>
             </div>
 
-            <div className="bg-[#232023] px-4 py-3 rounded-b-md flex flex-col items-end justify-center text-center space-y-1">
+            <div className="bg-white px-4 py-3 rounded-b-md items-end justify-center text-center space-y-1">
               <div className="flex gap-2">
                 <button
                   onClick={() => setConfirmOpen(false)}
-                  className="px-4 py-2 rounded-sm bg-gray-200 hover:bg-gray-300 text-gray-700"
+                  className="px-4 py-2 rounded-sm text-red-500 border hover:bg-red-50 border-red-500 w-full cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 rounded-sm bg-red-500 hover:bg-red-600 text-white"
+                  className="px-4 py-2 rounded-sm bg-red-500 hover:bg-red-600 text-white w-full cursor-pointer"
                 >
-                  Logout
+                  Yes, Log out
                 </button>
               </div>
             </div>

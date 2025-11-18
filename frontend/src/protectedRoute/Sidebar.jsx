@@ -22,23 +22,13 @@ const Sidebar = () => {
       icon: TableCellsSplit,
     },
     {
-      to: "register-face",
-      label: "Visitor Registration",
-      icon: UserPlus,
-    },
-    {
-      to: "register-inmate",
-      label: "Inmate Registration",
-      icon: UserLock,
-    },
-    {
       to: "manage-user",
       label: "Information Management",
       icon: Users,
     },
     {
       to: "account-settings",
-      label: "Settings & Privacy",
+      label: "Settings",
       icon: Settings,
     }
   ];

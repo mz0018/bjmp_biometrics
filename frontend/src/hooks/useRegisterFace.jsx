@@ -108,6 +108,7 @@ const useRegisterFace = () => {
         alert("Images and visitor details sent to backend!");
         resetForm();
         setCapturedImages([]);
+        window.history.back();
       }
 
     } catch (err) {
