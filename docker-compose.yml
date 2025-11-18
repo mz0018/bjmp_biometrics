@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb+srv://bjmp_face_recog:LXKGvyAsIaAx32hT@bjmp.kexnzgt.mongodb.net/bjmp_biometrics?retryWrites=true&w=majority&appName=bjmp
+      - MONGO_URI_INMATES=mongodb+srv://bjmp_face_recog:LXKGvyAsIaAx32hT@bjmp.kexnzgt.mongodb.net/Inmates?retryWrites=true&w=majority&appName=bjmp
+    volumes:
+      - ./uploads/mugshots:/app/uploads/mugshots
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://backend:5000/api
+
+  python-api:
+    build: ./python-api
+    container_name: python-api
+    restart: always
+    ports:
+      - "5001:5001"
+    environment:
+      - MONGO_URI=mongodb+srv://bjmp_face_recog:LXKGvyAsIaAx32hT@bjmp.kexnzgt.mongodb.net/bjmp_biometrics?retryWrites=true&w=majority&appName=bjmp
+    volumes:
+      - ./python-api/saved_faces:/app/saved_faces
