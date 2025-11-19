@@ -1,7 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { UserPlus, TableCellsSplit, UserLock, Users, Settings } from "lucide-react";
 import LogoutButton from "../protectedRoute/LogoutButton";
-import GenerateReports from "../protectedRoute/GenerateReports";
 import { useEffect, useState } from "react";
 
 const Sidebar = () => {
@@ -17,14 +16,14 @@ const Sidebar = () => {
 
   const navItems = [
     {
-      to: "visitors-log",
-      label: "Visitors Log",
-      icon: TableCellsSplit,
-    },
-    {
       to: "manage-user",
       label: "Information Management",
       icon: Users,
+    },
+    {
+      to: "visitors-log",
+      label: "Visitors Log",
+      icon: TableCellsSplit,
     },
     {
       to: "account-settings",
@@ -74,7 +73,6 @@ const Sidebar = () => {
       </div>
 
       <div className="mt-8 border-t border-gray-700 pt-4">
-        <GenerateReports />
         <LogoutButton firstName={admin?.first_name ?? ""} />
       </div>
     </aside>

@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import useVisitorsLogs from "../hooks/useVisitorsLogs";
 import useSaveToReports from "../hooks/useSaveToReports";
 import NoLogsFoundFallback from "../fallback/NoLogsFoundFallback";
+import GenerateReports from "../protectedRoute/GenerateReports"
 import {
   Search,
   Loader2,
@@ -82,6 +83,7 @@ const VisitorsLog = () => {
               className="pl-9 pr-3 py-2 border border-gray-300 rounded-sm w-full text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-bjmp-yellow"
             />
           </div>
+          <GenerateReports />
         </div>
       </header>
 

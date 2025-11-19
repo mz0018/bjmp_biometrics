@@ -62,7 +62,7 @@ const GenerateInmateInfo = ({ inmate }) => {
   return (
     <button
       onClick={handleExport}
-      className="bg-[#0B6E4F] hover:bg-green-700 text-white px-4 py-2 rounded-sm flex items-center gap-2 cursor-pointer transition"
+      className="bg-[#0B6E4F] hover:bg-green-700 text-white px-6 py-3 rounded-sm flex justify-center items-center gap-2 cursor-pointer transition w-full font-semibold cursor-pointer"
     >
       <FileSpreadsheet className="w-4 h-4" />
       <span>Export to Excel</span>

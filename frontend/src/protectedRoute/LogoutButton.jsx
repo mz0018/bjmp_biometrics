@@ -18,7 +18,7 @@ const LogoutButton = ({ firstName = "" }) => {
     <>
       <button
         onClick={() => setConfirmOpen(true)}
-        className="mt-4 flex items-center justify-center font-semibold gap-2 text-red-400 px-4 py-2 rounded w-full cursor-pointer tracking-wider"
+        className="border border-red-400 flex items-center justify-center font-semibold gap-2 text-red-400 px-4 py-2 rounded w-full cursor-pointer tracking-wider"
         aria-label="Logout"
         title={firstName ? `Logout, ${firstName}` : "Logout"}
       >

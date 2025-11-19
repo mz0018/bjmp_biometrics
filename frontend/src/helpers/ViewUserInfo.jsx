@@ -91,8 +91,6 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
     inmate?.mugshot_right ? { src: inmate.mugshot_right, title: "Right Mugshot" } : null,
   ].filter(Boolean);
 
-  console.log(images)
-
   return (
     <>
       <button
@@ -111,48 +109,100 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
               userType === "visitor" ? "max-w-md" : "max-w-3xl"
             } flex flex-col`}
           >
-            <div className="bg-[#232023] px-4 py-4 sm:px-6 sm:py-5 rounded-t-md shadow-md sticky top-0 z-10 flex justify-between items-center">
-              <h2 className="text-left text-lg sm:text-xl font-semibold text-white">
-                {userType === "inmate" ? "Inmate Information" : "Visitor Information"}
-              </h2>
+            <div className="bg-white px-4 py-4 sm:px-6 sm:py-5 rounded-t-md shadow-md sticky top-0 z-10 flex justify-between items-start">
+              <div className="flex flex-col">
+                <h2 className="text-left text-lg sm:text-xl font-bold text-gray-900">
+                  {userType === "inmate" ? "Inmate Information" : "Visitor Information"}
+                </h2>
+                <p className="text-gray-600">
+                  {userType === "inmate"
+                    ? "View detailed information about the inmate below."
+                    : "View detailed information about the visitor below."}
+                </p>
+              </div>
+
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-white hover:text-gray-300 transition"
+                className="text-gray-600 hover:text-gray-900 transition"
                 aria-label="Close"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className={`bg-white ${userType === "inmate" ? "overflow-y-auto" : ""} flex-grow max-h-[70vh] p-4 sm:p-6`}>
+            <div
+              className={`bg-white ${
+                userType === "inmate" ? "overflow-y-auto" : ""
+              } flex-grow max-h-[70vh] p-4 sm:p-6`}
+            >
               {userType === "inmate" && inmate && (
-                <div className="space-y-6">
+                <div className="space-y-10">
+                  {/* PERSONAL INFORMATION */}
                   <div>
-                    <h3 className="text-left font-semibold text-gray-700 uppercase text-sm sm:text-base">Personal Details</h3>
-                    <hr className="border-gray-300 my-2" />
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        {personalLeft.map((it) => renderProfileItem(it.label, it.value, it.icon))}
-                      </div>
-                      <div className="space-y-1">
-                        {personalRight.map((it) => renderProfileItem(it.label, it.value, it.icon))}
-                      </div>
+                    <h3 className="text-left font-semibold text-gray-900 tracking-wider uppercase text-sm sm:text-base">
+                      Personal Information
+                    </h3>
+                    <hr className="border-gray-400 mt-2 mb-5" />
+
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full table-auto border-collapse">
+                        <tbody>
+                          <tr>
+                            {personalLeft.map((it) => (
+                              <td
+                                key={it.label}
+                                className="border-b border-gray-300 py-2 px-4 text-sm text-gray-700"
+                              >
+                                <strong>{it.label}:</strong> {it.value}
+                              </td>
+                            ))}
+                          </tr>
+                          <tr>
+                            {personalRight.map((it) => (
+                              <td
+                                key={it.label}
+                                className="border-b border-gray-300 py-2 px-4 text-sm text-gray-700"
+                              >
+                                <strong>{it.label}:</strong> {it.value}
+                              </td>
+                            ))}
+                          </tr>
+                        </tbody>
+                      </table>
                     </div>
                   </div>
 
+                  {/* CRIMINAL RECORD */}
                   <div>
-                    <h3 className="text-left font-semibold text-gray-700 uppercase text-sm sm:text-base">Criminal Details</h3>
-                    <hr className="border-gray-300 my-2" />
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {criminalItems.map((it) => renderProfileItem(it.label, it.value, it.icon))}
+                    <h3 className="text-left font-semibold text-gray-900 tracking-wider uppercase text-sm sm:text-base">
+                      Criminal Record
+                    </h3>
+                    <hr className="border-gray-400 mt-2 mb-5" />
+
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full table-auto border-collapse">
+                        <tbody>
+                          {criminalItems.map((it) => (
+                            <tr key={it.label}>
+                              <td className="border-b border-gray-300 py-2 px-4 text-sm text-gray-700">
+                                <strong>{it.label}:</strong> {it.value}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
 
+                  {/* MUGSHOT GALLERY */}
                   <div>
-                    <h3 className="text-left font-semibold text-gray-700 text-sm sm:text-base">Mugshots</h3>
-                    <hr className="border-gray-300 my-2" />
+                    <h3 className="text-left font-semibold text-gray-900 tracking-wider uppercase text-sm sm:text-base">
+                      Mugshot Gallery
+                    </h3>
+                    <hr className="border-gray-400 mt-2 mb-5" />
+
                     {images.length > 0 ? (
-                      <div className="flex flex-wrap justify-center gap-4 mt-3">
+                      <div className="flex flex-wrap justify-start gap-6 mt-3">
                         {images.map((img, index) => (
                           <div
                             key={index}
@@ -165,9 +215,11 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
                             <img
                               src={img.src}
                               alt={img.title}
-                              className="w-40 h-48 object-cover rounded-md border border-gray-300 shadow-sm"
+                              className="w-40 h-52 object-cover border border-gray-400 shadow-sm"
                             />
-                            <span className="text-xs text-gray-600 mt-1">{img.title.split(" ")[0]}</span>
+                            <span className="text-xs text-gray-700 mt-3 font-medium tracking-wide">
+                              {img.title.split(" ")[0]}
+                            </span>
                           </div>
                         ))}
 
@@ -181,30 +233,34 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
                         )}
                       </div>
                     ) : (
-                      <p className="text-sm text-gray-500 italic mt-2">No mugshots available.</p>
+                      <p className="text-sm text-gray-500 italic mt-3">
+                        No mugshots available.
+                      </p>
                     )}
                   </div>
-           
-                  <div className="flex justify-end">
-                    <GenerateInmateInfo inmate={inmate} />
-                  </div>
-
                 </div>
               )}
 
+              {/* VISITOR VIEW */}
               {userType === "visitor" && visitor && (
-                <div className="grid grid-cols-1 gap-2">
-                  {visitorItems.map((it) => renderProfileItem(it.label, it.value, it.icon))}
+                <div className="grid grid-cols-1 gap-4">
+                  {visitorItems.map((it) => renderProfileItem(it.label, it.value, null))}
                 </div>
               )}
             </div>
 
-            <div className="bg-[#232023] px-4 py-3 rounded-b-md flex flex-col items-center justify-center text-center space-y-1">
+            {/* Footer with Close and Action Buttons */}
+            <div className="border-t border-gray-300 bg-white px-4 py-3 rounded-b-md flex flex-col space-y-1">
               {userType === "inmate" && (
-                <>
-                  <p className="text-gray-400 text-[11px] m-0">Confidential — Authorized personnel only.</p>
-                  <p className="text-gray-500 text-[10px] m-0">© {new Date().getFullYear()} Bureau of Jail Management and Penology</p>
-                </>
+                <div className="flex justify-between w-full gap-1">
+                  <button
+                    className="border border-gray-300 hover:bg-gray-50 text-gray-500 font-semibold px-6 py-3 rounded-sm text-sm transition w-full cursor-pointer"
+                    onClick={() => setIsModalOpen(false)}
+                  >
+                    Close
+                  </button>
+                  <GenerateInmateInfo inmate={inmate} />
+                </div>
               )}
             </div>
           </div>

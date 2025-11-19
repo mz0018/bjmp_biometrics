@@ -18,9 +18,9 @@ const GenerateReports = () => {
         type="button"
         onClick={() => {
           setIsModalOpen(true);
-          setError(false); // Reset error when opening modal
+          setError(false);
         }}
-        className="flex w-full items-center justify-center gap-2 font-semibold text-white px-4 py-2 rounded-sm transition cursor-pointer"
+        className="flex border border-gray-300 items-center justify-center gap-2 font-semibold text-gray-500 px-4 py-2 rounded-sm transition hover:bg-gray-50 cursor-pointer text-sm tracking-wider"
         aria-label="Open generate reports modal"
       >
         <Text className="w-4 h-4" />

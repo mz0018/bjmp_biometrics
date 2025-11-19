@@ -11,59 +11,28 @@ const UserManagement = () => {
 
   return (
     <section className="p-6 min-h-[100dvh] flex flex-col overflow-hidden">
-      <header className="flex flex-col mb-6 gap-3">
-        <div className="relative w-full">
-          <input
-            type="text"
-            placeholder={`Search ${activeTab} by name...`}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-4 py-2 border border-gray-300 rounded-sm w-full text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-bjmp-yellow"
-            aria-label="Search"
-          />
-          <Search className="absolute left-3 top-2.5 text-gray-400 w-4 h-4 pointer-events-none" />
-        </div>
-
-        <div className="flex justify-between gap-2 items-center">
-          <div className="flex gap-2">
-            <button
-              className={`px-4 py-2 rounded-sm text-sm font-medium cursor-pointer flex items-center gap-2 ${
-                activeTab === "inmates"
-                  ? "bg-bjmp-blue text-gray-700 shadow-lg"
-                  : "bg-gray-200 text-gray-500"
-              }`}
-              onClick={() => setActiveTab("inmates")}
-            >
-              {activeTab === "inmates" ? (
-                <Eye size={16} />
-              ) : (
-                <EyeOff size={16} />
-              )}
-              Inmates
-            </button>
-            <button
-              className={`px-4 py-2 rounded-sm text-sm font-medium cursor-pointer flex items-center gap-2 ${
-                activeTab === "visitors"
-                  ? "bg-bjmp-blue text-gray-700 shadow-lg"
-                  : "bg-gray-200 text-gray-500"
-              }`}
-              onClick={() => setActiveTab("visitors")}
-            >
-              {activeTab === "visitors" ? (
-                <Eye size={16} />
-              ) : (
-                <EyeOff size={16} />
-              )}
-              Visitors
-            </button>
+      <header className="flex flex-col gap-3">
+        <div className="flex items-center justify-between w-full gap-2">
+          {/* Search bar */}
+          <div className="relative flex-grow">
+            <input
+              type="text"
+              placeholder={`Search ${activeTab} by name...`}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-4 py-2 border border-gray-300 w-full rounded-sm text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-bjmp-yellow"
+              aria-label="Search"
+            />
+            <Search className="absolute left-3 top-2.5 text-gray-400 w-4 h-4 pointer-events-none" />
           </div>
 
+          {/* Buttons */}
           <div className="flex gap-2">
             {activeTab === "inmates" && (
               <div className="relative group">
                 <Link
                   to="/protectedRoute/register-inmate"
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-sm text-[#002868] hover:bg-blue-100 hover:text-blue-700 transition cursor-pointer text-xs tracking-wider"
+                  className="inline-flex items-center gap-1 px-6 py-2 rounded-sm text-gray-500 hover:bg-gray-50 transition cursor-pointer text-sm tracking-wider border border-gray-300 font-semibold"
                   aria-label="Go to Inmate Registration"
                 >
                   <Navigation size={16} />
@@ -79,7 +48,7 @@ const UserManagement = () => {
               <div className="relative group">
                 <Link
                   to="/protectedRoute/register-face"
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-sm text-[#002868] hover:bg-blue-100 hover:text-blue-700 transition cursor-pointer text-xs tracking-wider"
+                  className="inline-flex items-center gap-1 px-6 py-2 rounded-sm text-gray-500 hover:bg-gray-50 transition cursor-pointer text-sm tracking-wider border border-gray-300 font-semibold"
                   aria-label="Go to Visitor Registration"
                 >
                   <Navigation size={16} />
@@ -92,9 +61,35 @@ const UserManagement = () => {
             )}
           </div>
         </div>
+
+        {/* Tabs connected to table */}
+        <div className="flex border-b border-gray-200 -mb-px">
+          <button
+            className={`px-4 py-2 -mb-px text-sm font-medium cursor-pointer flex items-center gap-2 border-t border-l border-r rounded-t-sm ${
+              activeTab === "inmates"
+                ? "bg-white border-gray-200 text-gray-700 shadow"
+                : "bg-gray-100 border-gray-200 text-gray-500"
+            }`}
+            onClick={() => setActiveTab("inmates")}
+          >
+            {activeTab === "inmates" ? <Eye size={16} /> : <EyeOff size={16} />}
+            Inmates
+          </button>
+          <button
+            className={`px-4 py-2 -mb-px text-sm font-medium cursor-pointer flex items-center gap-2 border-t border-l border-r rounded-t-sm ${
+              activeTab === "visitors"
+                ? "bg-white border-gray-200 text-gray-700 shadow"
+                : "bg-gray-100 border-gray-200 text-gray-500"
+            }`}
+            onClick={() => setActiveTab("visitors")}
+          >
+            {activeTab === "visitors" ? <Eye size={16} /> : <EyeOff size={16} />}
+            Visitors
+          </button>
+        </div>
       </header>
 
-      <div className="shadow-lg rounded-sm border border-gray-200 overflow-hidden">
+      <div className="shadow-lg rounded-sm border border-gray-200 overflow-hidden mt-0">
         <div className="overflow-x-auto">
           <div
             className="overflow-y-auto"
@@ -156,12 +151,9 @@ const UserManagement = () => {
                           }`}
                         >
                           <td className="px-4 py-2 capitalize truncate">
-                            {inmate.lastname}, {inmate.firstname}{" "}
-                            {inmate.middleInitial}. ({inmate.gender})
+                            {inmate.lastname}, {inmate.firstname} {inmate.middleInitial}. ({inmate.gender})
                           </td>
-                          <td className="px-4 py-2 truncate">
-                            {inmate.caseNumber}
-                          </td>
+                          <td className="px-4 py-2 truncate">{inmate.caseNumber}</td>
                           <td className="px-4 py-2 text-center">
                             <div className="inline-flex items-center justify-center gap-2 whitespace-nowrap">
                               <ButtonUpdate userType={"inmate"} inmate={inmate} />
@@ -180,9 +172,7 @@ const UserManagement = () => {
                           <td className="px-4 py-2 capitalize truncate">
                             {visitor.visitor_info.name} ({visitor.visitor_info.gender})
                           </td>
-                          <td className="px-4 py-2 truncate">
-                            {visitor.visitor_info.contact}
-                          </td>
+                          <td className="px-4 py-2 truncate">{visitor.visitor_info.contact}</td>
                           <td className="px-4 py-2 text-center">
                             <div className="inline-flex items-center justify-center gap-2 whitespace-nowrap">
                               <ButtonUpdate userType={"visitor"} visitor={visitor} />

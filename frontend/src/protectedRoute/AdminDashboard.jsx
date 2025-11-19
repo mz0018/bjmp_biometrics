@@ -11,12 +11,17 @@ const AdminDashboard = () => {
 
       <main className="flex-1 flex flex-col overflow-hidden">
         <Header />
+
         <div className="flex-1 overflow-y-auto px-6 py-4">
           <Outlet />
         </div>
+
+        <footer className="bg-gray-50 border-t border-gray-200 px-6 py-3 text-sm text-gray-600 flex justify-between items-center">
+          <span>© 2025 Bureau of Jail Management Biometric System</span>
+          <span>Version 1.0</span>
+        </footer>
       </main>
     </div>
-    
   );
 };
 

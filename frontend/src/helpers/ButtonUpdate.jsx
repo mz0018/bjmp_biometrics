@@ -144,9 +144,7 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
       const fields = userType === "visitor" ? visitorFields : inmateFields;
       fields.forEach((field) => {
         const val = formData[field];
-        if (val === undefined || val === null || val.toString().trim() === "") {
-          emptyFields[field] = true;
-        }
+        if (!val || val.toString().trim() === "") emptyFields[field] = true;
       });
 
       if (Object.keys(emptyFields).length > 0) {
@@ -155,17 +153,13 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
         return;
       }
 
-      setMissingFields({});
-
       if (isChanged) {
         notyf.open({ type: "info", message: "No changes made." });
         return;
       }
 
-      const updatePayload = dirtyFields;
       setIsSaving(true);
-
-      await findAndUpdate(updatePayload);
+      await findAndUpdate(dirtyFields);
 
       notyf.success("Updated successfully!");
       setIsModalOpen(false);
@@ -180,9 +174,7 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
 
   useEffect(() => {
     document.body.style.overflow = isModalOpen ? "hidden" : "auto";
-    return () => {
-      document.body.style.overflow = "auto";
-    };
+    return () => (document.body.style.overflow = "auto");
   }, [isModalOpen]);
 
   const fields = userType === "visitor" ? visitorFields : inmateFields;
@@ -193,103 +185,168 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
         className="text-gray-700 hover:bg-gray-200 px-4 py-2 rounded-sm flex items-center gap-2 cursor-pointer transition"
         onClick={handleOpen}
         disabled={isSaving}
-        aria-disabled={isSaving}
-        title={isSaving ? "Saving..." : "Update"}
       >
-        {isSaving ? (
-          <Loader2 className="animate-spin w-4 h-4" />
-        ) : (
-          <SquarePen className="w-4 h-4" />
-        )}
+        {isSaving ? <Loader2 className="animate-spin w-4 h-4" /> : <SquarePen className="w-4 h-4" />}
         Edit
       </button>
 
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div
-            className={`rounded-md shadow-lg w-full max-h-[90vh] ${
+            className={`w-full max-h-[90vh] ${
               userType === "visitor" ? "max-w-md" : "max-w-xl"
-            } flex flex-col`}
+            } bg-white rounded-md shadow-lg flex flex-col`}
           >
-            <div className="bg-[#232023] px-4 py-4 sm:px-6 sm:py-5 rounded-t-md shadow-md sticky top-0 z-10 flex justify-between items-center">
-              <h2 className="text-left text-lg sm:text-xl font-semibold text-white">
-                Update Information
-              </h2>
+            {/* Header */}
+            <div className="flex items-start justify-between p-4 border-b border-gray-200 shadow-sm">
+              <div className="flex flex-col text-start">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 leading-tight mb-1">
+                  Update {userType === "inmate" ? "Inmate" : "Visitor"} Information
+                </h2>
+                <p className="text-gray-600 text-sm leading-snug">
+                  Modify the fields below and save your changes.
+                </p>
+              </div>
               <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-white hover:text-gray-300 transition"
-                aria-label="Close"
+                onClick={handleClose}
+                className="text-gray-600 hover:text-gray-900 transition"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div
-              className={`bg-white ${
-                userType === "inmate" ? "overflow-y-auto" : ""
-              } flex-grow max-h-[70vh] p-4 sm:p-6`}
-            >
+            {/* Scrollable content */}
+            <div className="overflow-y-auto flex-grow max-h-[70vh] p-4 sm:p-6">
               {userType === "inmate" && (
                 <div className="flex justify-center mb-4 px-2">
-                  <div className="bg-yellow-50 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-md flex items-center gap-3 max-w-full sm:max-w-[900px]">
-                    <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0" />
-                    <p className="text-xs sm:text-sm leading-snug m-0">
-                      <strong>Warning:</strong> This section contains confidential information.
+                  <div className="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 p-3 rounded flex items-start gap-3 max-w-md w-full">
+                    <AlertTriangle className="w-5 h-5 mt-1 text-yellow-600" />
+                    <p className="text-sm">
+                      <strong>Warning:</strong> Editing inmate records should be done carefully.
                     </p>
                   </div>
                 </div>
               )}
 
-              <div className="space-y-3 text-sm text-gray-700">
-                {fields.map((field) => (
-                  <div key={field} className="flex flex-col">
-                    <label className="font-semibold capitalize text-left text-xs sm:text-sm mb-1">
-                      {formatFieldLabel(field)}
-                    </label>
-
-                    <div className="relative">
-                      <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                        {getIconForField(field)}
-                      </span>
-
-                      <input
-                        type="text"
-                        name={field}
-                        value={
-                          ["dateOfBirth", "arrestDate", "commitmentDate"].includes(field)
-                            ? formatDate(formData[field])
-                            : formData[field] || ""
-                        }
-                        onChange={handleChange}
-                        disabled={isSaving || disabledFields[userType]?.includes(field)}
-                        className={`border px-8 py-2 rounded-md w-full disabled:text-gray-500 disabled:bg-gray-100 disabled:cursor-not-allowed ${
-                          missingFields[field]
-                            ? "border-red-500"
-                            : dirtyFields[field]
-                            ? "border-yellow-400"
-                            : "border-gray-300"
-                        }`}
-                      />
-                    </div>
-
-                    {missingFields[field] && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {formatFieldLabel(field)} is empty
-                      </p>
-                    )}
-                  </div>
-                ))}
+              {/* Personal Information Table */}
+              <div className="mb-6">
+                <h3 className="text-lg font-bold mb-2">Personal Information</h3>
+                <table className="table-auto w-full text-sm border border-gray-200">
+                  <tbody>
+                    {fields
+                      .filter((f) =>
+                        userType === "inmate"
+                          ? [
+                              "firstname",
+                              "lastname",
+                              "middleInitial",
+                              "gender",
+                              "dateOfBirth",
+                              "nationality",
+                              "address",
+                              "civilStatus",
+                              "height",
+                              "weight",
+                            ].includes(f)
+                          : ["visitor_id", "name", "address", "contact"].includes(f)
+                      )
+                      .map((field) => (
+                        <tr key={field} className="border-b border-gray-200">
+                          <td className="font-semibold px-3 py-2 w-1/3">{formatFieldLabel(field)}</td>
+                          <td className="px-3 py-2">
+                            <input
+                              type="text"
+                              name={field}
+                              value={
+                                ["dateOfBirth", "arrestDate", "commitmentDate"].includes(field)
+                                  ? formatDate(formData[field])
+                                  : formData[field] || ""
+                              }
+                              onChange={handleChange}
+                              disabled={isSaving || disabledFields[userType]?.includes(field)}
+                              className={`border px-2 py-1 rounded-md w-full ${
+                                missingFields[field]
+                                  ? "border-red-500"
+                                  : dirtyFields[field]
+                                  ? "border-yellow-400"
+                                  : "border-gray-300"
+                              }`}
+                            />
+                            {missingFields[field] && (
+                              <p className="text-red-500 text-xs mt-1">{formatFieldLabel(field)} is required</p>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
               </div>
+
+              {userType === "inmate" && (
+                <div>
+                  <h3 className="text-lg font-bold mb-2">Criminal Record</h3>
+                  <table className="table-auto w-full text-sm border border-gray-200">
+                    <tbody>
+                      {fields
+                        .filter((f) =>
+                          [
+                            "caseNumber",
+                            "offense",
+                            "sentence",
+                            "courtName",
+                            "arrestDate",
+                            "commitmentDate",
+                            "status",
+                            "remarks",
+                          ].includes(f)
+                        )
+                        .map((field) => (
+                          <tr key={field} className="border-b border-gray-200">
+                            <td className="font-semibold px-3 py-2 w-1/3">{formatFieldLabel(field)}</td>
+                            <td className="px-3 py-2">
+                              <input
+                                type="text"
+                                name={field}
+                                value={
+                                  ["dateOfBirth", "arrestDate", "commitmentDate"].includes(field)
+                                    ? formatDate(formData[field])
+                                    : formData[field] || ""
+                                }
+                                onChange={handleChange}
+                                disabled={isSaving || disabledFields[userType]?.includes(field)}
+                                className={`border px-2 py-1 rounded-md w-full ${
+                                  missingFields[field]
+                                    ? "border-red-500"
+                                    : dirtyFields[field]
+                                    ? "border-yellow-400"
+                                    : "border-gray-300"
+                                }`}
+                              />
+                              {missingFields[field] && (
+                                <p className="text-red-500 text-xs mt-1">{formatFieldLabel(field)} is required</p>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
 
-            <div className="bg-[#232023] px-4 py-3 rounded-b-md flex flex-col items-end justify-center text-center space-y-1">
+            {/* Footer */}
+            <div className="border-t border-gray-200 px-4 py-3 flex justify-end gap-1">
+              <button
+                className="border border-gray-300 hover:bg-gray-50 text-gray-500 font-semibold px-6 py-3 rounded-sm text-sm transition w-full cursor-pointer"
+                onClick={() => setIsModalOpen(false)}
+              >
+                Close
+              </button>
               <button
                 disabled={isChanged || isSaving}
                 onClick={handleSave}
-                className={`bg-[#002868] text-white px-4 py-2 rounded-sm ${
-                  isChanged || isSaving
-                    ? "cursor-not-allowed opacity-50"
-                    : "cursor-pointer hover:bg-blue-900"
+                className={`bg-blue-900 text-white px-4 py-2 rounded-sm w-full ${
+                  isChanged || isSaving ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-800"
                 }`}
               >
                 {isSaving ? (
