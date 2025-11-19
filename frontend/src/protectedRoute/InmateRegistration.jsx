@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import useInmateRegistration from "../hooks/useInmateRegistration";
+
 import {
   genderOptions,
   nationalityOptions,
@@ -7,519 +8,367 @@ import {
   offenseOptions,
   statusOptions,
 } from "../helpers/mockData";
-import {
-  User,
-  Calendar,
-  MapPin,
-  Clipboard,
-  FileText,
-  Image as ImageIcon,
-  Mars,
-  Venus,
-} from "lucide-react";
 
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 
-const TextHelper = ({ text }) => (
-  <p className="text-gray-500 text-xs mt-1">{text}</p>
+// --------------------------
+// Reusable Input
+// --------------------------
+
+const InputField = ({
+  label,
+  name,
+  type = "text",
+  value,
+  onChange,
+  error,
+  placeholder = "",
+  disabled = false,
+  helper,
+  required = false,
+  className = "",
+}) => {
+  const baseClasses = `border rounded-md focus:outline-none focus:ring-2 text-[#002868] placeholder-[#A0AEC0] p-2 w-full text-sm`;
+  const errorClasses = error
+    ? "border-red-500 focus:ring-red-500"
+    : "border-gray-300 focus:ring-[#002868]";
+  const disabledClasses = disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white";
+
+  return (
+    <div className="space-y-1">
+      <label
+        htmlFor={name}
+        className="font-semibold text-sm text-gray-700 tracking-wide flex justify-between"
+      >
+        <span>{label}</span>
+        {required && <span className="text-red-500">*</span>}
+      </label>
+      <input
+        id={name}
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        placeholder={placeholder}
+        className={`${baseClasses} ${errorClasses} ${disabledClasses} ${className}`}
+        aria-invalid={!!error}
+        aria-required={required}
+      />
+      {error && <p className="text-red-600 text-xs">{error}</p>}
+      {helper && !error && <p className="text-gray-500 text-xs">{helper}</p>}
+    </div>
+  );
+};
+
+// --------------------------
+// Reusable Select
+// --------------------------
+
+const SelectField = ({
+  label,
+  name,
+  value,
+  onChange,
+  error,
+  options,
+  helper,
+  required = false,
+}) => {
+  const baseClasses = `border rounded-md focus:outline-none focus:ring-2 text-[#002868] p-2 w-full text-sm`;
+  const errorClasses = error
+    ? "border-red-500 focus:ring-red-500"
+    : "border-gray-300 focus:ring-[#002868]";
+
+  return (
+    <div className="space-y-1">
+      <label className="font-semibold text-sm text-gray-700 tracking-wide flex justify-between">
+        <span>{label}</span>
+        {required && <span className="text-red-500">*</span>}
+      </label>
+      <select
+        name={name}
+        value={value}
+        onChange={onChange}
+        className={`${baseClasses} ${errorClasses} bg-white`}
+        aria-invalid={!!error}
+        aria-required={required}
+      >
+        <option value="">Select {label}</option>
+        {options.map((opt) => (
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
+        ))}
+      </select>
+      {error && <p className="text-red-600 text-xs">{error}</p>}
+      {helper && !error && <p className="text-gray-500 text-xs">{helper}</p>}
+    </div>
+  );
+};
+
+// --------------------------
+// Mugshot Uploader
+// --------------------------
+
+const MugshotUploader = ({ preview, onClick, onChange, id }) => (
+  <div className="flex flex-col items-center space-y-1">
+    <label
+      htmlFor={id}
+      className="w-28 h-28 border border-gray-400 bg-gray-100
+      flex items-center justify-center cursor-pointer overflow-hidden"
+    >
+      {preview ? (
+        <img
+          src={preview}
+          alt={`${id} preview`}
+          onClick={onClick}
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <span className="text-gray-500 text-xs">Upload</span>
+      )}
+    </label>
+
+    <input
+      id={id}
+      type="file"
+      accept="image/*"
+      name={id}
+      onChange={onChange}
+      className="hidden"
+    />
+  </div>
 );
 
-const InmateRegistration = () => {
-  const {
-    handleInmateRegistration,
-    formData,
-    handleChange,
-    loading,
-    hasError,
-  } = useInmateRegistration();
+// --------------------------
+// Main Component
+// --------------------------
 
-  const [previewImages, setPreviewImages] = useState({
+const InmateRegistration = () => {
+  const { handleInmateRegistration, formData, handleChange, loading, hasError } =
+    useInmateRegistration();
+
+  const [previews, setPreviews] = useState({
     mugshot_front: null,
     mugshot_left: null,
     mugshot_right: null,
   });
+
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
 
-  const getInputClass = (name) =>
-    `border p-2 rounded w-full text-sm focus:outline-none focus:ring-2 text-[#002868] placeholder-[#002868] ${
-      hasError[name] ? "border-red-500 focus:ring-red-300" : "border-gray-300"
-    }`;
-
-  const renderError = (name) =>
-    hasError[name] && (
-      <p className="text-red-500 text-xs mt-1 capitalize">{hasError[name]}</p>
-    );
-
-  const handleFileChange = (e) => {
+  const handleFile = (e) => {
     const { name, files } = e.target;
-    if (files && files[0]) {
-      handleChange(e);
+    if (!files[0]) return;
 
-      const previewUrl = URL.createObjectURL(files[0]);
-      setPreviewImages((prev) => ({
-        ...prev,
-        [name]: previewUrl,
-      }));
-      return () => URL.revokeObjectURL(previewUrl);
-    }
+    handleChange(e);
+    const url = URL.createObjectURL(files[0]);
+    setPreviews((p) => ({ ...p, [name]: url }));
   };
 
+  // Cleanup object URLs to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      Object.values(previews).forEach((url) => url && URL.revokeObjectURL(url));
+    };
+  }, [previews]);
+
   return (
-    <section className="p-6 min-h-[100dvh] flex flex-col overflow-hidden">
-      <form
-        onSubmit={handleInmateRegistration}
-        encType="multipart/form-data"
-        className="space-y-5"
-      >
-        {/* Case & Court Info */}
-        <div className="mb-2 rounded-md bg-white">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-            <div>
-              <label className="font-medium text-gray-700">Case Number</label>
-              <div className="relative mt-1">
-                <FileText
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={18}
-                />
-                <input
-                  className={`${getInputClass("caseNumber")} pl-10 bg-gray-100 cursor-not-allowed`}
-                  name="caseNumber"
-                  value={formData.caseNumber || "Auto-generated"}
-                  onChange={handleChange}
-                  placeholder="Case Number"
-                  disabled
-                />
-              </div>
-              {renderError("caseNumber")}
-              <TextHelper text="Automatically generated upon submission" />
-            </div>
+    <section className="px-6 py-4 min-h-[100dvh] bg-gray-50">
+      <form onSubmit={handleInmateRegistration} className="space-y-6">
+        {/* ------------------ CASE INFO ------------------ */}
+        <div className="bg-white border border-gray-300 p-4">
+          <h2 className="text-gray-700 font-bold text-sm mb-3 border-b pb-1 uppercase tracking-wide">
+            Case Information
+          </h2>
 
-            <div>
-              <label className="font-medium text-gray-700">Court Name</label>
-              <div className="relative mt-1">
-                <MapPin
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={18}
-                />
-                <input
-                  className={`${getInputClass("courtName")} pl-10`}
-                  name="courtName"
-                  value={formData.courtName}
-                  onChange={handleChange}
-                  placeholder="e.g., Regional Trial Court or Municipal Trial Court"
-                />
-              </div>
-              {renderError("courtName")}
-            </div>
-
-            <div>
-              <label className="font-medium text-gray-700">Arrest Date</label>
-              <div className="relative mt-1">
-                <Calendar
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={18}
-                />
-                <input
-                  className={`${getInputClass("arrestDate")} pl-10`}
-                  name="arrestDate"
-                  type="date"
-                  value={formData.arrestDate}
-                  onChange={handleChange}
-                />
-              </div>
-              {renderError("arrestDate")}
-            </div>
-
-            <div>
-              <label className="font-medium text-gray-700">Commitment Date</label>
-              <div className="relative mt-1">
-                <Calendar
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={18}
-                />
-                <input
-                  className={`${getInputClass("commitmentDate")} pl-10`}
-                  name="commitmentDate"
-                  type="date"
-                  value={formData.commitmentDate}
-                  onChange={handleChange}
-                />
-              </div>
-              {renderError("commitmentDate")}
-            </div>
+          <div className="grid md:grid-cols-4 gap-3">
+            <InputField
+              label="Case Number"
+              name="caseNumber"
+              value={formData.caseNumber || "Auto-generated"}
+              onChange={handleChange}
+              error={hasError.caseNumber}
+              disabled
+              helper="Generated on submission"
+            />
+            <InputField
+              label="Court Name"
+              name="courtName"
+              value={formData.courtName}
+              onChange={handleChange}
+              error={hasError.courtName}
+            />
+            <InputField
+              label="Arrest Date"
+              name="arrestDate"
+              type="date"
+              value={formData.arrestDate}
+              onChange={handleChange}
+              error={hasError.arrestDate}
+            />
+            <InputField
+              label="Commitment Date"
+              name="commitmentDate"
+              type="date"
+              value={formData.commitmentDate}
+              onChange={handleChange}
+              error={hasError.commitmentDate}
+            />
           </div>
         </div>
 
-        {/* Personal Info */}
-        <div className="mb-2 rounded-md bg-white">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-            <div>
-              <label className="font-medium text-gray-700">Firstname</label>
-              <div className="relative mt-1">
-                <User
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={18}
-                />
-                <input
-                  className={`${getInputClass("firstname")} pl-10`}
-                  name="firstname"
-                  value={formData.firstname}
-                  onChange={handleChange}
-                  placeholder="Firstname"
-                />
-              </div>
-              {renderError("firstname")}
-            </div>
+        {/* ------------------ PERSONAL INFO ------------------ */}
+        <div className="bg-white border border-gray-300 p-4 space-y-4">
+          <h2 className="text-gray-700 font-bold text-sm mb-1 border-b pb-1 uppercase tracking-wide">
+            Personal Information
+          </h2>
 
-            <div>
-              <label className="font-medium text-gray-700">Middle Initial</label>
-              <div className="relative mt-1">
-                <User
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={18}
-                />
-                <input
-                  className={`${getInputClass("middleInitial")} pl-10`}
-                  name="middleInitial"
-                  value={formData.middleInitial}
-                  onChange={handleChange}
-                  placeholder="Middle Initial"
-                />
-              </div>
-              {renderError("middleInitial")}
-            </div>
-
-            <div>
-              <label className="font-medium text-gray-700">Lastname</label>
-              <div className="relative mt-1">
-                <User
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={18}
-                />
-                <input
-                  className={`${getInputClass("lastname")} pl-10`}
-                  name="lastname"
-                  value={formData.lastname}
-                  onChange={handleChange}
-                  placeholder="Lastname"
-                />
-              </div>
-              {renderError("lastname")}
-            </div>
-
-            <div>
-              <label className="font-medium text-gray-700">Date of Birth</label>
-              <div className="relative mt-1">
-                <Calendar
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={18}
-                />
-                <input
-                  className={`${getInputClass("dateOfBirth")} pl-10`}
-                  name="dateOfBirth"
-                  type="date"
-                  value={formData.dateOfBirth}
-                  onChange={handleChange}
-                />
-              </div>
-              {renderError("dateOfBirth")}
-            </div>
+          <div className="grid md:grid-cols-4 gap-3">
+            <InputField label="Firstname" name="firstname" value={formData.firstname} onChange={handleChange} error={hasError.firstname} />
+            <InputField label="Middle Initial" name="middleInitial" value={formData.middleInitial} onChange={handleChange} error={hasError.middleInitial} />
+            <InputField label="Lastname" name="lastname" value={formData.lastname} onChange={handleChange} error={hasError.lastname} />
+            <InputField label="Date of Birth" name="dateOfBirth" type="date" value={formData.dateOfBirth} onChange={handleChange} error={hasError.dateOfBirth} />
           </div>
 
-          {/* Address, Nationality */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
-            <div className="md:col-span-2">
-              <label className="font-medium text-gray-700">Address</label>
-              <div className="relative mt-1">
-                <MapPin
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={18}
-                />
-                <input
-                  className={`${getInputClass("address")} pl-10`}
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  placeholder="e.g. 123 Sampaguita St., Brgy. San Isidro, Quezon City"
-                />
-              </div>
-              {renderError("address")}
-            </div>
-
-            <div>
-              <label className="font-medium text-gray-700">Nationality</label>
-              <div className="relative mt-1">
-                <Clipboard
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={18}
-                />
-                <select
-                  className={`${getInputClass("nationality")} pl-10`}
-                  name="nationality"
-                  value={formData.nationality}
-                  onChange={handleChange}
-                >
-                  <option value="">Select Nationality</option>
-                  {nationalityOptions.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {renderError("nationality")}
-            </div>
+          <div className="grid md:grid-cols-3 gap-3">
+            <InputField
+              label="Address"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              error={hasError.address}
+              className="md:col-span-2"
+            />
+            <SelectField
+              label="Nationality"
+              name="nationality"
+              value={formData.nationality}
+              onChange={handleChange}
+              error={hasError.nationality}
+              options={nationalityOptions}
+            />
           </div>
 
-          {/* Gender, Civil Status, Height, Weight */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mt-4">
-            <div>
-              <label className="font-medium text-gray-700">Gender</label>
-              <div className="relative mt-1">
-                {formData.gender === "Male" ? (
-                  <Mars
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                    size={18}
-                  />
-                ) : formData.gender === "Female" ? (
-                  <Venus
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                    size={18}
-                  />
-                ) : (
-                  <User
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300"
-                    size={18}
-                  />
-                )}
-                <select
-                  className={`${getInputClass("gender")} pl-10`}
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleChange}
-                >
-                  <option value="">Select Gender</option>
-                  {genderOptions.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {renderError("gender")}
-            </div>
-
-            <div>
-              <label className="font-medium text-gray-700">Civil Status</label>
-              <div className="relative mt-1">
-                <Clipboard
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={18}
-                />
-                <select
-                  className={`${getInputClass("civilStatus")} pl-10`}
-                  name="civilStatus"
-                  value={formData.civilStatus}
-                  onChange={handleChange}
-                >
-                  <option value="">Select Civil Status</option>
-                  {civilStatusOptions.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {renderError("civilStatus")}
-            </div>
-
-            <div>
-              <label className="font-medium text-gray-700">Height</label>
-              <div className="relative mt-1">
-                <FileText
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={18}
-                />
-                <input
-                  className={`${getInputClass("height")} pl-10`}
-                  name="height"
-                  value={formData.height}
-                  onChange={handleChange}
-                  placeholder="Height"
-                />
-              </div>
-              {renderError("height")}
-              <TextHelper text="Specify the height of the inmate in centimeters (cm)" />
-            </div>
-
-            <div>
-              <label className="font-medium text-gray-700">Weight</label>
-              <div className="relative mt-1">
-                <FileText
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={18}
-                />
-                <input
-                  className={`${getInputClass("weight")} pl-10`}
-                  name="weight"
-                  value={formData.weight}
-                  onChange={handleChange}
-                  placeholder="Weight"
-                />
-              </div>
-              {renderError("weight")}
-              <TextHelper text="Specify the weight of the inmate in kilograms (kg)" />
-            </div>
-
+          <div className="grid md:grid-cols-4 gap-3">
+            <SelectField
+              label="Gender"
+              name="gender"
+              value={formData.gender}
+              onChange={handleChange}
+              error={hasError.gender}
+              options={genderOptions}
+            />
+            <SelectField
+              label="Civil Status"
+              name="civilStatus"
+              value={formData.civilStatus}
+              onChange={handleChange}
+              error={hasError.civilStatus}
+              options={civilStatusOptions}
+            />
+            <InputField
+              label="Height (cm)"
+              name="height"
+              value={formData.height}
+              onChange={handleChange}
+              error={hasError.height}
+            />
+            <InputField
+              label="Weight (kg)"
+              name="weight"
+              value={formData.weight}
+              onChange={handleChange}
+              error={hasError.weight}
+            />
           </div>
         </div>
 
-        {/* Offense & Sentence */}
-        <div className="mb-2 rounded-md bg-white">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div>
-              <label className="font-medium text-gray-700">Offense</label>
-              <div className="relative mt-1">
-                <Clipboard
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={18}
-                />
-                <select
-                  className={`${getInputClass("offense")} pl-10`}
-                  name="offense"
-                  value={formData.offense}
-                  onChange={handleChange}
-                >
-                  <option value="">Select Offense</option>
-                  {offenseOptions.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {renderError("offense")}
-            </div>
+        {/* ------------------ OFFENSE ------------------ */}
+        <div className="bg-white border border-gray-300 p-4 space-y-3">
+          <h2 className="text-gray-700 font-bold text-sm mb-1 border-b pb-1 uppercase tracking-wide">
+            Offense & Legal Status
+          </h2>
 
-            <div>
-              <label className="font-medium text-gray-700">Sentence</label>
-              <div className="relative mt-1">
-                <Clipboard
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={18}
-                />
-                <input
-                  className={`${getInputClass("sentence")} pl-10`}
-                  name="sentence"
-                  value={formData.sentence}
-                  onChange={handleChange}
-                  placeholder="e.g. 2 years"
-                />
-              </div>
-              {renderError("sentence")}
-            </div>
-
-            <div>
-              <label className="font-medium text-gray-700">Status</label>
-              <div className="relative mt-1">
-                <Clipboard
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={18}
-                />
-                <select
-                  className={`${getInputClass("status")} pl-10`}
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                >
-                  <option value="">Select Status</option>
-                  {statusOptions.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {renderError("status")}
-            </div>
-
-            <div>
-              <label className="font-medium text-gray-700">Remarks</label>
-              <div className="relative mt-1">
-                <FileText
-                  className="absolute left-3 top-2 text-gray-400"
-                  size={18}
-                />
-                <textarea
-                  className={`${getInputClass("remarks")} pl-10 resize-none`}
-                  name="remarks"
-                  value={formData.remarks}
-                  onChange={handleChange}
-                  placeholder="Any additional notes or remarks"
-                  rows={3}
-                />
-              </div>
-              {renderError("remarks")}
-              <TextHelper text="Optional field for extra information about the inmate" />
-            </div>
-
+          <div className="grid md:grid-cols-3 gap-3">
+            <SelectField
+              label="Offense"
+              name="offense"
+              value={formData.offense}
+              onChange={handleChange}
+              error={hasError.offense}
+              options={offenseOptions}
+            />
+            <InputField
+              label="Sentence"
+              name="sentence"
+              value={formData.sentence}
+              onChange={handleChange}
+              error={hasError.sentence}
+            />
+            <SelectField
+              label="Status"
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+              error={hasError.status}
+              options={statusOptions}
+            />
+            <InputField
+              label="Remarks (Optional)"
+              name="remarks"
+              value={formData.remarks}
+              onChange={handleChange}
+              error={hasError.remarks}
+              className="md:col-span-3"
+            />
           </div>
         </div>
 
-        {/* Mugshots */}
-        <div className="mb-2 rounded-md bg-white p-3">
-          <label className="font-medium text-gray-700">Mugshots</label>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
+        {/* ------------------ MUGSHOTS ------------------ */}
+        <div className="bg-white border border-gray-300 p-4">
+          <h2 className="text-gray-700 font-bold text-sm mb-3 border-b pb-1 uppercase tracking-wide">
+            Mugshots
+          </h2>
+
+          <div className="grid md:grid-cols-3 gap-4">
             {["mugshot_front", "mugshot_left", "mugshot_right"].map((key) => (
-              <div key={key} className="flex flex-col items-center">
-                <label
-                  htmlFor={key}
-                  className="w-24 h-24 border border-gray-300 rounded cursor-pointer flex items-center justify-center overflow-hidden relative bg-gray-50 hover:bg-gray-100"
-                >
-                  {previewImages[key] ? (
-                    <img
-                      src={previewImages[key]}
-                      alt={key}
-                      className="w-full h-full object-cover"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setCurrentImage(previewImages[key]);
-                        setLightboxOpen(true);
-                      }}
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center justify-center text-gray-400">
-                      <ImageIcon size={24} />
-                      <span className="text-xs mt-1">Upload</span>
-                    </div>
-                  )}
-                </label>
-
-                <input
-                  id={key}
-                  type="file"
-                  accept="image/*"
-                  name={key}
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
-              </div>
+              <MugshotUploader
+                key={key}
+                id={key}
+                preview={previews[key]}
+                onChange={handleFile}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentImage(previews[key]);
+                  setLightboxOpen(true);
+                }}
+              />
             ))}
           </div>
         </div>
 
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          disabled={loading}
-        >
-          {loading ? "Registering..." : "Register Inmate"}
-        </button>
+        <div className="flex justify-end items-center mt-4 gap-1">
+          <button
+            onClick={() => window.history.back()}
+            className="border border-gray-300 px-6 text-gray-600 py-3 rounded-md text-sm tracking-wider hover:bg-gray-100 transition font-semibold cursor-pointer"
+          >
+            Go Back
+          </button>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="bg-[#002868] text-white px-6 py-3 rounded-md text-sm tracking-wider hover:bg-blue-900 transition cursor-pointer"
+          >
+            {loading ? "Processing..." : "Register Inmate"}
+          </button>
+        </div>
       </form>
 
-      {lightboxOpen && currentImage && (
+      {lightboxOpen && (
         <Lightbox
           open={lightboxOpen}
           close={() => setLightboxOpen(false)}

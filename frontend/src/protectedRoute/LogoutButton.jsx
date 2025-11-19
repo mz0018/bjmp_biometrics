@@ -40,7 +40,7 @@ const LogoutButton = ({ firstName = "" }) => {
               <div className="flex gap-2">
                 <button
                   onClick={() => setConfirmOpen(false)}
-                  className="px-4 py-2 rounded-sm text-red-500 border hover:bg-red-50 border-red-500 w-full cursor-pointer"
+                  className="px-4 py-2 rounded-sm text-red-500 border hover:bg-red-50 border-red-500 w-full cursor-pointer font-semibold"
                 >
                   Cancel
                 </button>

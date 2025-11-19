@@ -1,4 +1,4 @@
-import { User, Home, MapPin, Calendar, Clock, Database } from "lucide-react";
+import { User, Home, MapPin, Calendar, Clock, Database, Settings } from "lucide-react";
 
 const TableHeaderCell = ({ icon: Icon, label }) => (
   <th className="px-4 py-3 text-sm font-semibold tracking-wide">
@@ -26,9 +26,7 @@ const NoLogsFoundFallback = () => {
                 <TableHeaderCell icon={MapPin} label="Visitor Address" />
                 <TableHeaderCell icon={Calendar} label="Timestamp" />
                 <TableHeaderCell icon={Clock} label="Time Left" />
-                <th className="px-4 py-3 w-[7%] text-center font-semibold tracking-wide whitespace-nowrap">
-                  Actions
-                </th>
+                <TableHeaderCell icon={Settings} label="Actions" />
               </tr>
             </thead>
 

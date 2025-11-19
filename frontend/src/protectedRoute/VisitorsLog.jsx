@@ -12,11 +12,12 @@ import {
   MapPin,
   Calendar,
   Clock,
+  Settings
 } from "lucide-react";
 
 const TableHeaderCell = ({ icon: Icon, label }) => (
-  <th className="px-4 py-3 text-sm font-semibold tracking-wide">
-    <div className="flex items-center gap-1">
+  <th className="px-4 py-3 text-sm font-semibold">
+    <div className="flex items-start gap-1 whitespace-nowrap">
       <Icon className="w-4 h-4" /> {label}
     </div>
   </th>
@@ -25,6 +26,9 @@ const TableHeaderCell = ({ icon: Icon, label }) => (
 const VisitorsLog = () => {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  const [confirmStopOpen, setConfirmStopOpen] = useState(false);
+  const [pendingLog, setPendingLog] = useState(null);
 
   const { isLoading, hasErrors, logs, isWsConnected } = useVisitorsLogs(debouncedSearch);
   const { handleStop, countdowns, stopped } = useSaveToReports(logs);
@@ -73,7 +77,7 @@ const VisitorsLog = () => {
     <section className="p-6 min-h-[100dvh] flex flex-col overflow-hidden">
       <header className="flex flex-col mb-6 gap-3">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full">
             <Search className="absolute left-3 top-2.5 text-gray-400 w-4 h-4" />
             <input
               type="text"
@@ -101,14 +105,12 @@ const VisitorsLog = () => {
               <table className="min-w-full table-fixed border-collapse bg-white">
                 <thead className="bg-bjmp-blue bg-white shadow-lg text-sm capitalize">
                   <tr>
-                    <TableHeaderCell icon={User} label="Visitor Name" />
-                    <TableHeaderCell icon={Home} label="Visited Inmate" />
-                    <TableHeaderCell icon={MapPin} label="Visitor Address" />
-                    <TableHeaderCell icon={Calendar} label="Timestamp" />
+                    <TableHeaderCell icon={User} label="Visitor" />
+                    <TableHeaderCell icon={Home} label="Inmate" />
+                    <TableHeaderCell icon={MapPin} label="Address" />
+                    <TableHeaderCell icon={Calendar} label="Date" />
                     <TableHeaderCell icon={Clock} label="Time Left" />
-                    <th className="px-4 py-3 w-[7%] text-center font-semibold tracking-wide whitespace-nowrap">
-                      Actions
-                    </th>
+                    <TableHeaderCell icon={Settings} label="Actions" />
                   </tr>
                 </thead>
 
@@ -152,10 +154,13 @@ const VisitorsLog = () => {
                         <td className="px-4 py-2 w-[7%] text-center">
                           {!log.isSaveToLogs && !stopped[log._id] && timeLeft > 0 && (
                             <button
-                              onClick={() => handleStop(log)}
-                              className="px-3 py-1 text-xs font-medium text-white bg-red-500 rounded hover:bg-red-600 transition"
+                              onClick={() => {
+                                setPendingLog(log);
+                                setConfirmStopOpen(true);
+                              }}
+                              className="px-3 py-1 text-xs font-medium text-red-500 border border-red-500 rounded hover:bg-red-50 transition cursor-pointer whitespace-nowrap"
                             >
-                              Stop
+                              Stop Time
                             </button>
                           )}
                         </td>
@@ -171,6 +176,36 @@ const VisitorsLog = () => {
           <div className="px-4 py-2 text-sm text-gray-600 bg-gray-50 border-t border-gray-200">
             Showing <span className="font-semibold">{filteredLogs.length}</span>{" "}
             {filteredLogs.length === 1 ? "entry" : "entries"}
+          </div>
+        </div>
+      )}
+
+      {confirmStopOpen && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg w-80">
+            <h2 className="text-lg font-semibold mb-3">Stop Time?</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Are you sure you want to stop the timer for this visitor?
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setConfirmStopOpen(false)}
+                className="px-3 py-1 text-sm border border-gray-300 text-gray-600 font-semibold rounded-md w-full cursor-pointer"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={() => {
+                  handleStop(pendingLog); 
+                  setConfirmStopOpen(false);
+                }}
+                className="px-3 py-1 text-sm bg-red-600 text-white rounded-md w-full cursor-pointer"
+              >
+                Yes, Stop
+              </button>
+            </div>
           </div>
         </div>
       )}
