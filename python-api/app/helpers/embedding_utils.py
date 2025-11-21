@@ -75,28 +75,13 @@ def find_best_match(query_embedding, threshold=0.90):
 
 
 def preload_embeddings(folder="./saved_faces"):
-    """
-    Load all visitor embeddings + metadata into memory at startup.
-    Expects one JSON per visitor with structure:
-    {
-      "visitor_id": "...",
-      "name": "...",
-      ...
-      "images": [
-         {"filename": "...", "embedding": [...]},
-         ...
-      ]
-    }
-    """
-    count = 0
     if not os.path.exists(folder):
         print("saved_faces folder does not exist, skipping preload")
         return
 
+    total_embeddings = 0
     for filename in os.listdir(folder):
-        if not filename.endswith(".json"):
-            continue
-
+        if not filename.endswith(".json"): continue
         json_path = os.path.join(folder, filename)
         try:
             with open(json_path, "r") as f:
@@ -106,27 +91,22 @@ def preload_embeddings(folder="./saved_faces"):
             continue
 
         visitor_id = visitor_info.get("visitor_id")
-        if not visitor_id:
-            continue
+        if not visitor_id: continue
 
-        # Ensure cache entry exists
-        embedding_cache.setdefault(visitor_id, {
-            "meta": {
-                "visitor_id": visitor_id,
-                "name": visitor_info.get("name"),
-                "address": visitor_info.get("address"),
-                "contact": visitor_info.get("contact"),
-                "gender": visitor_info.get("gender"),
-                "inmates": visitor_info.get("inmates", []),
-            },
-            "embeddings": []
-        })
+        embeddings = [img.get("embedding") for img in visitor_info.get("images", []) if img.get("embedding")]
+        if embeddings:
+            embedding_cache[visitor_id] = {
+                "meta": {
+                    "visitor_id": visitor_id,
+                    "name": visitor_info.get("name"),
+                    "address": visitor_info.get("address"),
+                    "contact": visitor_info.get("contact"),
+                    "gender": visitor_info.get("gender"),
+                    "inmates": visitor_info.get("inmates", []),
+                },
+                "embeddings": embeddings
+            }
+            total_embeddings += len(embeddings)
 
-        # Add each image embedding
-        for img in visitor_info.get("images", []):
-            emb = img.get("embedding")
-            if emb:
-                embedding_cache[visitor_id]["embeddings"].append(emb)
-                count += 1
+    print(f"Preloaded {total_embeddings} embeddings across {len(embedding_cache)} visitors")
 
-    print(f"✅ Preloaded {count} embeddings across {len(embedding_cache)} visitors")
