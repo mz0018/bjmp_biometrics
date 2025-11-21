@@ -16,10 +16,11 @@ const AdminDashboard = () => {
           <Outlet />
         </div>
 
-        <footer className="bg-gray-50 border-t border-gray-200 px-6 py-3 text-sm text-gray-600 flex justify-between items-center">
+        <footer className="bg-gray-50 border-t border-gray-200 px-6 py-3 text-sm text-gray-600 flex justify-end items-center space-x-6">
           <span>© 2025 Bureau of Jail Management Biometric System</span>
           <span>Version 1.0</span>
         </footer>
+
       </main>
     </div>
   );

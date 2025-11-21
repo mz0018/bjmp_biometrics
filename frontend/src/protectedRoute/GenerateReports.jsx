@@ -20,7 +20,7 @@ const GenerateReports = () => {
           setIsModalOpen(true);
           setError(false);
         }}
-        className="flex border border-gray-300 items-center justify-center gap-2 font-semibold text-gray-500 px-6 py-2 rounded-sm transition hover:bg-gray-50 cursor-pointer text-sm tracking-wider whitespace-nowrap"
+        className="bg-[#2B282B] flex border border-gray-300 items-center justify-center gap-2 font-semibold text-white px-6 py-2 rounded-sm transition cursor-pointer text-sm tracking-wider whitespace-nowrap"
         aria-label="Open generate reports modal"
       >
         <Text className="w-4 h-4" />

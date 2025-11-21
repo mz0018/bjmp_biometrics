@@ -2,58 +2,41 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import useVisitorsLogs from "../hooks/useVisitorsLogs";
 import useSaveToReports from "../hooks/useSaveToReports";
 import NoLogsFoundFallback from "../fallback/NoLogsFoundFallback";
-import GenerateReports from "../protectedRoute/GenerateReports"
-import {
-  Search,
-  Loader2,
-  AlertCircle,
-  User,
-  Home,
-  MapPin,
-  Calendar,
-  Clock,
-  Settings
-} from "lucide-react";
+import GenerateReports from "../protectedRoute/GenerateReports";
+import { Search, Loader2, AlertCircle, Settings } from "lucide-react";
 
-const TableHeaderCell = ({ icon: Icon, label }) => (
-  <th className="px-4 py-3 text-sm font-semibold">
-    <div className="flex items-start gap-1 whitespace-nowrap">
-      <Icon className="w-4 h-4" /> {label}
-    </div>
-  </th>
+const TableCell = ({ children, className = "", center }) => (
+  <td
+    className={`border-b border-gray-300 px-4 py-2 truncate ${center ? "text-center" : "capitalize"} ${className}`}
+  >
+    {children}
+  </td>
 );
 
 const VisitorsLog = () => {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-
   const [confirmStopOpen, setConfirmStopOpen] = useState(false);
   const [pendingLog, setPendingLog] = useState(null);
 
-  const { isLoading, hasErrors, logs, isWsConnected } = useVisitorsLogs(debouncedSearch);
+  const { isLoading, hasErrors, logs } = useVisitorsLogs(debouncedSearch);
   const { handleStop, countdowns, stopped } = useSaveToReports(logs);
 
+  // debounce search
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearch(search);
-    }, 300);
+    const handler = setTimeout(() => setDebouncedSearch(search), 300);
     return () => clearTimeout(handler);
   }, [search]);
 
   const formatTime = useCallback((ms) => {
     const totalSec = Math.floor(ms / 1000);
-    const min = Math.floor(totalSec / 60);
-    const sec = totalSec % 60;
-    return `${min}:${sec.toString().padStart(2, "0")}`;
+    return `${Math.floor(totalSec / 60)}:${(totalSec % 60).toString().padStart(2, "0")}`;
   }, []);
 
   const filteredLogs = useMemo(
-    () =>
-      logs.filter((log) =>
-        log.visitor_info?.name
-          ?.toLowerCase()
-          .includes(debouncedSearch.toLowerCase())
-      ),
+    () => logs.filter((log) =>
+      log.visitor_info?.name?.toLowerCase().includes(debouncedSearch.toLowerCase())
+    ),
     [logs, debouncedSearch]
   );
 
@@ -73,21 +56,37 @@ const VisitorsLog = () => {
       </div>
     );
 
+  const tableHeaders = [
+    { label: "Visitor", align: "start" },
+    { label: "Inmate", align: "start" },
+    { label: "Address", align: "start" },
+    { label: "Date", align: "start" },
+    { label: "Time Left", align: "start" },
+    { label: "Actions", align: "center", icon: <Settings size={16} /> },
+  ];
+
   return (
-    <section className="p-6 min-h-[100dvh] flex flex-col overflow-hidden">
+    <section className="p-6 min-h-[100dvh] flex flex-col overflow-hidden bg-gray-50">
       <header className="flex flex-col mb-6 gap-3">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-2.5 text-gray-400 w-4 h-4" />
+        <div className="flex flex-col sm:flex-row items-center justify-between w-full gap-3">
+          <div className="relative flex-grow min-w-0 max-w-md">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center text-gray-500">
+              <Search className="w-4 h-4" />
+              <span className="mx-2 h-5 w-px bg-gray-300"></span>
+            </div>
             <input
               type="text"
-              placeholder="Search by visitor name..."
+              placeholder="Search visitors by name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 pr-3 py-2 border border-gray-300 rounded-sm w-full text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-bjmp-yellow"
+              aria-label="Search"
+              className="w-full pl-14 pr-4 py-2.5 border border-gray-300 rounded-md bg-white text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-bjmp-yellow placeholder:text-gray-400 placeholder:tracking-wider text-gray-700 transition"
             />
           </div>
-          <GenerateReports />
+
+          <div className="flex-shrink-0">
+            <GenerateReports />
+          </div>
         </div>
       </header>
 
@@ -96,74 +95,52 @@ const VisitorsLog = () => {
       ) : (
         <div className="shadow-lg rounded-sm border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
-            <div
-              className="overflow-y-auto"
-              style={{
-                maxHeight: "min(800px, 65dvh)",
-              }}
-            >
-              <table className="min-w-full table-fixed border-collapse bg-white">
-                <thead className="bg-bjmp-blue bg-white shadow-lg text-sm capitalize">
+            <div className="overflow-y-auto max-h-[65dvh]">
+              <table className="min-w-full table-fixed border-collapse border border-gray-300 text-sm text-gray-700">
+                <thead className="bg-gray-100">
                   <tr>
-                    <TableHeaderCell icon={User} label="Visitor" />
-                    <TableHeaderCell icon={Home} label="Inmate" />
-                    <TableHeaderCell icon={MapPin} label="Address" />
-                    <TableHeaderCell icon={Calendar} label="Date" />
-                    <TableHeaderCell icon={Clock} label="Time Left" />
-                    <TableHeaderCell icon={Settings} label="Actions" />
+                    {tableHeaders.map((h) => (
+                      <th
+                        key={h.label}
+                        className={`border-b border-gray-300 px-4 py-2 font-medium tracking-wide text-${h.align}`}
+                      >
+                        {h.icon ? <div className="flex items-center justify-center gap-1">{h.icon} {h.label}</div> : h.label}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
 
-                <tbody className="text-gray-700 text-sm leading-relaxed">
+                <tbody>
                   {filteredLogs.map((log, index) => {
-                    const timeLeft =
-                      countdowns[log._id] ??
-                      new Date(log.expiresAt).getTime() - Date.now();
+                    const timeLeft = countdowns[log._id] ?? new Date(log.expiresAt).getTime() - Date.now();
+                    const isSaved = log.isSaveToLogs || stopped[log._id] || timeLeft <= 0;
+                    const rowBg = index % 2 === 0 ? "bg-white" : "bg-gray-50";
 
                     return (
-                      <tr
-                        key={log._id}
-                        className={`hover:bg-bjmp-yellow/10 transition ${
-                          index % 2 === 0 ? "bg-gray-50" : "bg-white"
-                        }`}
-                      >
-                        <td className="px-4 py-2 w-[18%] capitalize truncate">
-                          {log.visitor_info?.name || "Unknown"}
-                        </td>
-                        <td className="px-4 py-2 w-[25%] capitalize truncate">
+                      <tr key={log._id} className={`hover:bg-gray-100 transition ${rowBg}`}>
+                        <TableCell>{log.visitor_info?.name || "Unknown"}</TableCell>
+                        <TableCell>
                           {log.selected_inmate?.inmate_name
                             ? `${log.selected_inmate.inmate_name} (${log.selected_inmate.relationship})`
                             : "N/A"}
-                        </td>
-                        <td className="px-4 py-2 w-[20%] capitalize truncate">
-                          {log.visitor_info?.address || "N/A"}
-                        </td>
-                        <td className="px-4 py-2 w-[20%] truncate">
+                        </TableCell>
+                        <TableCell>{log.visitor_info?.address || "N/A"}</TableCell>
+                        <TableCell>
                           {log.timestamp
-                            ? new Date(log.timestamp).toLocaleString("en-US", {
-                                dateStyle: "medium",
-                                timeStyle: "short",
-                              })
+                            ? new Date(log.timestamp).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })
                             : "—"}
-                        </td>
-                        <td className="px-4 py-2 w-[10%] font-medium text-bjmp-blue truncate">
-                          {log.isSaveToLogs || stopped[log._id] || timeLeft <= 0
-                            ? "Saved to log"
-                            : formatTime(timeLeft)}
-                        </td>
-                        <td className="px-4 py-2 w-[7%] text-center">
-                          {!log.isSaveToLogs && !stopped[log._id] && timeLeft > 0 && (
+                        </TableCell>
+                        <TableCell className="font-medium text-bjmp-blue">{isSaved ? "Saved to log" : formatTime(timeLeft)}</TableCell>
+                        <TableCell center>
+                          {!isSaved && (
                             <button
-                              onClick={() => {
-                                setPendingLog(log);
-                                setConfirmStopOpen(true);
-                              }}
+                              onClick={() => { setPendingLog(log); setConfirmStopOpen(true); }}
                               className="px-3 py-1 text-xs font-medium text-red-500 border border-red-500 rounded hover:bg-red-50 transition cursor-pointer whitespace-nowrap"
                             >
                               Stop Time
                             </button>
                           )}
-                        </td>
+                        </TableCell>
                       </tr>
                     );
                   })}
@@ -172,7 +149,6 @@ const VisitorsLog = () => {
             </div>
           </div>
 
-          {/* footer outside the scroll area so it remains visible */}
           <div className="px-4 py-2 text-sm text-gray-600 bg-gray-50 border-t border-gray-200">
             Showing <span className="font-semibold">{filteredLogs.length}</span>{" "}
             {filteredLogs.length === 1 ? "entry" : "entries"}
@@ -187,7 +163,6 @@ const VisitorsLog = () => {
             <p className="text-sm text-gray-600 mb-4">
               Are you sure you want to stop the timer for this visitor?
             </p>
-
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setConfirmStopOpen(false)}
@@ -195,12 +170,8 @@ const VisitorsLog = () => {
               >
                 Cancel
               </button>
-
               <button
-                onClick={() => {
-                  handleStop(pendingLog); 
-                  setConfirmStopOpen(false);
-                }}
+                onClick={() => { handleStop(pendingLog); setConfirmStopOpen(false); }}
                 className="px-3 py-1 text-sm bg-red-600 text-white rounded-md w-full cursor-pointer"
               >
                 Yes, Stop
@@ -209,7 +180,6 @@ const VisitorsLog = () => {
           </div>
         </div>
       )}
-
     </section>
   );
 };

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import GenerateInmateInfo from "./GenerateInmateInfo";
 import {
-  UserRoundCog,
+  View,
   X,
   User,
   Calendar,
@@ -94,12 +94,12 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
   return (
     <>
       <button
-        className="inline-flex items-center gap-2 bg-[#002868] hover:bg-blue-900 text-white px-4 py-2 rounded-sm transition cursor-pointer"
+        className="text-gray-700 hover:bg-gray-200 px-4 py-2 rounded-sm flex items-center gap-2 cursor-pointer transition"
         onClick={() => setIsModalOpen((p) => !p)}
         aria-label="View user information"
+        title="View user information"
       >
-        <UserRoundCog className="w-4 h-4" />
-        <span>View</span>
+        <View className="w-5 h-5" />
       </button>
 
       {isModalOpen && (

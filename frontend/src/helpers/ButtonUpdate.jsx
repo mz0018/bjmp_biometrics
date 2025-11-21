@@ -185,9 +185,10 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
         className="text-gray-700 hover:bg-gray-200 px-4 py-2 rounded-sm flex items-center gap-2 cursor-pointer transition"
         onClick={handleOpen}
         disabled={isSaving}
+        aria-label="Edit user information"
+        title="Edit user information"
       >
-        {isSaving ? <Loader2 className="animate-spin w-4 h-4" /> : <SquarePen className="w-4 h-4" />}
-        Edit
+        {isSaving ? <Loader2 className="animate-spin w-4 h-4" /> : <SquarePen className="w-5 h-5" />}
       </button>
 
       {isModalOpen && (

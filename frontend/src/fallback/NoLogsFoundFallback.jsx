@@ -1,58 +1,58 @@
 import { User, Home, MapPin, Calendar, Clock, Database, Settings } from "lucide-react";
 
-const TableHeaderCell = ({ icon: Icon, label }) => (
-  <th className="px-4 py-3 text-sm font-semibold tracking-wide">
-    <div className="flex items-center gap-1">
-      <Icon className="w-4 h-4" /> {label}
-    </div>
-  </th>
-);
-
 const NoLogsFoundFallback = () => {
+  const tableHeaders = [
+    { label: "Visitor", align: "start" },
+    { label: "Inmate", align: "start" },
+    { label: "Address", align: "start" },
+    { label: "Date", align: "start" },
+    { label: "Time Left", align: "start" },
+    { label: "Actions", align: "center", icon: <Settings size={16} /> },
+  ];
+
   return (
     <div className="shadow-lg rounded-sm border border-gray-200 overflow-hidden">
       <div className="overflow-x-auto">
-        <div
-          className="overflow-y-auto"
-          style={{
-            maxHeight: "min(800px, 65dvh)",
-          }}
-        >
-          <table className="min-w-full table-fixed border-collapse bg-white">
-            <thead className="bg-bjmp-blue bg-white shadow-lg text-sm capitalize">
+        <div className="overflow-y-auto max-h-[65dvh]">
+          <table className="min-w-full table-fixed border-collapse border border-gray-300 text-sm text-gray-700">
+            <thead className="bg-gray-100">
               <tr>
-                <TableHeaderCell icon={User} label="Visitor Name" />
-                <TableHeaderCell icon={Home} label="Visited Inmate" />
-                <TableHeaderCell icon={MapPin} label="Visitor Address" />
-                <TableHeaderCell icon={Calendar} label="Timestamp" />
-                <TableHeaderCell icon={Clock} label="Time Left" />
-                <TableHeaderCell icon={Settings} label="Actions" />
+                {tableHeaders.map((h) => (
+                  <th
+                    key={h.label}
+                    className={`border-b border-gray-300 px-4 py-2 font-medium tracking-wide text-${h.align}`}
+                  >
+                    {h.icon ? (
+                      <div className="flex items-center justify-center gap-1">
+                        {h.icon} {h.label}
+                      </div>
+                    ) : (
+                      h.label
+                    )}
+                  </th>
+                ))}
               </tr>
             </thead>
 
-            <tbody className="text-gray-700 text-sm leading-relaxed">
-            <tr>
-                <td colSpan="6" className="px-4 py-10 text-center">
-                <div className="flex flex-col items-center justify-center text-gray-500">
-                    <div className="relative inline-block mb-3">
-                    <Database className="w-20 h-20 text-gray-200" />
-                    <User
+            <tbody>
+              <tr>
+                <td colSpan={tableHeaders.length} className="border-b border-gray-300 px-4 py-10 text-center">
+                  <div className="flex flex-col items-center justify-center text-gray-500 gap-2">
+                    <div className="relative inline-block">
+                      <Database className="w-20 h-20 text-gray-200 animate-pulse" />
+                      <User
                         className="w-10 h-10 text-bjmp-blue absolute bottom-0 left-0 bg-white rounded-full p-1 border border-gray-200 shadow-sm"
                         strokeWidth={2}
-                    />
+                      />
                     </div>
-
-                    <p className="text-gray-500 text-lg font-semibold">
-                    No Data Available
-                    </p>
+                    <p className="text-gray-500 text-lg font-semibold">No Data Available</p>
                     <span className="text-xs text-gray-400">
-                    There is no data to show you right now.
+                      There is no visitor log data to show you right now.
                     </span>
-                </div>
+                  </div>
                 </td>
-            </tr>
+              </tr>
             </tbody>
-
           </table>
         </div>
       </div>

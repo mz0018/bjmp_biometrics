@@ -1,73 +1,50 @@
-import { User, FileText, Phone, Settings, Database } from "lucide-react";
+import { Settings, Database } from "lucide-react";
 
 const NoRecordsFoundFallback = ({ activeTab }) => {
+  const tableHeaders = activeTab === "inmates"
+    ? [
+        { label: "Inmate Name", align: "start" },
+        { label: "Case Number", align: "start" },
+        { label: "Status", align: "start" },
+        { label: "Options", align: "center", icon: <Settings size={16} /> },
+      ]
+    : [
+        { label: "Visitor Name", align: "start" },
+        { label: "Contact", align: "start" },
+        { label: "Options", align: "center", icon: <Settings size={16} /> },
+      ];
+
   return (
-    <table className="min-w-full table-fixed border-collapse bg-white">
-      <thead className="bg-white shadow-lg text-sm capitalize">
+    <table className="min-w-full table-fixed border-collapse border border-gray-300 text-sm text-gray-700">
+      <thead className="bg-gray-100">
         <tr>
-          {activeTab === "inmates" ? (
-            <>
-              <th className="px-4 py-3 text-start font-semibold tracking-wide">
-                <div className="flex items-center gap-2">
-                  <User size={16} /> Inmate Name
-                </div>
-              </th>
-              <th className="px-4 py-3 text-start font-semibold tracking-wide">
-                <div className="flex items-center gap-2">
-                  <FileText size={16} /> Case Number
-                </div>
-              </th>
-              <th className="px-4 py-3 w-[8%] text-center font-semibold tracking-wide">
-                <div className="flex items-center justify-center gap-2">
-                  <Settings size={16} /> Options
-                </div>
-              </th>
-            </>
-          ) : (
-            <>
-              <th className="px-4 py-3 text-start font-semibold tracking-wide">
-                <div className="flex items-center gap-2">
-                  <User size={16} /> Visitor Name
-                </div>
-              </th>
-              <th className="px-4 py-3 text-start font-semibold tracking-wide">
-                <div className="flex items-center gap-2">
-                  <Phone size={16} /> Contact
-                </div>
-              </th>
-              <th className="px-4 py-3 w-[8%] text-center font-semibold tracking-wide">
-                <div className="flex items-center justify-center gap-2">
-                  <Settings size={16} /> Options
-                </div>
-              </th>
-            </>
-          )}
+          {tableHeaders.map((h) => (
+            <th
+              key={h.label}
+              className={`border-b border-gray-300 px-4 py-2 text-${h.align} font-medium tracking-wide`}
+            >
+              {h.icon ? <div className="flex items-center justify-center gap-1">{h.icon} {h.label}</div> : h.label}
+            </th>
+          ))}
         </tr>
       </thead>
 
-      <tbody className="text-gray-700 text-sm leading-relaxed">
-            <tr>
-                <td colSpan="6" className="px-4 py-10 text-center">
-                <div className="flex flex-col items-center justify-center text-gray-500">
-                    <div className="relative inline-block mb-3">
-                    <Database className="w-20 h-20 text-gray-200" />
-                    <User
-                        className="w-10 h-10 text-bjmp-blue absolute bottom-0 left-0 bg-white rounded-full p-1 border border-gray-200 shadow-sm"
-                        strokeWidth={2}
-                    />
-                    </div>
-
-                    <p className="text-gray-500 text-lg font-semibold">
-                    No Data Available
-                    </p>
-                    <span className="text-xs text-gray-400 mt-1">
-                      {activeTab === "inmates"
-                        ? "There is no inmate data to show you right now."
-                        : "There is no visitor data to show you right now."}
-                    </span>
-                </div>
-                </td>
-            </tr>
+      <tbody>
+        <tr>
+          <td colSpan={tableHeaders.length} className="border-b border-gray-300 px-4 py-10 text-center">
+            <div className="flex flex-col items-center justify-center text-gray-500 gap-2">
+              <div className="relative inline-block">
+                <Database className="w-20 h-20 text-gray-200 animate-pulse" />
+              </div>
+              <p className="text-gray-500 text-lg font-semibold">No Data Available</p>
+              <span className="text-xs text-gray-400">
+                {activeTab === "inmates"
+                  ? "There is no inmate data to show you right now."
+                  : "There is no visitor data to show you right now."}
+              </span>
+            </div>
+          </td>
+        </tr>
       </tbody>
     </table>
   );

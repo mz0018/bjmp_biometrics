@@ -11,6 +11,7 @@ const convertBufferToBase64 = (buffer) => {
 const useUserManagement = () => {
   const [activeTab, setActiveTab] = useState("inmates");
   const [searchQuery, setSearchQuery] = useState("");
+  const [filterBy, setFilterBy] = useState("All");
 
   const [inmatesList, setInmatesList] = useState([]);
   const [visitorsList, setVisitorsList] = useState([]);
@@ -26,9 +27,12 @@ const useUserManagement = () => {
     const fetchData = async () => {
       try {
         if (activeTab === "inmates") {
-          const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/listofinmates`, {
-            params: { search: debouncedQuery },
-          });
+          const res = await axios.get(
+            `${import.meta.env.VITE_API_URL}/admin/listofinmates`,
+            {
+              params: { search: debouncedQuery },
+            }
+          );
 
           const inmatesWithImages = res.data.map((inmate) => ({
             ...inmate,
@@ -39,9 +43,12 @@ const useUserManagement = () => {
 
           setInmatesList(inmatesWithImages);
         } else {
-          const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/visitorsLogs`, {
-            params: { search: debouncedQuery },
-          });
+          const res = await axios.get(
+            `${import.meta.env.VITE_API_URL}/admin/visitorsLogs`,
+            {
+              params: { search: debouncedQuery },
+            }
+          );
           setVisitorsList(res.data);
         }
       } catch (err) {
@@ -52,9 +59,37 @@ const useUserManagement = () => {
     fetchData();
   }, [activeTab, debouncedQuery]);
 
-  const filteredData = activeTab === "inmates" ? inmatesList : visitorsList;
+  const applyFiltering = () => {
+    if (activeTab === "inmates") {
+      if (filterBy === "All") return inmatesList;
 
-  return { activeTab, setActiveTab, searchQuery, setSearchQuery, filteredData };
+      return inmatesList.filter(
+        (i) => i.status && i.status.toLowerCase() === filterBy.toLowerCase()
+      );
+    }
+
+    if (activeTab === "visitors") {
+      if (filterBy === "All") return visitorsList;
+
+      return visitorsList.filter(
+        (v) =>
+          v.visitor_info.gender &&
+          v.visitor_info.gender.toLowerCase() === filterBy.toLowerCase()
+      );
+    }
+  };
+
+  const filteredData = applyFiltering();
+
+  return {
+    activeTab,
+    setActiveTab,
+    searchQuery,
+    setSearchQuery,
+    filterBy,
+    setFilterBy,
+    filteredData,
+  };
 };
 
 export default useUserManagement;

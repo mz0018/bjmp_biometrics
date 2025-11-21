@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import useRegisterFace from "../hooks/useRegisterFace";
 import TakenPictureFallback from "../fallback/TakenPictureFallbackj";
 import SelectInmates from "../helpers/SelectInmates";
@@ -8,7 +8,7 @@ import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 
 const inputBaseClasses = "w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-[#002868] placeholder-[#002868]";
-const buttonBaseClasses = "px-4 py-2 rounded-md flex items-center justify-center gap-2 text-white transition cursor-pointer tracking-wide";
+const buttonBaseClasses = "px-4 py-2 rounded-md flex items-center justify-center gap-2 text-white transition cursor-pointer tracking-wide text-sm";
 
 const InputField = ({ label, icon: Icon, value, onChange, hasError, helperText, placeholder, type = "text" }) => (
   <div>
@@ -24,7 +24,7 @@ const InputField = ({ label, icon: Icon, value, onChange, hasError, helperText, 
       />
     </div>
     {helperText && !hasError && <p className="text-gray-500 text-xs mt-1">{helperText}</p>}
-    {hasError && <p className="text-red-500 text-sm mt-1 p-2">{hasError}</p>}
+    {hasError && <p className="text-red-500 text-sm mt-1">{hasError}</p>}
   </div>
 );
 
@@ -59,38 +59,28 @@ const RegisterFace = () => {
   const handleDeleteImage = (index) => setCapturedImages(prev => prev.filter((_, i) => i !== index));
   const handleRetakeAll = () => window.confirm("Are you sure you want to remove all captured images?") && setCapturedImages([]);
 
+  const genderIcon = {
+    Male: Mars,
+    Female: Venus,
+  }[visitorGender] || Mars;
+
+  const relationshipOptions = ["Father","Mother","Brother","Sister","Son","Daughter","Spouse","Friend","Other"];
+
   return (
-    <section className="sm:p-6 min-h-[100dvh] flex flex-col">
-      {/* ---------------- Visitor Information ---------------- */}
-      <div className="max-w-5xl mx-auto w-full p-6 md:p-8 space-y-3">
-        <h2 className="text-2xl font-semibold text-[#002868] border-b border-gray-200 pb-2">1. Visitor Information</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <InputField
-            label="Full Name"
-            icon={User}
-            placeholder="e.g. Dina Lee Go"
-            helperText="Enter the visitor’s name exactly as it appears on their ID."
-            value={visitorName}
-            onChange={e => setVisitorName(e.target.value)}
-            hasError={hasErrors.visitor_name}
-          />
-          <InputField
-            label="Contact"
-            icon={Phone}
-            placeholder="e.g. +63 912 345 6789"
-            helperText="Use a valid Philippine mobile number."
-            value={visitorContact}
-            onChange={e => setVisitorContact(e.target.value)}
-            hasError={hasErrors.visitor_contact}
-          />
+    <section className="sm:p-6 min-h-[100dvh] flex flex-col space-y-6">
+
+      {/* Visitor Information */}
+      <div className="max-w-5xl mx-auto w-full p-6 md:p-8 space-y-4 bg-white border border-gray-200 rounded-md shadow-sm">
+        <h2 className="text-xl font-semibold text-[#002868] border-b border-gray-200 pb-2">1. Visitor Information</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <InputField label="Full Name" icon={User} placeholder="e.g. Dina Lee Go" helperText="Enter the visitor’s name exactly as it appears on their ID." value={visitorName} onChange={e => setVisitorName(e.target.value)} hasError={hasErrors.visitor_name} />
+          <InputField label="Contact" icon={Phone} placeholder="e.g. +63 912 345 6789" helperText="Use a valid Philippine mobile number." value={visitorContact} onChange={e => setVisitorContact(e.target.value)} hasError={hasErrors.visitor_contact} />
 
           {/* Gender */}
           <div>
             <label className="font-medium text-gray-700">Gender</label>
             <div className="relative mt-1">
-              {(visitorGender === "Male" && <Mars className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />) ||
-               (visitorGender === "Female" && <Venus className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />) ||
-               (<Mars className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={18} />)}
+              {React.createElement(genderIcon, { className: "absolute left-3 top-1/2 -translate-y-1/2 text-gray-400", size: 18 })}
               <select
                 value={visitorGender}
                 onChange={e => setVisitorGender(e.target.value)}
@@ -102,15 +92,7 @@ const RegisterFace = () => {
             </div>
           </div>
 
-          <InputField
-            label="Address"
-            icon={MapPin}
-            placeholder="e.g. 123 Sampaguita St., Brgy. San Isidro, Quezon City"
-            helperText="Enter the visitor’s complete address as shown on their ID."
-            value={visitorAddress}
-            onChange={e => setVisitorAddress(e.target.value)}
-            hasError={hasErrors.visitor_address}
-          />
+          <InputField label="Address" icon={MapPin} placeholder="e.g. 123 Sampaguita St., Brgy. San Isidro, Quezon City" helperText="Enter the visitor’s complete address as shown on their ID." value={visitorAddress} onChange={e => setVisitorAddress(e.target.value)} hasError={hasErrors.visitor_address} />
         </div>
 
         {/* Inmates Section */}
@@ -126,15 +108,11 @@ const RegisterFace = () => {
                 <div className="flex items-center gap-2">
                   <select
                     value={v.relationship ?? ""}
-                    onChange={e => setVisitorListOfInmates(prev => {
-                      const updated = [...prev];
-                      updated[i] = { ...updated[i], relationship: e.target.value };
-                      return updated;
-                    })}
+                    onChange={e => setVisitorListOfInmates(prev => prev.map((item, idx) => idx === i ? { ...item, relationship: e.target.value } : item))}
                     className="border border-gray-300 rounded px-2 py-1 text-sm bg-white"
                   >
                     <option value="">Relationship</option>
-                    {["Father","Mother","Brother","Sister","Son","Daughter","Spouse","Friend","Other"].map(rel => <option key={rel} value={rel}>{rel}</option>)}
+                    {relationshipOptions.map(rel => <option key={rel} value={rel}>{rel}</option>)}
                   </select>
                   <button type="button" onClick={() => setVisitorListOfInmates(prev => prev.filter((_, idx) => idx !== i))} className="text-red-500 hover:text-red-600 transition">
                     <Trash2 size={16} />
@@ -153,35 +131,31 @@ const RegisterFace = () => {
           <SelectInmates
             setIsSelectInmateClicked={setIsSelectInmateClicked}
             isSelectInmateClicked={isSelectInmateClicked}
-            onAdd={selected =>
-              setVisitorListOfInmates(
-                selected.map(i => ({
-                  id: i._id,
-                  inmate_name: `${i.firstname}${i.middleInitial ? " " + i.middleInitial + "." : ""} ${i.lastname}`.trim(),
-                  caseNumber: i.caseNumber,
-                  relationship: "",
-                }))
-              )
-            }
+            onAdd={selected => setVisitorListOfInmates(selected.map(i => ({
+              id: i._id,
+              inmate_name: `${i.firstname}${i.middleInitial ? " " + i.middleInitial + "." : ""} ${i.lastname}`.trim(),
+              caseNumber: i.caseNumber,
+              relationship: "",
+            })))}
           />
         </div>
       </div>
 
-      {/* ---------------- Face Recognition ---------------- */}
-      <div className="max-w-5xl mx-auto w-full p-6 md:p-8 space-y-3">
-        <h2 className="text-2xl font-semibold text-[#002868] border-b border-gray-200 pb-2">2. Face Recognition Step</h2>
-        <div className="w-full flex flex-col items-center">
+      {/* Face Recognition */}
+      <div className="max-w-5xl mx-auto w-full p-6 md:p-8 space-y-4 bg-white border border-gray-200 rounded-md shadow-sm">
+        <h2 className="text-xl font-semibold text-[#002868] border-b border-gray-200 pb-2">2. Face Recognition Step</h2>
+        <div className="w-full flex flex-col items-center space-y-4">
           {capturedImages.length === 0 ? (
             <TakenPictureFallback capturedImages={capturedImages} setCapturedImages={setCapturedImages} />
           ) : (
             <>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 mt-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                 {capturedImages.map((img, index) => (
-                  <div key={index} className="relative group overflow-hidden">
+                  <div key={index} className="relative group overflow-hidden rounded-md border border-gray-200 bg-[#232023]">
                     <img
                       src={img}
                       alt={`Captured ${index + 1}`}
-                      className="w-full aspect-square rounded-md object-contain cursor-pointer transition"
+                      className="w-full aspect-square object-cover cursor-pointer transition block"
                       onClick={() => { setLightboxIndex(index); setIsLightboxOpen(true); }}
                     />
                     <button onClick={() => handleDeleteImage(index)} className="absolute top-2 right-2 bg-black/50 text-white p-1 rounded opacity-0 group-hover:opacity-100 transition" title="Delete photo">
@@ -190,7 +164,7 @@ const RegisterFace = () => {
                   </div>
                 ))}
               </div>
-              <button onClick={handleRetakeAll} className="mt-4 flex items-center gap-2 text-red-500 hover:text-red-600 transition text-sm font-medium">
+              <button onClick={handleRetakeAll} className="flex items-center gap-2 text-red-500 hover:text-red-600 transition font-medium">
                 <RotateCcw size={16} /> Retake All Photos
               </button>
             </>
@@ -198,7 +172,7 @@ const RegisterFace = () => {
         </div>
 
         <div className="flex flex-col sm:flex-row justify-end items-start gap-4 mt-4">
-          <button onClick={() => { startCamera(); setIsCameraOpen(true); }} className={`px-4 py-2 rounded-md flex items-center justify-center gap-2 text-[#002868] border border-[#002868] hover:bg-blue-50 cursor-pointer font-semibold tracking-wide`}>
+          <button onClick={() => { startCamera(); setIsCameraOpen(true); }} className="px-4 py-2 rounded-md flex items-center justify-center gap-2 text-gray-500 border border-gray-300 hover:bg-gray-50 cursor-pointer font-semibold tracking-wide text-sm">
             <Camera size={18} /> Open Camera
           </button>
           <button
@@ -211,32 +185,41 @@ const RegisterFace = () => {
         </div>
       </div>
 
-      {/* ---------------- Camera Modal ---------------- */}
+      {/* Camera Modal */}
       {isCameraOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-          <div className="rounded-md shadow-lg w-full max-h-[90vh] max-w-md flex flex-col">
-            <div className="bg-[#232023] px-4 py-4 sm:px-6 sm:py-5 rounded-t-md shadow-md sticky top-0 z-10 flex justify-between items-center">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
+
+            {/* Header */}
+            <div className="px-5 py-4 flex justify-between items-center border-b border-gray-300">
               <div>
-                <h2 className="text-left text-lg sm:text-xl font-semibold text-white">Face Capture</h2>
-                <span className="block text-xs text-gray-300 mt-1">Upload 3 to 4 clear images for optimal facial recognition</span>
+                <h2 className="text-lg font-semibold">Face Capture</h2>
+                <p className="text-gray-600 text-xs mt-1">Upload 3 to 4 clear images for optimal facial recognition</p>
               </div>
-              <button onClick={() => setIsCameraOpen(false)} className="text-white hover:text-gray-300 transition" aria-label="Close">
-                <X className="w-5 h-5" />
-              </button>
+              <button onClick={() => setIsCameraOpen(false)} className="text-gray-600 transition"><X size={20} /></button>
             </div>
-            <div className="bg-white flex-grow max-h-[70vh] p-4 sm:p-6 overflow-y-auto flex flex-col items-center">
-              <div className="relative w-full h-[50vh] bg-gray-200 overflow-hidden rounded-md">
+
+            {/* Body */}
+            <div className="flex-grow p-4 sm:p-6 flex flex-col items-center space-y-4 overflow-y-auto">
+              <div className="relative w-full h-[50vh] bg-gray-100 rounded-lg overflow-hidden border border-gray-300">
                 <video ref={videoRef} autoPlay playsInline className="absolute top-0 left-0 w-full h-full object-cover" />
                 <canvas ref={canvasRef} width="320" height="240" className="hidden" />
               </div>
               {capturedImages.length > 0 && (
-                <div className="flex gap-2 mt-4 overflow-x-auto w-full">
-                  {capturedImages.map((img, index) => <img key={index} src={img} alt={`Preview ${index + 1}`} className="w-16 h-16 object-contain" />)}
+                <div className="flex gap-2 mt-2 overflow-x-auto w-full">
+                  {capturedImages.map((img, index) => (
+                    <img key={index} src={img} alt={`Preview ${index + 1}`} className="w-16 h-16 object-cover rounded-md border border-gray-200" />
+                  ))}
                 </div>
               )}
             </div>
-            <div className="bg-[#232023] px-4 py-3 rounded-b-md flex justify-center items-center space-x-2">
-              <button onClick={captureImage} className="inline-flex items-center gap-2 px-4 py-2 rounded-sm text-white bg-red-500 hover:bg-red-600 transition text-sm">
+
+            {/* Footer */}
+            <div className="px-5 py-3 border-t border-gray-200 flex justify-center gap-4">
+              <button onClick={() => setIsCameraOpen(false)} className="inline-flex items-center justify-center gap-1 px-6 py-3 rounded-sm text-gray-600 border border-gray-200 hover:bg-gray-50 transition font-medium w-full cursor-pointer">
+                Close
+              </button>
+              <button onClick={captureImage} className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-sm text-white bg-red-500 hover:bg-red-600 transition font-medium w-full cursor-pointer">
                 <CameraOff size={18} /> Capture
               </button>
             </div>
@@ -244,14 +227,9 @@ const RegisterFace = () => {
         </div>
       )}
 
-      {/* ---------------- Lightbox ---------------- */}
+      {/* Lightbox */}
       {isLightboxOpen && (
-        <Lightbox
-          open={isLightboxOpen}
-          close={() => setIsLightboxOpen(false)}
-          index={lightboxIndex}
-          slides={capturedImages.map(img => ({ src: img }))}
-        />
+        <Lightbox open={isLightboxOpen} close={() => setIsLightboxOpen(false)} index={lightboxIndex} slides={capturedImages.map(img => ({ src: img }))} />
       )}
     </section>
   );
