@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import axios from "axios";
 import GenerateInmateInfo from "./GenerateInmateInfo";
 import {
   View,
@@ -25,6 +26,8 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [photoIndex, setPhotoIndex] = useState(0);
+  const [visitLogs, setVisitLogs] = useState([]);
+  const [isVisitLoading, setIsVisitLoading] = useState(false);
 
   const formatDate = (d) => (d ? new Date(d).toLocaleDateString() : "N/A");
 
@@ -46,10 +49,39 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
 
   useEffect(() => {
     document.body.style.overflow = isModalOpen ? "hidden" : "auto";
+
+    // Fetch visit history when opening visitor modal (if we have visitor_id)
+    if (isModalOpen && userType === "visitor" && visitor?.visitor_id) {
+      const controller = new AbortController();
+      const fetchHistory = async () => {
+        try {
+          setIsVisitLoading(true);
+          const res = await axios.get(
+            `${import.meta.env.VITE_API_URL}/admin/visitorsLogs`,
+            { params: { visitor_id: visitor.visitor_id }, signal: controller.signal }
+          );
+          setVisitLogs(res.data || []);
+        } catch (err) {
+          if (err?.name === "CanceledError" || err?.code === "ERR_CANCELED") return;
+          console.error("Failed to fetch visit history:", err);
+          setVisitLogs([]);
+        } finally {
+          setIsVisitLoading(false);
+        }
+      };
+
+      fetchHistory();
+
+      return () => {
+        try { controller.abort(); } catch (e) {}
+        document.body.style.overflow = "auto";
+      };
+    }
+
     return () => {
       document.body.style.overflow = "auto";
     };
-  }, [isModalOpen]);
+  }, [isModalOpen, userType, visitor]);
 
   const personalLeft = [
     { label: "First Name", value: inmate?.firstname, icon: <User className="w-4 h-4" /> },
@@ -245,6 +277,40 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
               {userType === "visitor" && visitor && (
                 <div className="grid grid-cols-1 gap-4">
                   {visitorItems.map((it) => renderProfileItem(it.label, it.value, null))}
+
+                  {/* Visit history: count + dated entries */}
+                  <div>
+                    <h3 className="text-left font-semibold text-gray-900 tracking-wider uppercase text-sm sm:text-base">
+                      Visit History
+                    </h3>
+                    <hr className="border-gray-400 mt-2 mb-3" />
+
+                    {isVisitLoading ? (
+                      <p className="text-sm text-gray-500">Loading history...</p>
+                    ) : visitLogs && visitLogs.length > 0 ? (
+                      <div className="space-y-2 text-sm text-gray-700">
+                        <div className="flex items-center justify-between">
+                          <div className="font-medium">Total visits</div>
+                          <div className="text-gray-600">{visitLogs.length}</div>
+                        </div>
+
+                        <div className="max-h-44 overflow-y-auto mt-2 border border-gray-100 rounded p-2 bg-gray-50">
+                          {visitLogs.map((vl) => (
+                            <div key={vl._id} className="flex items-center justify-between py-1 px-2 border-b last:border-b-0">
+                              <div className="truncate">
+                                {vl.selected_inmate?.inmate_name || (vl.visitor_info?.inmates && vl.visitor_info.inmates[0]?.inmate_name) || "—"}
+                              </div>
+                              <div className="text-gray-500 text-xs ml-4 whitespace-nowrap">
+                                {vl.timestamp ? new Date(vl.timestamp).toLocaleString() : "—"}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500 italic">No visit history found.</p>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

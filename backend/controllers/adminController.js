@@ -177,14 +177,18 @@ export const signinAdmin = async (req, res) => {
 
 export const getVisitorsLog = async (req, res) => {
   try {
-    const { search } = req.query;
+    const { search, visitor_id } = req.query;
 
-    const filter = search
-      ? { "visitor_info.name": { $regex: search, $options: "i" } }
-      : {};
+
+    let filter = {};
+    if (visitor_id) {
+      filter = { visitor_id };
+    } else if (search) {
+      filter = { "visitor_info.name": { $regex: search, $options: "i" } };
+    }
 
     let query = RecognitionLog.find(filter).sort({ timestamp: -1 });
-    if (!search) query = query.limit(15);
+    if (!search && !visitor_id) query = query.limit(15);
 
     const logs = await query.lean();
 
