@@ -275,14 +275,11 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
 
               {/* VISITOR VIEW */}
               {userType === "visitor" && visitor && (
-                <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-1">
                   {visitorItems.map((it) => renderProfileItem(it.label, it.value, null))}
 
-                  {/* Visit history: count + dated entries */}
                   <div>
-                    <h3 className="text-left font-semibold text-gray-900 tracking-wider uppercase text-sm sm:text-base">
-                      Visit History
-                    </h3>
+                    
                     <hr className="border-gray-400 mt-2 mb-3" />
 
                     {isVisitLoading ? (
@@ -317,7 +314,7 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
 
             {/* Footer with Close and Action Buttons */}
             <div className="border-t border-gray-300 bg-white px-4 py-3 rounded-b-md flex flex-col space-y-1">
-              {userType === "inmate" && (
+              
                 <div className="flex justify-between w-full gap-1">
                   <button
                     className="border border-gray-300 hover:bg-gray-50 text-gray-500 font-semibold px-6 py-3 rounded-sm text-sm transition w-full cursor-pointer"
@@ -325,9 +322,10 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
                   >
                     Close
                   </button>
+                  {userType === "inmate" && (
                   <GenerateInmateInfo inmate={inmate} />
+                  )}
                 </div>
-              )}
             </div>
           </div>
         </div>

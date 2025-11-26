@@ -236,40 +236,53 @@ export const generateReports = async (req, res) => {
     if (!from || !to) {
       return res.status(400).json({
         success: false,
-        message: "Missing date range",
+        message: "Both 'from' and 'to' dates are required."
       });
     }
 
     const fromDate = new Date(from);
     const toDate = new Date(to);
-    toDate.setHours(23, 59, 59, 999);
 
-    const logs = await RecognitionLog.find({
-      timestamp: { $gte: fromDate, $lte: toDate },
-      isSaveToLogs: true,
-    })
-      .select(
-        "visitor_info.name visitor_info.address visitor_info.contact selected_inmate.inmate_name selected_inmate.relationship timestamp"
-      )
-      .sort({ timestamp: -1 });
-
-    if (!logs.length) {
-      return res.status(200).json({
+    if (isNaN(fromDate) || isNaN(toDate)) {
+      return res.status(400).json({
         success: false,
-        message: "No data found for selected range.",
-        data: [],
+        message: "Invalid date format."
       });
     }
+
+    if (fromDate > toDate) {
+      return res.status(400).json({
+        success: false,
+        message: "'from' date cannot be later than 'to' date."
+      });
+    }
+
+    fromDate.setHours(0, 0, 0, 0);         
+    toDate.setHours(23, 59, 59, 999);   
+
+    const logs = await RecognitionLog.find({
+      timestamp: {
+        $gte: fromDate,
+        $lte: toDate,
+      }
+    });
+
+    console.log("FOUND LOGS:", logs);
 
     return res.status(200).json({
       success: true,
       data: logs,
+      message: logs.length === 0 
+        ? "No records found for the selected date range."
+        : "Report generated successfully."
     });
+
   } catch (err) {
     console.error("Error in generateReports:", err);
-    res.status(500).json({
+
+    return res.status(500).json({
       success: false,
-      message: "Server error",
+      message: "Server error"
     });
   }
 };

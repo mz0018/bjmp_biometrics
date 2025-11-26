@@ -97,14 +97,14 @@ const Signin = () => {
           error={errors.password || errors.username}
         />
 
-        <div className="w-full flex justify-end">
+        {/* <div className="w-full flex justify-end">
           <a
             href="/forgot-password"
             className="text-xs text-[#002868] hover:font-semibold flex items-center gap-1 tracking-widest transition"
           >
             Forgot your password?
           </a>
-        </div>
+        </div> */}
 
         <button
           type="submit"

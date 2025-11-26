@@ -1,41 +1,52 @@
 import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
 
 const exportToExcel = (logs, fromDate, toDate) => {
   const formattedLogs = logs.map((log, index) => ({
     "No.": index + 1,
-    "Visitor Name": log.visitor_info.name,
-    "Address": log.visitor_info.address,
-    "Contact": log.visitor_info.contact,
+    "Visitor Name": log.visitor_info?.name || "N/A",
+    "Address": log.visitor_info?.address || "N/A",
+    "Contact": log.visitor_info?.contact || "N/A",
     "Inmate Name": log.selected_inmate?.inmate_name || "N/A",
     "Relationship": log.selected_inmate?.relationship || "N/A",
     "Date & Time": new Date(log.timestamp).toLocaleString(),
   }));
 
-  const worksheet = XLSX.utils.json_to_sheet(formattedLogs, {
-    origin: "A5",
-  });
-
-  XLSX.utils.sheet_add_aoa(worksheet, [
+  const worksheet = XLSX.utils.aoa_to_sheet([
     ["Visitor Logs Report"],
     [`Date Range: ${fromDate} to ${toDate}`],
     [],
-  ], { origin: "A1" });
+    [
+      "No.",
+      "Visitor Name",
+      "Address",
+      "Contact",
+      "Inmate Name",
+      "Relationship",
+      "Date & Time"
+    ]
+  ]);
+
+  XLSX.utils.sheet_add_json(worksheet, formattedLogs, {
+    origin: "A5",
+    skipHeader: true,
+  });
 
   worksheet["!cols"] = [
-    { wch: 5 },   
-    { wch: 20 },  
-    { wch: 25 },  
-    { wch: 15 },  
-    { wch: 20 }, 
-    { wch: 15 }, 
-    { wch: 25 },  
+    { wch: 5 },
+    { wch: 20 },
+    { wch: 25 },
+    { wch: 15 },
+    { wch: 20 },
+    { wch: 15 },
+    { wch: 25 },
   ];
 
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Visitor Report");
+  worksheet["!merges"] = [
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } },
+    { s: { r: 1, c: 0 }, e: { r: 1, c: 6 } },
+  ];
 
-  const headerCells = ["A5", "B5", "C5", "D5", "E5", "F5", "G5"];
+  const headerCells = ["A4", "B4", "C4", "D4", "E4", "F4", "G4"];
   headerCells.forEach((cell) => {
     if (worksheet[cell]) {
       worksheet[cell].s = {
@@ -44,6 +55,9 @@ const exportToExcel = (logs, fromDate, toDate) => {
       };
     }
   });
+
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Visitor Report");
 
   const fileName = `Visitor_Report_${fromDate}_to_${toDate}.xlsx`;
   XLSX.writeFile(workbook, fileName);
