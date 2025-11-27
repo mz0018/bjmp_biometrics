@@ -9,6 +9,17 @@ const UserManagement = () => {
   const { activeTab, setActiveTab, searchQuery, setSearchQuery, filteredData, filterBy, setFilterBy } =
     useUserManagement();
 
+  const uniqueFilteredData =
+    activeTab === "visitors"
+      ? filteredData.filter(
+          (item, index, self) =>
+            index ===
+            self.findIndex(
+              (v) => v.visitor_id === item.visitor_id
+            )
+        )
+      : filteredData;
+
   const filterOptions = activeTab === "inmates"
     ? ["All", "Detained", "Released", "Transferred", "On Trial", "Pending", "Escaped"]
     : ["All", "Male", "Female"];
@@ -133,7 +144,7 @@ const UserManagement = () => {
       <div className="shadow-lg rounded-sm border border-gray-200 overflow-hidden mt-0 bg-white">
         <div className="overflow-x-auto">
           <div className="overflow-y-auto max-h-[65dvh]">
-            {filteredData.length > 0 ? (
+            {uniqueFilteredData.length > 0 ? (
               <table className="min-w-full table-fixed border-collapse border border-gray-300 text-sm text-gray-700">
                 <thead className="bg-gray-100">
                   <tr>
@@ -145,14 +156,15 @@ const UserManagement = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredData.map(renderRow)}
+                  {uniqueFilteredData.map(renderRow)}
                 </tbody>
               </table>
             ) : <NoRecordsFoundFallback activeTab={activeTab} />}
           </div>
         </div>
+
         <div className="px-4 py-2 text-sm text-gray-600 bg-gray-50 border-t border-gray-200">
-          Showing <span className="font-semibold">{filteredData.length}</span> {filteredData.length === 1 ? "entry" : "entries"}
+          Showing <span className="font-semibold">{uniqueFilteredData.length}</span> {uniqueFilteredData.length === 1 ? "entry" : "entries"}
         </div>
       </div>
     </section>
