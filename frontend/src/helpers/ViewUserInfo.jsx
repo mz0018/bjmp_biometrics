@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import GenerateInmateInfo from "./GenerateInmateInfo";
+import TotalVisits from "./TotalVisits";
 import {
   View,
   X,
@@ -285,23 +286,9 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
                     {isVisitLoading ? (
                       <p className="text-sm text-gray-500">Loading history...</p>
                     ) : visitLogs && visitLogs.length > 0 ? (
-                      <div className="space-y-2 text-sm text-gray-700">
-                        <div className="flex items-center justify-between">
-                          <div className="font-medium">Total visits</div>
-                          <div className="text-gray-600">{visitLogs.length}</div>
-                        </div>
-
-                        <div className="max-h-44 overflow-y-auto mt-2 border border-gray-100 rounded p-2 bg-gray-50">
-                          {visitLogs.map((vl) => (
-                            <div key={vl._id} className="flex items-center justify-between py-1 px-2 border-b last:border-b-0">
-                              <div className="truncate">
-                                {vl.selected_inmate?.inmate_name || (vl.visitor_info?.inmates && vl.visitor_info.inmates[0]?.inmate_name) || "—"}
-                              </div>
-                              <div className="text-gray-500 text-xs ml-4 whitespace-nowrap">
-                                {vl.timestamp ? new Date(vl.timestamp).toLocaleString() : "—"}
-                              </div>
-                            </div>
-                          ))}
+                      <div className="text-right">
+                        <div className="text-sm text-gray-700 inline-block">
+                          <TotalVisits visitLogs={visitLogs} />
                         </div>
                       </div>
                     ) : (
@@ -312,7 +299,6 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
               )}
             </div>
 
-            {/* Footer with Close and Action Buttons */}
             <div className="border-t border-gray-300 bg-white px-4 py-3 rounded-b-md flex flex-col space-y-1">
               
                 <div className="flex justify-between w-full gap-1">

@@ -7,25 +7,21 @@ const GenerateInmateInfo = ({ inmate }) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Inmate Info");
 
-    // 🧾 Title row
-    worksheet.mergeCells("A1", "B1");
+     worksheet.mergeCells("A1", "B1");
     const titleCell = worksheet.getCell("A1");
     titleCell.value = "Inmate Record";
     titleCell.font = { size: 16, bold: true };
     titleCell.alignment = { horizontal: "center" };
 
-    // 🧱 Table header row
     worksheet.addRow(["Field", "Value"]);
     const headerRow = worksheet.getRow(2);
     headerRow.font = { bold: true };
     headerRow.alignment = { horizontal: "center" };
 
-    // 🧩 Add inmate data rows (key/value pairs)
     Object.entries(inmate).forEach(([key, value]) => {
       worksheet.addRow([key, value ?? ""]);
     });
 
-    // 🎨 Style: auto width, borders
     worksheet.columns.forEach((column) => {
       let maxLength = 0;
       column.eachCell({ includeEmpty: true }, (cell) => {
@@ -46,14 +42,12 @@ const GenerateInmateInfo = ({ inmate }) => {
       });
     });
 
-    // 🕒 Footer row
     const lastRow = worksheet.addRow([]);
     worksheet.mergeCells(`A${lastRow.number + 1}:B${lastRow.number + 1}`);
     const footerCell = worksheet.getCell(`A${lastRow.number + 1}`);
     footerCell.value = `Generated on ${new Date().toLocaleString()}`;
     footerCell.alignment = { horizontal: "right", italic: true };
 
-    // 💾 Generate and download
     const buffer = await workbook.xlsx.writeBuffer();
     const fileName = `${inmate.name?.replace(/\s+/g, "_") || "inmate"}_record.xlsx`;
     saveAs(new Blob([buffer]), fileName);
