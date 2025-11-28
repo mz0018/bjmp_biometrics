@@ -51,7 +51,7 @@ def cosine_similarity(embedding1, embedding2):
     return float(np.dot(emb1, emb2) / denom)
 
 
-def find_best_match(query_embedding, threshold=0.90):
+def find_best_match(query_embedding, threshold=0.93):
     """
     Search the embedding_cache for the best match across all visitors and their embeddings.
     Returns a dict with visitor_id, similarity, meta or False if none passes threshold.

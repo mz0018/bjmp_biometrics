@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import GenerateInmateInfo from "./GenerateInmateInfo";
 import TotalVisits from "./TotalVisits";
+import ButtonAddInmate from "./ButtonAddInmate";
 import {
   View,
   X,
@@ -308,6 +309,9 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
                   >
                     Close
                   </button>
+                  {userType === "visitor" && (
+                    <ButtonAddInmate visitorId={visitor.visitor_id} />
+                  )}
                   {userType === "inmate" && (
                   <GenerateInmateInfo inmate={inmate} />
                   )}

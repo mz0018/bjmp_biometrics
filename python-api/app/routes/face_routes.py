@@ -1,10 +1,11 @@
 from fastapi import APIRouter
 from fastapi.concurrency import run_in_threadpool
+from fastapi.responses import JSONResponse
 from app.models.face_model import FaceData
 from app.helpers.image_utils import base64_to_webp, generate_filename
 from app.helpers.embedding_utils import get_embedding, embedding_cache, find_best_match
 from app.helpers.json_response import json_response
-import os, uuid, asyncio
+import os, uuid, asyncio, json
 import motor.motor_asyncio
 from datetime import datetime, timedelta
 from app.ws_manager import clients
@@ -155,7 +156,7 @@ async def recognize_face(data: dict):
             query_embedding = await run_in_threadpool(get_embedding, webp_file)
 
             async with cache_lock:
-                match = find_best_match(query_embedding, threshold=0.90) if embedding_cache else None
+                match = find_best_match(query_embedding, threshold=0.93) if embedding_cache else None
 
             if not match:
                 return json_response({"status": "not_found", "message": "No match found"})
@@ -174,3 +175,16 @@ async def recognize_face(data: dict):
         return json_response({"status": "error", "message": "No image or visitor confirmation provided"})
     except Exception as e:
         return json_response({"status": "error", "message": str(e)})
+
+@router.get("/visitor-json/{visitor_id}")
+async def get_visitor_json(visitor_id: str):
+    json_path = os.path.join(SAVE_FOLDER, f"{visitor_id}.json")
+    if not os.path.exists(json_path):
+        print(f"[DEBUG] Visitor JSON not found for ID: {visitor_id}")
+        return JSONResponse(status_code=404, content={"error": "Visitor JSON not found"})
+    
+    with open(json_path, "r") as f:
+        visitor_data = json.load(f)
+    
+    print(f"[DEBUG] Visitor JSON for ID {visitor_id}: {visitor_data}")
+    return JSONResponse(content=visitor_data)
