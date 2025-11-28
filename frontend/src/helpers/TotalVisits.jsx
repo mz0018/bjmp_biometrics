@@ -14,16 +14,17 @@ const TotalVisits = ({ visitLogs }) => {
 
   return (
     <div className="text-sm text-gray-600">
-      <div>
-        Visitor Daily{" "}
-        <span
-          className="text-blue-600 hover:underline cursor-pointer"
-          onClick={() => setOpen(true)}
-        >
-          Logs
-        </span>
-        .
-      </div>
+      <button
+        onClick={() => setOpen(true)}
+        className="flex items-center gap-2 text-sm border border-gray-300 px-3 py-1.5 rounded-md
+                  hover:bg-gray-50 transition text-gray-700 tracking-wide cursor-pointer"
+      >
+        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" strokeWidth="2"
+            viewBox="0 0 24 24">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
+        </svg>
+        Daily Logs
+      </button>
 
       {open && (
         <div

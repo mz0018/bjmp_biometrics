@@ -277,23 +277,22 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
 
               {/* VISITOR VIEW */}
               {userType === "visitor" && visitor && (
-                <div className="grid grid-cols-1">
-                  {visitorItems.map((it) => renderProfileItem(it.label, it.value, null))}
+                <div className="grid">
+                  {visitorItems.map((it) =>
+                    renderProfileItem(it.label, it.value, null)
+                  )}
 
-                  <div>
-                    
-                    <hr className="border-gray-400 mt-2 mb-3" />
-
+                  <div className="mt-2">
                     {isVisitLoading ? (
                       <p className="text-sm text-gray-500">Loading history...</p>
                     ) : visitLogs && visitLogs.length > 0 ? (
-                      <div className="text-right">
-                        <div className="text-sm text-gray-700 inline-block">
-                          <TotalVisits visitLogs={visitLogs} />
-                        </div>
+                      <div className="flex justify-end">
+                        <TotalVisits visitLogs={visitLogs} />
                       </div>
                     ) : (
-                      <p className="text-sm text-gray-500 italic">No visit history found.</p>
+                      <p className="text-sm text-gray-500 italic pt-2 text-center">
+                        No visit history found.
+                      </p>
                     )}
                   </div>
                 </div>

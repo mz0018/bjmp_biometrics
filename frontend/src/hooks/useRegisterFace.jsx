@@ -1,22 +1,25 @@
 import { useState, useRef, useEffect } from "react";
 import api from "../api";
+import { Notyf } from "notyf";
+import "notyf/notyf.min.css";
+
+const notyf = new Notyf({
+  duration: 3000,
+  position: { x: "right", y: "top" },
+});
 
 const useRegisterFace = () => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
 
   const [capturedImages, setCapturedImages] = useState([]);
-
   const [isLoading, setIsLoading] = useState(false);
   const [hasErrors, setHasErrors] = useState({});
-
   const [admin, setAdmin] = useState(null);
-
   const [visitorName, setVisitorName] = useState("");
   const [visitorAddress, setVisitorAddress] = useState("");
   const [visitorContact, setVisitorContact] = useState("");
   const [visitorGender, setVisitorGender] = useState("");
-
   const [visitorListOfInmates, setVisitorListOfInmates] = useState([]);
 
   useEffect(() => {
@@ -42,7 +45,7 @@ const useRegisterFace = () => {
       }
     } catch (err) {
       console.error("Error accessing webcam:", err);
-      alert("Could not access webcam");
+      notyf.error("Could not access webcam");
     }
   };
 
@@ -55,10 +58,9 @@ const useRegisterFace = () => {
   };
 
   const saveImages = async () => {
-
     if (!admin) {
       console.warn("No admin found in localStorage");
-      alert("Admin details not found. Please log in again.");
+      notyf.error("Admin details not found. Please log in again.");
       return;
     }
 
@@ -105,25 +107,23 @@ const useRegisterFace = () => {
       }
 
       if (response.data.status === "success") {
-        alert("Images and visitor details sent to backend!");
+        notyf.success("Images and visitor details sent successfully!");
         resetForm();
         setCapturedImages([]);
         window.history.back();
       }
-
     } catch (err) {
       console.error("ERROR sending images:", err);
 
       if (err.response && err.response.data && err.response.data.errors) {
         setHasErrors(err.response.data.errors);
       } else {
-        alert("Failed to send data!");
+        notyf.error("Failed to send data!");
       }
     } finally {
       setIsLoading(false);
     }
   };
-
 
   return {
     isLoading,

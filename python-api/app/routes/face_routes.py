@@ -1,11 +1,11 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Body
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import JSONResponse
 from app.models.face_model import FaceData
 from app.helpers.image_utils import base64_to_webp, generate_filename
 from app.helpers.embedding_utils import get_embedding, embedding_cache, find_best_match
 from app.helpers.json_response import json_response
-import os, uuid, asyncio, json
+import os, uuid, asyncio, json, re
 import motor.motor_asyncio
 from datetime import datetime, timedelta
 from app.ws_manager import clients
@@ -44,6 +44,13 @@ def save_visitor_data(visitor_data):
     import json
     with open(json_path, "w") as f:
         json.dump(visitor_data, f, indent=2)
+
+def _normalize_name_py(s: str) -> str:
+    if not s:
+        return ""
+    s = re.sub(r"[^\w\s]", "", s)
+    s = re.sub(r"\s+", " ", s)
+    return s.strip().lower()
 
 # --- Routes ---
 @router.post("/register-face")
@@ -188,3 +195,65 @@ async def get_visitor_json(visitor_id: str):
     
     print(f"[DEBUG] Visitor JSON for ID {visitor_id}: {visitor_data}")
     return JSONResponse(content=visitor_data)
+
+@router.post("/visitor-json/{visitor_id}/add-inmates")
+async def add_inmates_to_visitor(visitor_id: str, payload: dict = Body(...)):
+    """
+    Expects JSON body: { "inmates": [ { "inmate_name": "Full Name", "relationship": "Son" }, ... ] }
+    Appends those inmates to the visitor's saved JSON file, avoiding duplicates by normalized name.
+    Returns the updated visitor JSON.
+    """
+    inmates_to_add = payload.get("inmates", [])
+    if not isinstance(inmates_to_add, list) or len(inmates_to_add) == 0:
+        return JSONResponse(status_code=400, content={"error": "No inmates provided"})
+
+    json_path = os.path.join(SAVE_FOLDER, f"{visitor_id}.json")
+    if not os.path.exists(json_path):
+        return JSONResponse(status_code=404, content={"error": "Visitor JSON not found"})
+
+    async with cache_lock:
+        try:
+            # load
+            with open(json_path, "r", encoding="utf-8") as f:
+                visitor_data = json.load(f)
+
+            existing_inmates = visitor_data.get("inmates", [])
+            existing_names_norm = set(
+                _normalize_name_py(i.get("inmate_name", "")) for i in existing_inmates
+            )
+
+            added = []
+            for it in inmates_to_add:
+                name = it.get("inmate_name", "").strip()
+                rel = it.get("relationship", "").strip()
+                if not name:
+                    continue
+                norm = _normalize_name_py(name)
+                if norm in existing_names_norm:
+                    # skip duplicate
+                    continue
+                # append new inmate object (match JSON structure you're using)
+                new_obj = {
+                    "inmate_name": name,
+                    "relationship": rel or "Relative"
+                }
+                existing_inmates.append(new_obj)
+                existing_names_norm.add(norm)
+                added.append(new_obj)
+
+            # assign back (in case there was no inmates field)
+            visitor_data["inmates"] = existing_inmates
+
+            # write back to file
+            with open(json_path, "w", encoding="utf-8") as f:
+                json.dump(visitor_data, f, indent=2, ensure_ascii=False)
+
+            # also update embedding_cache meta if present (optional)
+            if visitor_id in embedding_cache:
+                embedding_cache[visitor_id]["meta"] = visitor_data
+
+            return JSONResponse(content=visitor_data)
+        except Exception as e:
+            # don't hide exceptions while developing - log and return 500
+            print(f"[ERROR] add_inmates_to_visitor: {e}")
+            return JSONResponse(status_code=500, content={"error": str(e)})
