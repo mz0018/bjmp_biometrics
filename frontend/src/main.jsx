@@ -14,6 +14,8 @@ const UserManagement = lazy(() => import("./protectedRoute/UserManagement.jsx"))
 const Settings = lazy(() => import("./protectedRoute/SettingsDashboard.jsx"));
 const ForgotPassword = lazy(() => import("./protectedRoute/ForgotPassword.jsx"));
 const ResetPasswordForm = lazy(() => import("./protectedRoute/ResetPasswordForm.jsx"));
+const Inmate = lazy(() => import("./protectedRoute/InmateManagement.jsx"));
+const Visitor = lazy(() => import("./protectedRoute/VisitorManagement.jsx"));
 
 const router = createBrowserRouter([
   { path: "/", element: <App /> },
@@ -27,6 +29,8 @@ const router = createBrowserRouter([
       { path: "register-face", element: <RegisterFace /> },
       { path: "register-inmate", element: <InmateRegistration /> }, 
       { path: "manage-user", element: <UserManagement />},
+      { path: "manage-inmate", element: <Inmate />},
+      { path: "manage-visitor", element: <Visitor />},
       { path: "account-settings", element: <Settings />},
     ],
   },

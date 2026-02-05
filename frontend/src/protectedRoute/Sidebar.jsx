@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { UserPlus, TableCellsSplit, UserLock, Users, Settings } from "lucide-react";
+import { UserPlus, TableCellsSplit, UserLock, Users, Settings, ShieldUser, FileInput } from "lucide-react";
 import LogoutButton from "../protectedRoute/LogoutButton";
 import { useEffect, useState } from "react";
 
@@ -15,21 +15,31 @@ const Sidebar = () => {
   }, []);
 
   const navItems = [
-    {
-      to: "manage-user",
-      label: "Information Management",
-      icon: Users,
-    },
+    // {
+    //   to: "manage-user",
+    //   label: "Information Management",
+    //   icon: Users,
+    // },
     {
       to: "visitors-log",
       label: "Visitors Log",
       icon: TableCellsSplit,
     },
     {
+      to: "manage-inmate",
+      label: "Inmate Registration",
+      icon: ShieldUser,
+    },
+    {
+      to: "manage-visitor",
+      label: "Visitor Registration",
+      icon: FileInput,
+    },
+    {
       to: "account-settings",
       label: "Settings",
       icon: Settings,
-    }
+    },
   ];
 
   return (
