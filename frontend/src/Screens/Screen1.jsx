@@ -48,13 +48,16 @@ const VisitorInfo = memo(({ visitor, onConfirm }) => {
 
       <label className="block text-sm mb-1">Select inmate to visit:</label>
       <select
-        className="text-black px-2 py-1 rounded w-full mb-2"
+        className="px-2 py-1 rounded w-full mb-2 text-white cursor-pointer"
         value={selectedInmate}
         onChange={(e) => setSelectedInmate(e.target.value)}
       >
-        <option value="">-- Choose inmate --</option>
+        <option value="" disabled className="text-white bg-gray-600">
+          -- Choose inmate --
+        </option>
+
         {visitor.visitor_info?.inmates?.map((inmate, idx) => (
-          <option key={idx} value={JSON.stringify(inmate)}>
+          <option key={idx} value={JSON.stringify(inmate)} className="text-black">
             {inmate.inmate_name} ({inmate.relationship})
           </option>
         ))}
