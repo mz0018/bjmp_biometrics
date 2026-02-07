@@ -7,7 +7,6 @@ import NoRecordsFoundFallback from "../fallback/NoRecordsFoundFallback";
 import {
   Search,
   Navigation,
-  Settings,
   ChevronDown,
 } from "lucide-react";
 
@@ -79,10 +78,9 @@ const VisitorManagement = () => {
           <table className="min-w-full text-sm">
             <thead className="bg-gray-100">
               <tr>
-                <th className="px-4 py-2 text-left">Visitor Name</th>
-                <th className="px-4 py-2 text-left">Contact</th>
+                <th className="px-4 py-2 text-left font-medium">Visitor Name</th>
+                <th className="px-4 py-2 text-left font-medium">Contact</th>
                 <th className="px-4 py-2 text-center">
-                  <Settings size={16} />
                 </th>
               </tr>
             </thead>
@@ -96,8 +94,10 @@ const VisitorManagement = () => {
                     {item.visitor_info.contact}
                   </td>
                   <td className="px-4 py-2 text-center">
-                    <ButtonUpdate userType="visitor" visitor={item} />
-                    <ButtonViewUser userType="visitor" visitor={item} />
+                    <div className="inline-flex items-center gap-2 whitespace-nowrap">
+                      <ButtonUpdate userType="visitor" visitor={item} />
+                      <ButtonViewUser userType="visitor" visitor={item} />
+                    </div>
                   </td>
                 </tr>
               ))}

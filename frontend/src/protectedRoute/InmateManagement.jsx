@@ -7,7 +7,6 @@ import NoRecordsFoundFallback from "../fallback/NoRecordsFoundFallback";
 import {
   Search,
   Navigation,
-  Settings,
   ChevronDown,
 } from "lucide-react";
 
@@ -86,11 +85,10 @@ const InmateManagement = () => {
           <table className="min-w-full text-sm">
             <thead className="bg-gray-100">
               <tr>
-                <th className="px-4 py-2 text-left">Inmate Name</th>
-                <th className="px-4 py-2 text-left">Case Number</th>
-                <th className="px-4 py-2 text-left">Status</th>
+                <th className="px-4 py-2 text-left font-medium">Inmate Name</th>
+                <th className="px-4 py-2 text-left font-medium">Case Number</th>
+                <th className="px-4 py-2 text-left font-medium">Status</th>
                 <th className="px-4 py-2 text-center">
-                  <Settings size={16} />
                 </th>
               </tr>
             </thead>
@@ -103,8 +101,10 @@ const InmateManagement = () => {
                   <td className="px-4 py-2">{item.caseNumber}</td>
                   <td className="px-4 py-2">{item.status}</td>
                   <td className="px-4 py-2 text-center">
-                    <ButtonUpdate userType="inmate" inmate={item} />
-                    <ButtonViewUser userType="inmate" inmate={item} />
+                    <div className="inline-flex items-center gap-2 whitespace-nowrap">
+                      <ButtonUpdate userType="inmate" inmate={item} />
+                      <ButtonViewUser userType="inmate" inmate={item} />
+                    </div>
                   </td>
                 </tr>
               ))}
