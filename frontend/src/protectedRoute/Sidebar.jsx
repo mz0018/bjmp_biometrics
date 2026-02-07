@@ -54,7 +54,7 @@ const Sidebar = () => {
               loading="lazy"
               src="/img/BJMP-icon.png"
               alt={`${admin.first_name} avatar`}
-              className="h-40 w-40 md:h-48 md:w-48 rounded-full object-cover border-2 border-white/20"
+              className="h-40 w-40 md:h-48 md:w-48 object-contain"
             />
           </div>
         )}
