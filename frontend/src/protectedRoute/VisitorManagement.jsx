@@ -43,7 +43,7 @@ const VisitorManagement = () => {
               placeholder="Search visitors by name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-md text-sm"
+              className="w-full pl-10 pr-4 py-2 rounded-md text-sm bg-white shadow-sm focus:outline-none"
             />
           </div>
 
@@ -51,7 +51,7 @@ const VisitorManagement = () => {
             <select
               value={filterBy}
               onChange={(e) => setFilterBy(e.target.value)}
-              className="w-full pr-10 pl-3 py-2 rounded-md text-sm"
+              className="bg-white w-full pr-10 pl-3 py-2 rounded-md text-sm appearance-none focus:outline-none text-gray-700 shadow-sm"
             >
               {filterOptions.map((o) => (
                 <option key={o} value={o}>{o}</option>
@@ -63,7 +63,11 @@ const VisitorManagement = () => {
 
         <Link
           to="/protectedRoute/register-face"
-          className="bg-gray-800 text-white px-6 py-2 text-sm font-semibold"
+          className="
+            bg-gray-800 text-white px-6 py-2 text-sm font-semibold
+            inline-flex items-center gap-2
+            whitespace-nowrap rounded
+          "
         >
           <Navigation size={16} className="inline mr-1" />
           Register Visitor
