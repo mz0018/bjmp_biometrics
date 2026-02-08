@@ -9,6 +9,7 @@ const convertBufferToBase64 = (buffer) => {
 };
 
 const useUserManagement = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("inmates");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterBy, setFilterBy] = useState("All");
@@ -25,6 +26,8 @@ const useUserManagement = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
+
       try {
         if (activeTab === "inmates") {
           const res = await axios.get(
@@ -53,6 +56,8 @@ const useUserManagement = () => {
         }
       } catch (err) {
         console.error("Error fetching data:", err);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -82,6 +87,7 @@ const useUserManagement = () => {
   const filteredData = applyFiltering();
 
   return {
+    isLoading,
     activeTab,
     setActiveTab,
     searchQuery,

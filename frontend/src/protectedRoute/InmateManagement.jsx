@@ -12,6 +12,7 @@ import {
 
 const InmateManagement = () => {
   const {
+    isLoading,
     setActiveTab,
     searchQuery,
     setSearchQuery,
@@ -81,15 +82,16 @@ const InmateManagement = () => {
 
       {/* TABLE */}
       <div className="bg-white shadow overflow-x-auto">
-        {filteredData.length > 0 ? (
+        {isLoading ? (
+          <NoRecordsFoundFallback activeTab="inmates" />
+        ) : filteredData.length > 0 ? (
           <table className="min-w-full text-sm">
             <thead className="bg-gray-100">
               <tr>
                 <th className="px-4 py-2 text-left font-medium">Inmate Name</th>
                 <th className="px-4 py-2 text-left font-medium">Case Number</th>
                 <th className="px-4 py-2 text-left font-medium">Status</th>
-                <th className="px-4 py-2 text-center">
-                </th>
+                <th className="px-4 py-2 text-center"></th>
               </tr>
             </thead>
             <tbody>
@@ -111,9 +113,12 @@ const InmateManagement = () => {
             </tbody>
           </table>
         ) : (
-          <NoRecordsFoundFallback activeTab="inmates" />
+          <div className="p-8 text-center text-gray-500 text-sm">
+            No inmates found.
+          </div>
         )}
       </div>
+
     </section>
   );
 };

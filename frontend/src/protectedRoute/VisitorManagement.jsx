@@ -12,6 +12,7 @@ import {
 
 const VisitorManagement = () => {
   const {
+    isLoading,
     setActiveTab,
     searchQuery,
     setSearchQuery,
@@ -74,14 +75,15 @@ const VisitorManagement = () => {
       </header>
 
       <div className="bg-white shadow overflow-x-auto">
-        {uniqueVisitors.length > 0 ? (
+        {isLoading ? (
+          <NoRecordsFoundFallback activeTab="visitors" />
+        ) : uniqueVisitors.length > 0 ? (
           <table className="min-w-full text-sm">
             <thead className="bg-gray-100">
               <tr>
                 <th className="px-4 py-2 text-left font-medium">Visitor Name</th>
                 <th className="px-4 py-2 text-left font-medium">Contact</th>
-                <th className="px-4 py-2 text-center">
-                </th>
+                <th className="px-4 py-2 text-center"></th>
               </tr>
             </thead>
             <tbody>
@@ -104,9 +106,12 @@ const VisitorManagement = () => {
             </tbody>
           </table>
         ) : (
-          <NoRecordsFoundFallback activeTab="visitors" />
+          <div className="p-8 text-center text-gray-500 text-sm">
+            No visitors found.
+          </div>
         )}
       </div>
+
     </section>
   );
 };

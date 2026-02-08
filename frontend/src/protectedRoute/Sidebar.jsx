@@ -55,7 +55,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
           <img
             src="/img/BJMP-icon.png"
             alt="Logo"
-            className="h-32 object-contain"
+            className="h-48 object-contain"
           />
         </div>
       )}
