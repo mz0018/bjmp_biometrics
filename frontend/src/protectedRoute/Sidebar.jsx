@@ -1,89 +1,94 @@
 import { Link, useLocation } from "react-router-dom";
-import { UserPlus, TableCellsSplit, UserLock, Users, Settings, ShieldUser, FileInput } from "lucide-react";
+import {
+  TableCellsSplit,
+  Settings,
+  ShieldUser,
+  FileInput,
+  ChevronLeft,
+  ChevronRight,
+  UserLock,
+} from "lucide-react";
 import LogoutButton from "../protectedRoute/LogoutButton";
 import { useEffect, useState } from "react";
 
-const Sidebar = () => {
+const Sidebar = ({ collapsed, setCollapsed }) => {
   const [admin, setAdmin] = useState(null);
   const location = useLocation();
 
   useEffect(() => {
     const storedAdmin = localStorage.getItem("admin");
-    if (storedAdmin) {
-      setAdmin(JSON.parse(storedAdmin));
-    }
+    if (storedAdmin) setAdmin(JSON.parse(storedAdmin));
   }, []);
 
   const navItems = [
-    // {
-    //   to: "manage-user",
-    //   label: "Information Management",
-    //   icon: Users,
-    // },
-    {
-      to: "visitors-log",
-      label: "Visitors Log",
-      icon: TableCellsSplit,
-    },
-    {
-      to: "manage-inmate",
-      label: "Inmate Registration",
-      icon: ShieldUser,
-    },
-    {
-      to: "manage-visitor",
-      label: "Visitor Registration",
-      icon: FileInput,
-    },
-    {
-      to: "account-settings",
-      label: "Settings",
-      icon: Settings,
-    },
+    { to: "visitors-log", label: "Visitors Log", icon: TableCellsSplit },
+    { to: "manage-inmate", label: "Inmate Registration", icon: ShieldUser },
+    { to: "manage-visitor", label: "Visitor Registration", icon: FileInput },
+    { to: "account-settings", label: "Settings", icon: Settings },
   ];
 
   return (
     <aside
-      className="w-74 h-full flex-shrink-0 bg-[#232023] shadow-xl p-6 flex flex-col justify-between text-white overflow-y-auto"
-      aria-label="Admin Sidebar"
+      className={`h-full bg-[#232023] shadow-xl
+      transition-all duration-300 ease-in-out
+      ${collapsed ? "w-20" : "w-72"}
+      flex flex-col justify-between text-white`}
     >
-      <div>
-        {admin && (
-          <div className="flex flex-col items-center gap-2 mb-8">
-            <img
-              loading="lazy"
-              src="/img/BJMP-icon.png"
-              alt={`${admin.first_name} avatar`}
-              className="h-40 w-40 md:h-48 md:w-48 object-contain"
-            />
+      <button
+        onClick={() => setCollapsed(!collapsed)}
+        className={`p-3 flex items-center gap-2 text-gray-400 cursor-pointer
+        ${collapsed ? "justify-center" : "justify-start"}`}
+      >
+        {collapsed ? (
+          <ChevronRight />
+        ) : (
+          <>
+            <ChevronLeft />
+            <span className="text-sm whitespace-nowrap">Close sidebar</span>
+          </>
+        )}
+      </button>
+
+      {/* Logo */}
+      {admin && !collapsed && (
+        <div className="flex justify-center my-6">
+          <img
+            src="/img/BJMP-icon.png"
+            alt="Logo"
+            className="h-32 object-contain"
+          />
+        </div>
+      )}
+
+      {/* Navigation */}
+      <nav className="flex flex-col gap-2 px-2">
+        {navItems.map(({ to, label, icon: Icon }) => {
+          const isActive = location.pathname.includes(to);
+
+          return (
+            <Link
+              key={to}
+              to={to}
+              className={`flex items-center rounded-md transition
+              ${collapsed ? "justify-center p-3" : "gap-3 px-4 py-3"}
+              ${isActive ? "bg-white/10" : "hover:bg-white/5"}`}
+            >
+              <Icon size={20} />
+              {!collapsed && <span>{label}</span>}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Logout */}
+      <div className="border-t border-gray-700 p-4">
+        {!collapsed ? (
+          <LogoutButton firstName={admin?.first_name ?? ""} />
+        ) : (
+          <div className="flex justify-center">
+            <UserLock size={20} />
           </div>
         )}
-
-        <nav aria-label="Main Navigation" className="flex flex-col gap-2">
-          {navItems.map(({ to, label, icon: Icon }) => {
-            const isActive = location.pathname.includes(to);
-            return (
-              <Link
-                key={to}
-                to={to}
-                aria-label={label}
-                aria-current={isActive ? "page" : undefined}
-                className={`flex items-center gap-3 p-3 rounded-sm transition-all ${
-                  isActive ? "bg-white/5 text-white shadow-md" : "text-white hover:bg-white/5"
-                }`}
-              >
-                <Icon size={20} className="text-current" aria-hidden="true" />
-                <span className={`font-medium ${isActive ? " decoration-white decoration-2 underline-offset-2" : ""}`}>
-                  {label}
-                </span>
-              </Link>
-            );
-          })}
-        </nav>
-      </div>
-
-      <div className="mt-8 border-t border-gray-700 pt-4">
-        <LogoutButton firstName={admin?.first_name ?? ""} />
       </div>
     </aside>
   );

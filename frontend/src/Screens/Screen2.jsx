@@ -52,14 +52,14 @@ const Screen2 = () => {
         />
         <div className="absolute inset-0 bg-black/55"></div>
 
-        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[200px] bg-red-500/40 flex items-center justify-center px-6">
+        {/* <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[200px] bg-red-500/40 flex items-center justify-center px-6">
           <img
             src="/img/banner-v2.png"
             alt="banner"
             loading="lazy"
             className="w-full h-full object-contain"
           />
-        </div>
+        </div> */}
       </div>
 
       <div className="flex flex-col items-center justify-center w-full xl:w-1/2 p-6">
