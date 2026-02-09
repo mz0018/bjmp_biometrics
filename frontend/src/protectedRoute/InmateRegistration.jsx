@@ -179,7 +179,7 @@ const InmateRegistration = () => {
     <section className="px-6 py-4 min-h-[100dvh] bg-gray-50">
       <form onSubmit={handleInmateRegistration} className="space-y-6">
         {/* ------------------ CASE INFO ------------------ */}
-        <div className="bg-white border border-gray-300 p-4">
+        {/* <div className="bg-white border border-gray-300 p-4">
           <h2 className="text-gray-700 font-bold text-sm mb-3 border-b pb-1 uppercase tracking-wide">
             Case Information
           </h2>
@@ -218,7 +218,7 @@ const InmateRegistration = () => {
               error={hasError.commitmentDate}
             />
           </div>
-        </div>
+        </div> */}
 
         {/* ------------------ PERSONAL INFO ------------------ */}
         <div className="bg-white border border-gray-300 p-4 space-y-4">
@@ -287,7 +287,7 @@ const InmateRegistration = () => {
         </div>
 
         {/* ------------------ OFFENSE ------------------ */}
-        <div className="bg-white border border-gray-300 p-4 space-y-3">
+        {/* <div className="bg-white border border-gray-300 p-4 space-y-3">
           <h2 className="text-gray-700 font-bold text-sm mb-1 border-b pb-1 uppercase tracking-wide">
             Offense & Legal Status
           </h2>
@@ -325,7 +325,7 @@ const InmateRegistration = () => {
               className="md:col-span-3"
             />
           </div>
-        </div>
+        </div> */}
 
         {/* ------------------ MUGSHOTS ------------------ */}
         <div className="bg-white border border-gray-300 p-4">

@@ -26,15 +26,15 @@ const InmateManagement = () => {
     setActiveTab("inmates");
   }, [setActiveTab]);
 
-  const filterOptions = [
-    "All",
-    "Detained",
-    "Released",
-    "Transferred",
-    "On Trial",
-    "Pending",
-    "Escaped",
-  ];
+  // const filterOptions = [
+  //   "All",
+  //   "Detained",
+  //   "Released",
+  //   "Transferred",
+  //   "On Trial",
+  //   "Pending",
+  //   "Escaped",
+  // ];
 
   return (
     <section className="p-6 min-h-[100dvh] bg-gray-50">
@@ -52,18 +52,6 @@ const InmateManagement = () => {
             />
           </div>
 
-          <div className="relative flex-[1.5]">
-            <select
-              value={filterBy}
-              onChange={(e) => setFilterBy(e.target.value)}
-              className="bg-white w-full pr-10 pl-3 py-2 rounded-md text-sm appearance-none focus:outline-none text-gray-700 shadow-sm"
-            >
-              {filterOptions.map((o) => (
-                <option key={o} value={o}>{o}</option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          </div>
         </div>
 
         <Link
@@ -89,8 +77,8 @@ const InmateManagement = () => {
             <thead className="bg-gray-100">
               <tr>
                 <th className="px-4 py-2 text-left font-medium">Inmate Name</th>
-                <th className="px-4 py-2 text-left font-medium">Case Number</th>
-                <th className="px-4 py-2 text-left font-medium">Status</th>
+                {/* <th className="px-4 py-2 text-left font-medium">Case Number</th> */}
+                {/* <th className="px-4 py-2 text-left font-medium">Status</th> */}
                 <th className="px-4 py-2 text-center"></th>
               </tr>
             </thead>
@@ -100,8 +88,8 @@ const InmateManagement = () => {
                   <td className="px-4 py-2 capitalize">
                     {item.lastname}, {item.firstname} {item.middleInitial}. ({item.gender})
                   </td>
-                  <td className="px-4 py-2">{item.caseNumber}</td>
-                  <td className="px-4 py-2">{item.status}</td>
+                  {/* <td className="px-4 py-2">{item.caseNumber}</td> */}
+                  {/* <td className="px-4 py-2">{item.status}</td> */}
                   <td className="px-4 py-2 text-center">
                     <div className="inline-flex items-center gap-2 whitespace-nowrap">
                       <ButtonUpdate userType="inmate" inmate={item} />

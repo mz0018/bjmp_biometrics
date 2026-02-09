@@ -207,7 +207,7 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
                   </div>
 
                   {/* CRIMINAL RECORD */}
-                  <div>
+                  {/* <div>
                     <h3 className="text-left font-semibold text-gray-900 tracking-wider uppercase text-sm sm:text-base">
                       Criminal Record
                     </h3>
@@ -226,7 +226,7 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
                         </tbody>
                       </table>
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* MUGSHOT GALLERY */}
                   <div>

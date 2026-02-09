@@ -283,7 +283,7 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
                 </table>
               </div>
 
-              {userType === "inmate" && (
+              {/* {userType === "inmate" && (
                 <div>
                   <h3 className="text-lg font-bold mb-2">Criminal Record</h3>
                   <table className="table-auto w-full text-sm border border-gray-200">
@@ -332,7 +332,7 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
                     </tbody>
                   </table>
                 </div>
-              )}
+              )} */}
             </div>
 
             {/* Footer */}
