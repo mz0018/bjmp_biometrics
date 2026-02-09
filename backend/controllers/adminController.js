@@ -542,3 +542,32 @@ export const updatePersonalDetails = async (req, res) => {
     res.status(500).json({ error: "Internal server error." });
   }
 };
+
+export const visitorLiveMonitoring = async (req, res) => {
+  try {
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const now = new Date();
+
+    const logs = await RecognitionLog.find({
+      isSaveToLogs: false,
+      timestamp: {
+        $gte: startOfToday,
+        $lte: now,
+      },
+    }).sort({ timestamp: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: logs,
+    });
+  } catch (err) {
+    console.error("Live monitoring error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch live monitoring data",
+    });
+  }
+};
+

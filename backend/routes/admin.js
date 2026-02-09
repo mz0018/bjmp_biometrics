@@ -14,6 +14,7 @@ import { googleSignInAdmin } from "../controllers/adminController.js";
 import { ipLimiter, userLimiter } from "../helper/rateLimiter.js";
 import { forgotPassword } from "../controllers/adminController.js";
 import { updatePersonalDetails } from "../controllers/adminController.js";
+import { visitorLiveMonitoring } from "../controllers/adminController.js";
 
 const router = express.Router();
 
@@ -30,5 +31,6 @@ router.patch("/update/visitor/:id", updateVisitorUsers);
 router.post("/confirm/:id", [ipLimiter, userLimiter, changeAdminPassword]);
 router.post("/forgot-password", forgotPassword);
 router.patch("/update/:id", updatePersonalDetails);
+router.get("/activeVisitors", visitorLiveMonitoring);
 
 export default router;
