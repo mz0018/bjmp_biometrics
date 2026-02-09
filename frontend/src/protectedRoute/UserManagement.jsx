@@ -20,9 +20,7 @@ const UserManagement = () => {
         )
       : filteredData;
 
-  const filterOptions = activeTab === "inmates"
-    ? ["All", "Detained", "Released", "Transferred", "On Trial", "Pending", "Escaped"]
-    : ["All", "Male", "Female"];
+  const filterOptions = ["All", "Male", "Female"];
 
   const tabs = [
     { id: "inmates", label: "Inmates", icon: Eye, iconInactive: EyeOff, link: "/protectedRoute/register-inmate", addText: "Add a new inmate" },
@@ -32,8 +30,7 @@ const UserManagement = () => {
   const tableHeaders = activeTab === "inmates"
     ? [
         { label: "Inmate Name", align: "start" },
-        { label: "Case Number", align: "start" },
-        { label: "Status", align: "start" },
+        { label: "Nationality", align: "start" },
         { label: "Options", align: "center", icon: <Settings size={16} /> },
       ]
     : [
@@ -47,14 +44,12 @@ const UserManagement = () => {
     const name = isInmate
       ? `${item.lastname}, ${item.firstname} ${item.middleInitial}. (${item.gender})`
       : `${item.visitor_info.name} (${item.visitor_info.gender})`;
-    const extra = isInmate ? item.caseNumber : item.visitor_info.contact;
-    const status = isInmate ? item.status : null;
+    const extra = isInmate ? item.nationality : item.visitor_info.contact;
 
     return (
       <tr key={item._id} className={`hover:bg-gray-100 transition ${index % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
         <td className="border-b border-gray-300 px-4 py-2 capitalize truncate">{name}</td>
         <td className="border-b border-gray-300 px-4 py-2 truncate tracking-widest">{extra}</td>
-        {isInmate && <td className="border-b border-gray-300 px-4 py-2 truncate">{status}</td>}
         <td className="border-b border-gray-300 px-4 py-2 text-center">
           <div className="inline-flex items-center justify-center gap-2 whitespace-nowrap">
             <ButtonUpdate userType={activeTab.slice(0, -1)} {...{ [activeTab.slice(0, -1)]: item }} />

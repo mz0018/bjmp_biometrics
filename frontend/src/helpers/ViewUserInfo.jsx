@@ -13,12 +13,7 @@ import {
   Flag,
   Heart,
   Ruler,
-  FileText,
-  Gavel,
   Users,
-  CheckSquare,
-  Info,
-  AlertTriangle,
 } from "lucide-react";
 
 import Lightbox from "yet-another-react-lightbox";
@@ -99,17 +94,6 @@ const ViewUserInfo = ({ userType, inmate, visitor }) => {
     { label: "Civil Status", value: inmate?.civilStatus, icon: <Heart className="w-4 h-4" /> },
     { label: "Height", value: inmate?.height, icon: <Ruler className="w-4 h-4" /> },
     { label: "Weight", value: inmate?.weight, icon: <Ruler className="w-4 h-4" /> },
-  ];
-
-  const criminalItems = [
-    { label: "Case Number", value: inmate?.caseNumber, icon: <FileText className="w-4 h-4" /> },
-    { label: "Court Name", value: inmate?.courtName, icon: <Gavel className="w-4 h-4" /> },
-    { label: "Offense", value: inmate?.offense, icon: <Gavel className="w-4 h-4" /> },
-    { label: "Arrest Date", value: formatDate(inmate?.arrestDate), icon: <Calendar className="w-4 h-4" /> },
-    { label: "Sentence", value: inmate?.sentence, icon: <CheckSquare className="w-4 h-4" /> },
-    { label: "Commitment Date", value: formatDate(inmate?.commitmentDate), icon: <Calendar className="w-4 h-4" /> },
-    { label: "Status", value: inmate?.status, icon: <Info className="w-4 h-4" /> },
-    { label: "Remarks", value: inmate?.remarks, icon: <Info className="w-4 h-4" /> },
   ];
 
   const visitorItems = [

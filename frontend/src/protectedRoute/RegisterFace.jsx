@@ -103,7 +103,6 @@ const RegisterFace = () => {
               <div key={v.id ?? i} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-gray-50 border border-gray-200 p-3 rounded-md">
                 <div>
                   <div className="font-medium capitalize text-gray-800">{v.inmate_name}</div>
-                  <div className="text-xs text-gray-500">Case Number: {v.caseNumber}</div>
                 </div>
                 <div className="flex items-center gap-2">
                   <select
@@ -134,7 +133,6 @@ const RegisterFace = () => {
             onAdd={selected => setVisitorListOfInmates(selected.map(i => ({
               id: i._id,
               inmate_name: `${i.firstname}${i.middleInitial ? " " + i.middleInitial + "." : ""} ${i.lastname}`.trim(),
-              caseNumber: i.caseNumber,
               relationship: "",
             })))}
           />
