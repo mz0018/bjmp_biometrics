@@ -69,7 +69,7 @@ const useUserManagement = () => {
       if (filterBy === "All") return inmatesList;
 
       return inmatesList.filter(
-        (i) => i.status && i.status.toLowerCase() === filterBy.toLowerCase()
+        (i) => i.gender && i.gender.toLowerCase() === filterBy.toLowerCase()
       );
     }
 

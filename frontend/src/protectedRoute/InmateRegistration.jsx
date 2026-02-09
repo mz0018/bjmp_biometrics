@@ -5,8 +5,6 @@ import {
   genderOptions,
   nationalityOptions,
   civilStatusOptions,
-  offenseOptions,
-  statusOptions,
 } from "../helpers/mockData";
 
 import Lightbox from "yet-another-react-lightbox";
@@ -178,48 +176,6 @@ const InmateRegistration = () => {
   return (
     <section className="px-6 py-4 min-h-[100dvh] bg-gray-50">
       <form onSubmit={handleInmateRegistration} className="space-y-6">
-        {/* ------------------ CASE INFO ------------------ */}
-        {/* <div className="bg-white border border-gray-300 p-4">
-          <h2 className="text-gray-700 font-bold text-sm mb-3 border-b pb-1 uppercase tracking-wide">
-            Case Information
-          </h2>
-
-          <div className="grid md:grid-cols-4 gap-3">
-            <InputField
-              label="Case Number"
-              name="caseNumber"
-              value={formData.caseNumber || "Auto-generated"}
-              onChange={handleChange}
-              error={hasError.caseNumber}
-              disabled
-              helper="Generated on submission"
-            />
-            <InputField
-              label="Court Name"
-              name="courtName"
-              value={formData.courtName}
-              onChange={handleChange}
-              error={hasError.courtName}
-            />
-            <InputField
-              label="Arrest Date"
-              name="arrestDate"
-              type="date"
-              value={formData.arrestDate}
-              onChange={handleChange}
-              error={hasError.arrestDate}
-            />
-            <InputField
-              label="Commitment Date"
-              name="commitmentDate"
-              type="date"
-              value={formData.commitmentDate}
-              onChange={handleChange}
-              error={hasError.commitmentDate}
-            />
-          </div>
-        </div> */}
-
         {/* ------------------ PERSONAL INFO ------------------ */}
         <div className="bg-white border border-gray-300 p-4 space-y-4">
           <h2 className="text-gray-700 font-bold text-sm mb-1 border-b pb-1 uppercase tracking-wide">
@@ -285,47 +241,6 @@ const InmateRegistration = () => {
             />
           </div>
         </div>
-
-        {/* ------------------ OFFENSE ------------------ */}
-        {/* <div className="bg-white border border-gray-300 p-4 space-y-3">
-          <h2 className="text-gray-700 font-bold text-sm mb-1 border-b pb-1 uppercase tracking-wide">
-            Offense & Legal Status
-          </h2>
-
-          <div className="grid md:grid-cols-3 gap-3">
-            <SelectField
-              label="Offense"
-              name="offense"
-              value={formData.offense}
-              onChange={handleChange}
-              error={hasError.offense}
-              options={offenseOptions}
-            />
-            <InputField
-              label="Sentence"
-              name="sentence"
-              value={formData.sentence}
-              onChange={handleChange}
-              error={hasError.sentence}
-            />
-            <SelectField
-              label="Status"
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              error={hasError.status}
-              options={statusOptions}
-            />
-            <InputField
-              label="Remarks (Optional)"
-              name="remarks"
-              value={formData.remarks}
-              onChange={handleChange}
-              error={hasError.remarks}
-              className="md:col-span-3"
-            />
-          </div>
-        </div> */}
 
         {/* ------------------ MUGSHOTS ------------------ */}
         <div className="bg-white border border-gray-300 p-4">

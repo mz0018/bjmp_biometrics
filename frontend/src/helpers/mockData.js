@@ -29,27 +29,3 @@ export const civilStatusOptions = [
   "Separated",
   "Common-law / Partner",
 ];
-
-export const offenseOptions = [
-  "Theft",
-  "Assault",
-  "Drug Possession",
-  "Fraud",
-  "Homicide / Murder",
-  "Arson",
-  "Cybercrime",
-  "Illegal Possession of Firearm",
-  "Robbery",
-  "Sexual Offense",
-  "Traffic Violation (serious)",
-  "Other",
-];
-
-export const statusOptions = [
-  "Detained",
-  "Released",
-  "Transferred",
-  "On Trial",
-  "Pending",
-  "Escaped",
-];

@@ -113,7 +113,7 @@ const SelectInmates = ({ setIsSelectInmateClicked, onAdd }) => {
                     <tr>
                       <th className="p-1 text-left w-6"></th>
                       <th className="p-1 text-left">Name</th>
-                      <th className="p-1 text-left">Case #</th>
+                      <th className="p-1 text-left">Details</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -135,7 +135,9 @@ const SelectInmates = ({ setIsSelectInmateClicked, onAdd }) => {
                           {inmate.firstname} {inmate.middleInitial ? `${inmate.middleInitial}. ` : ""}
                           {inmate.lastname}
                         </td>
-                        <td className="p-1 text-gray-500">{inmate.caseNumber}</td>
+                        <td className="p-1 text-gray-500">
+                          {inmate.nationality || ""}{inmate.address ? ` • ${inmate.address}` : ""}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

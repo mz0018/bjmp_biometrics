@@ -77,8 +77,6 @@ const InmateManagement = () => {
             <thead className="bg-gray-100">
               <tr>
                 <th className="px-4 py-2 text-left font-medium">Inmate Name</th>
-                {/* <th className="px-4 py-2 text-left font-medium">Case Number</th> */}
-                {/* <th className="px-4 py-2 text-left font-medium">Status</th> */}
                 <th className="px-4 py-2 text-center"></th>
               </tr>
             </thead>
@@ -88,8 +86,6 @@ const InmateManagement = () => {
                   <td className="px-4 py-2 capitalize">
                     {item.lastname}, {item.firstname} {item.middleInitial}. ({item.gender})
                   </td>
-                  {/* <td className="px-4 py-2">{item.caseNumber}</td> */}
-                  {/* <td className="px-4 py-2">{item.status}</td> */}
                   <td className="px-4 py-2 text-center">
                     <div className="inline-flex items-center gap-2 whitespace-nowrap">
                       <ButtonUpdate userType="inmate" inmate={item} />

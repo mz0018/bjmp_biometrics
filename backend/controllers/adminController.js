@@ -294,10 +294,16 @@ export const registerInmate = async (req, res) => {
     const errors = {};
 
     const requiredFields = [
-      "firstname", "middleInitial", "lastname", "gender",
-      "dateOfBirth", "nationality", "address", "civilStatus",
-      // "height", "weight", "offense", "sentence",
-      // "courtName", "arrestDate", "commitmentDate", "status"
+      "firstname",
+      "middleInitial",
+      "lastname",
+      "gender",
+      "dateOfBirth",
+      "nationality",
+      "address",
+      "civilStatus",
+      "height",
+      "weight",
     ];
 
     for (const field of requiredFields) {
@@ -324,22 +330,12 @@ export const registerInmate = async (req, res) => {
       return res.status(400).json({ errors: { username: "Inmate already exists" } });
     }
 
-    // const counter = await Counter.findOneAndUpdate(
-    //   { name: "caseNumber" },
-    //   { $inc: { seq: 1 } },
-    //   { new: true, upsert: true }
-    // );
-
-    // const formattedNumber = counter.seq.toString().padStart(3, 0);
-    // const generatedCaseNumber = `CRM-${formattedNumber}`;
-
     const frontBuffer = await processMugshot(req.files.mugshot_front[0]);
     const leftBuffer = await processMugshot(req.files.mugshot_left[0]);
     const rightBuffer = await processMugshot(req.files.mugshot_right[0]);
 
     const inmate = await InmateModel.create({
       ...body,
-      // caseNumber: generatedCaseNumber,
       mugshot_front: frontBuffer,
       mugshot_left: leftBuffer,
       mugshot_right: rightBuffer,
@@ -364,7 +360,6 @@ export const getInmates = async (req, res) => {
         $or: [
           { firstname: { $regex: search, $options: "i" } },
           { lastname: { $regex: search, $options: "i" } },
-          { caseNumber: { $regex: search, $options: "i" } },
           {
             $expr: {
               $regexMatch: {

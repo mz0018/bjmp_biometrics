@@ -225,7 +225,7 @@ const ButtonAddInmate = ({ visitorId }) => {
                             />
                           </td>
                           <td className="px-3 py-2 font-medium text-left">
-                            {fullName} {inmate.caseNumber ? `- ${inmate.caseNumber}` : ""}
+                            {fullName}
                           </td>
                           <td className="px-3 py-2 text-sm text-gray-500 text-left">
                             {inmate.nationality || ""} {inmate.address ? `• ${inmate.address}` : ""}

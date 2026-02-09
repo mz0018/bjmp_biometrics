@@ -83,7 +83,6 @@ const useRegisterFace = () => {
       const inmatesPayload = visitorListOfInmates.map((v) => ({
         id: v.id ?? null,
         inmate_name: v.inmate_name ?? "",
-        caseNumber: v.caseNumber ?? "",
         relationship: v.relationship ?? "",
       }));
 

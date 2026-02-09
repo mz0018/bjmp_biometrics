@@ -13,16 +13,23 @@ import {
 } from "lucide-react";
 
 const inmateFields = [
-  "firstname", "lastname", "middleInitial", "gender", "dateOfBirth", "nationality",
-  "address", "civilStatus", "height", "weight", "caseNumber", "offense", "sentence",
-  "courtName", "arrestDate", "commitmentDate", "status", "remarks",
+  "firstname",
+  "lastname",
+  "middleInitial",
+  "gender",
+  "dateOfBirth",
+  "nationality",
+  "address",
+  "civilStatus",
+  "height",
+  "weight",
 ];
 
 const visitorFields = ["visitor_id", "name", "address", "contact", "inmate"];
 
 const disabledFields = {
   visitor: ["visitor_id", "inmate"],
-  inmate: ["gender", "caseNumber"],
+  inmate: ["gender"],
 };
 
 const notyf = new Notyf({
@@ -36,7 +43,7 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
     if (field.toLowerCase().includes("name")) return <User className="w-4 h-4" />;
     if (field.toLowerCase().includes("address")) return <MapPin className="w-4 h-4" />;
     if (field.toLowerCase().includes("contact")) return <Phone className="w-4 h-4" />;
-    if (field.toLowerCase().includes("visitor_id") || field.toLowerCase().includes("case"))
+    if (field.toLowerCase().includes("visitor_id"))
       return <Fingerprint className="w-4 h-4" />;
     return <FileText className="w-4 h-4" />;
   };
@@ -259,7 +266,7 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
                               type="text"
                               name={field}
                               value={
-                                ["dateOfBirth", "arrestDate", "commitmentDate"].includes(field)
+                                ["dateOfBirth"].includes(field)
                                   ? formatDate(formData[field])
                                   : formData[field] || ""
                               }
@@ -283,56 +290,6 @@ const ButtonUpdate = ({ userType, inmate, visitor }) => {
                 </table>
               </div>
 
-              {/* {userType === "inmate" && (
-                <div>
-                  <h3 className="text-lg font-bold mb-2">Criminal Record</h3>
-                  <table className="table-auto w-full text-sm border border-gray-200">
-                    <tbody>
-                      {fields
-                        .filter((f) =>
-                          [
-                            "caseNumber",
-                            "offense",
-                            "sentence",
-                            "courtName",
-                            "arrestDate",
-                            "commitmentDate",
-                            "status",
-                            "remarks",
-                          ].includes(f)
-                        )
-                        .map((field) => (
-                          <tr key={field} className="border-b border-gray-200">
-                            <td className="font-semibold px-3 py-2 w-1/3">{formatFieldLabel(field)}</td>
-                            <td className="px-3 py-2">
-                              <input
-                                type="text"
-                                name={field}
-                                value={
-                                  ["dateOfBirth", "arrestDate", "commitmentDate"].includes(field)
-                                    ? formatDate(formData[field])
-                                    : formData[field] || ""
-                                }
-                                onChange={handleChange}
-                                disabled={isSaving || disabledFields[userType]?.includes(field)}
-                                className={`border px-2 py-1 rounded-md w-full ${
-                                  missingFields[field]
-                                    ? "border-red-500"
-                                    : dirtyFields[field]
-                                    ? "border-yellow-400"
-                                    : "border-gray-300"
-                                }`}
-                              />
-                              {missingFields[field] && (
-                                <p className="text-red-500 text-xs mt-1">{formatFieldLabel(field)} is required</p>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
-              )} */}
             </div>
 
             {/* Footer */}
