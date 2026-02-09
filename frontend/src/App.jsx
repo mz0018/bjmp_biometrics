@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { LogIn, Camera } from "lucide-react";
+import { LogIn, Camera, Radio } from "lucide-react";
 
 export default function AppContent() {
   const buttons = [
@@ -14,6 +14,12 @@ export default function AppContent() {
       label: "Admin Sign In",
       icon: LogIn,
       bg: "bg-[#BF0A30] hover:bg-[#990820]",
+    },
+    {
+      to: "/visitor",
+      label: "Visitor Live Monitoring",
+      icon: Radio,
+      bg: "bg-[#50C878] hover:bg-[#00A36C]",
     },
   ];
 
