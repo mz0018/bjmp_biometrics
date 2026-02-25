@@ -1,6 +1,6 @@
 import { memo, useState } from "react";
 import useFaceRecognition from "../hooks/useFaceRecognition";
-import api from "../api";
+import api, { pyApi } from "../api";
 
 const boxStyle = "bg-black/70 px-4 py-2 rounded-lg text-white";
 
@@ -12,7 +12,7 @@ const VisitorInfo = memo(({ visitor, onConfirm }) => {
     const inmateObj = JSON.parse(selectedInmate);
 
     try {
-      const res = await api.post("/recognize-face", {
+      const res = await pyApi.post("/recognize-face", {
         visitor_id: visitor.visitor_id,
         visitor_info: {
           name: visitor.visitor_info.name,

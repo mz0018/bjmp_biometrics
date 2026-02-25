@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import api from "../api";
+import api, { pyApi } from "../api";
 import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
 
@@ -86,7 +86,7 @@ const useRegisterFace = () => {
         relationship: v.relationship ?? "",
       }));
 
-      const response = await api.post("/register-face", {
+      const response = await pyApi.post("/register-face", {
         id: admin.id,
         first_name: admin.first_name,
         last_name: admin.last_name,

@@ -3,7 +3,7 @@ import * as faceapi from "face-api.js";
 import * as tf from "@tensorflow/tfjs";
 import "@tensorflow/tfjs-backend-cpu";
 import "@tensorflow/tfjs-backend-webgl";
-import api from "../api";
+import api, { pyApi } from "../api";
 
 export const useFaceRecognition = () => {
   const videoRef = useRef(null);
@@ -119,7 +119,7 @@ export const useFaceRecognition = () => {
             faceCanvas.getContext("2d").drawImage(videoRef.current, x, y, width, height, 0, 0, width, height);
 
             const faceBase64 = faceCanvas.toDataURL("image/jpeg");
-            const resApi = await api.post("/recognize-face", { image: faceBase64 });
+            const resApi = await pyApi.post("/recognize-face", { image: faceBase64 });
 
             if (resApi.data?.status === "success") {
               const log = resApi.data.log;
@@ -165,7 +165,7 @@ export const useFaceRecognition = () => {
     if (!visitor || !selectedInmate) return;
 
     try {
-      const resApi = await api.post("/recognize-face", {
+      const resApi = await pyApi.post("/recognize-face", {
         visitor_id: visitor.visitor_id,
         visitor_info: {
           name: visitor.visitor_info.name,
